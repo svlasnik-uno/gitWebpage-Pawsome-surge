@@ -1,0 +1,296 @@
+/*************************************
+This css file includes several different formatting examples
+GENERAL
+https://fonts.google.com/specimen/Pacifico#license
+Images should be 1x1 ratio to display correctly
+**************************************/
+
+
+body {
+    background-color: lightseagreen;
+    color: #000;
+                margin: 0px;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+
+}
+
+mark {
+  background-color: gray;
+  color: black;
+
+}
+head {
+    color: black;
+    font-size: 22px;
+}
+h1 {
+    margin: 20px 20px;
+    font-weight: normal;
+    text-align: center;
+    color: black;
+    padding: 2px 0 0 0;
+}
+
+h2 {
+    font-size: 2.0em;
+    font-weight: normal;
+    margin: 10px 20px;
+    text-align: center;
+    padding: 6px 0 0 0;
+    color: black;
+}
+h3 {
+    font-size: 2.0em;
+    font-weight: bold;
+    margin: 10px 20px;
+    text-align: center;
+    padding: 6px 0 0 0;
+    color: black;
+}
+h4 {
+    font-size: 1.0em;
+    font-weight: bold;
+    margin: 10px 10px;
+    text-align: center;
+    padding: 6px 0 0 0;
+    color: black;
+}
+h6 {
+    font-size: 1.0em;
+    margin: 5px 5px;
+    text-align: center;
+    padding: 3px 0 0 0;
+    color: black;
+}
+.row {
+    height: 60%;
+    width: 100%;
+    padding-left: 20px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.card {
+    float: left;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.card-text {
+    font-size: 100%;
+}
+/* Equal-height card images, cf. https://stackoverflow.com/a/47698201/1375163*/
+.card-img-top {
+    margin-bottom: .75rem;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+}
+/* for gallery */
+.card2-img-top {
+    margin-bottom: .75rem;
+    display: block;
+    width: 95%;
+    height: 83%;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+}
+.card-title {
+    height: 2vh;
+}
+/* Equal-height card images, cf. https://stackoverflow.com/a/47698201/1375163*/
+.card3-img-top {
+    margin-bottom: .75rem;
+    display: block;
+    width: 70%;
+    height: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+}
+.text-container {
+    font-size: 1.0em;
+    margin: 5px 5px;
+    text-align: center;
+    padding: 6px 0 0 0;
+    color: black;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 12%;
+    background-color: darkseagreen;
+    color: #101884;
+    text-align: center;
+}
+
+/* {box-sizing:border-box}*/
+
+/* Slideshow container */
+.slideshow-container {
+  max-width: 60vh;
+    max-height: 60vh;
+
+
+  position: relative;
+  margin: auto;
+}
+
+/* Make the images invisible by default */
+.Containers {
+  display: none;
+}
+
+/* forward & Back buttons */
+.Back, .forward {
+  cursor: pointer;
+  position: absolute;
+  top: 48%;
+  width: auto;
+  margin-top: -23px;
+  padding: 17px;
+  color: grey;
+  font-weight: bold;
+  font-size: 19px;
+  transition: 0.4s ease;
+  border-radius: 0 5px 5px 0;
+  user-select: none;
+}
+
+/* Place the "forward button" to the right */
+.forward {
+  right: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+/*when the user hovers,add a black background with some little opacity */
+.Back:hover, .forward:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+
+/* Caption Info */
+.Info {
+  color: #e3e3e3;
+  font-size: 16px;
+  padding: 10px 14px;
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Worknumbering (1/3 etc) */
+.MessageInfo {
+  color: #f2f2f3;
+  font-size: 14px;
+  padding: 10px 14px;
+  position: absolute;
+  top: 0;
+}
+
+/* The circles or bullets and indicators */
+.dots {
+  cursor: pointer;
+  height: 16px;
+  width: 16px;
+  margin: 0 3px;
+  background-color: #acc;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.5s ease;
+}
+
+.enable, .dots:hover {
+  background-color: #717161;
+}
+
+/* Faint animation */
+.fade {
+  -webkit-animation-name: fade;
+  -webkit-animation-duration: 1.4s;
+  animation-name: fade;
+  animation-duration: 1.4s;
+}
+
+@-webkit-keyframes fade {
+  from {opacity: .5}
+  to {opacity: 2}
+}
+
+@keyframes fade {
+  from {opacity: .5}
+  to {opacity: 2}
+}
+
+/* Add a black background color to the top navigation */
+.navbar-centered {
+    margin: 20px 20px;
+    font-weight: normal;
+    text-align: center;
+    color: black;
+    padding: 2px 0 0 0;
+    font-size: 22px;
+}
+
+
+/* Style the links inside the navigation bar */
+.navbar-centered a {
+  float: none;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 22px;
+
+}
+
+/* Change the color of links on hover */
+.navbar-centered a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.navbar-centered a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+
+
+
+/* Responsive navigation menu - display links on top of each other instead of next to each other (for mobile devices) */
+@media screen and (max-width: 600px) {
+  .navbar-centered a, .navbar-centered {
+    float: none;
+    display: block;
+  }
+
+  .navbar-centered a {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+  }
+}
+.navbar-brand {
+  width:75px;
+  font-size: 24px;
+}
+.navbar-brand img {
+  height: 50px;
+  /* put value of image height as your need */
+  float: left;
+  margin-right: 7px;
+    margin-left: 7px
+}
