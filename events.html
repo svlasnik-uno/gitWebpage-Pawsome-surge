@@ -19,14 +19,14 @@
     </style>
 </head>
 <body class="site">
-  <div class="container-fluid">
+<div class="container-fluid">
     <div id="navbar"></div>
-  </div>
-  <main class="site-content py-2">
+</div>
+<main class="site-content py-2">
     <br>
-     <div class="flex-container justify-content-center">
+    <div class="flex-container justify-content-center">
         <div class="row">
-            <div class="col-sm-6 col-sm-6 col-12 mb-3">
+            <div class="col-sm-4 col-sm-4 col-12 mb-3">
                 <div class="card gallery-card">
                     <div class="embed-responsive-1by1">
                         <img alt="Millard West Baseball Craft Fair"
@@ -40,7 +40,17 @@
                 </div>
             </div>
 
-            <div class="col-sm-6 col-sm-6 col-12 mb-3">
+            <div class="col-sm-4 col-sm-4 col-12 mb-3">
+                <div class="card gallery-card">
+                    <div class="embed-responsive-1by1">
+                        <img alt="Look for our booth!"
+                             class="gallery-img" src="img/events/HillcrestHighlands.jpg"/>
+                        <!--<div class="image-text">Look for our booth!</div>-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-4 col-sm-4 col-12 mb-3">
                 <div class="card gallery-card">
                     <div class="embed-responsive-1by1">
                         <img alt="Look for our booth!"
@@ -54,40 +64,40 @@
 </main>
 <div id="footer"></div>
 <script>
-  fetch("footer.html")
-    .then(r => r.text())
-    .then(html => {
-      document.getElementById("footer").innerHTML = html;
+    fetch("footer.html")
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById("footer").innerHTML = html;
 
-      const current = (location.pathname.split("/").pop() || "index.html")
-        .split("?")[0].split("#")[0];
+            const current = (location.pathname.split("/").pop() || "index.html")
+                .split("?")[0].split("#")[0];
 
-      document.querySelectorAll("#footer a.foot-link").forEach(a => {
-        const href = (a.getAttribute("href") || "").split("?")[0].split("#")[0];
-        if (href === current) a.classList.add("active");
-      });
-    });
-  fetch("navbar.html")
-    .then(r => r.text())
-    .then(html => {
-      document.getElementById("navbar").innerHTML = html;
+            document.querySelectorAll("#footer a.foot-link").forEach(a => {
+                const href = (a.getAttribute("href") || "").split("?")[0].split("#")[0];
+                if (href === current) a.classList.add("active");
+            });
+        });
+    fetch("navbar.html")
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById("navbar").innerHTML = html;
 
-      // current file name (no query/hash)
-      const current = (location.pathname.split("/").pop() || "index.html")
-        .split("?")[0].split("#")[0];
+            // current file name (no query/hash)
+            const current = (location.pathname.split("/").pop() || "index.html")
+                .split("?")[0].split("#")[0];
 
-      document.querySelectorAll("#navbar a.nav-page").forEach(a => {
-        const href = (a.getAttribute("href") || "").split("?")[0].split("#")[0];
+            document.querySelectorAll("#navbar a.nav-page").forEach(a => {
+                const href = (a.getAttribute("href") || "").split("?")[0].split("#")[0];
 
-        if (href === current) {
-          a.classList.add("active");
-          a.setAttribute("aria-current", "page");
+                if (href === current) {
+                    a.classList.add("active");
+                    a.setAttribute("aria-current", "page");
 
-          const li = a.closest(".nav-item");
-          if (li) li.classList.add("active");
-        }
-      });
-    });
+                    const li = a.closest(".nav-item");
+                    if (li) li.classList.add("active");
+                }
+            });
+        });
 </script>
 </body>
 
