@@ -1,13 +1,5 @@
-# pawsome arts and crafts
-Simple, HTML only webpage
-To publish to surge: In a Terminal/PowerShell window, enter surge press 
-enter for the project
-CNAME file defines the domain - current: PawsomeArtsAndCrafts.surge.sh
-Help: https://surge.sh/help/getting-started-with-surge
-Current page is defined in the CNAME file in this repository
+# Vue 3 + Vite
 
-If the page fails to update on deployment - try 
-surge teardown PawsomeArtsAndCrafts
-.surge.sh
+This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-then redeploy.
+Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
