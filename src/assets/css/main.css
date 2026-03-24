@@ -136,8 +136,37 @@ body.site {
     max-height: 700px;
     position: relative;
     margin: auto;
+    position: relative;
 }
 
+
+/* Navigation buttons */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* Left */
+.prev {
+  left: 10px;
+}
+
+/* Right */
+.next {
+  right: 10px;
+}
+
+.nav-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
 .navbar {
     font-size: 1.3rem;
 }
