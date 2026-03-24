@@ -8,9 +8,9 @@
           class="Containers"
           v-show="currentSlide === index"
         >
-          <div class="card gallery-card">
-            <div class="gallery-wrapper">
-              <img class="gallery-img" :src="image.src" :alt="image.alt" />
+          <div class="card show-card">
+            <div class="show-wrapper">
+              <img class="show-img" :src="image.src" :alt="image.alt" />
             </div>
           </div>
         </div>
@@ -93,65 +93,6 @@ export default {
 </script>
 
 <style scoped>
-.Containers {
-  display: block;
-}
-
-.slideshow-container {
-  position: relative;
-}
-
-.nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.4);
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 24px;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.prev {
-  left: 10px;
-}
-
-.next {
-  right: 10px;
-}
-
-.nav-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
-}
-.dots {
-  position: absolute;
-  bottom: 10px;
-  width: 100%;
-  display: flex;
-  justify-content: center; /* centers horizontally */
-  align-items: center;
-  z-index: 2;
-}
-.dot {
-  height: 12px;
-  width: 12px;
-  margin: 0 5px;
-  background-color: white; /* soft white */
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-/* Active dot = solid white */
-.activeDot {
-  background-color: black;
-}
-
-/* Hover effect */
-.dot:hover {
-  background-color: grey;
-}
 
 
 </style>

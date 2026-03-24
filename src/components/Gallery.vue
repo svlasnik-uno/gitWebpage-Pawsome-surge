@@ -1,19 +1,17 @@
 <template>
   <main class="site-content py-2 gallery-page">
-    <h4>
-      <mark>A few of our arrangements</mark>
-    </h4>
+    <h4 class="gallery-title">A few of our arrangements</h4>
 
     <div class="container mt-3">
       <div class="row">
         <div
           v-for="(image, index) in images"
           :key="index"
-          class="col-md-4 col-sm-6 col-12 mb-0"
+          class="col-md-4 col-sm-6 col-12 mb-3"
         >
           <div class="card gallery-card">
             <img
-              class="gallery-img"
+              class="gallery-img img-fluid"
               :src="image.src"
               :alt="image.alt"
             />
@@ -46,4 +44,3 @@ const images = [
   { src: "/img/gallery/18.jpg", alt: "Arrangement 18" },
 ];
 </script>
-
