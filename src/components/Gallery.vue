@@ -81,4 +81,5 @@ const images = [
 .gallery-title mark {
   line-height: inherit;
 }
+
 </style>

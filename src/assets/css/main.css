@@ -41,15 +41,7 @@ body,
 .content {
   flex: 1;
 }
-.row {
-  width: 100%;
-  height: auto;
-  padding-left: 20px;
-  font-size: 18px;
-  text-align: center;
-  margin-left: -8px;
-  margin-right: -8px;
-}
+
 .nav-btn:hover {
   background: rgba(0, 0, 0, 0.7);
 }

@@ -53,15 +53,17 @@
 }
 
 .about-logo {
-  max-width: 300px;
+  max-width: 400px;
   margin: 0 auto;
 }
 .about-card {
-  height: 400px;
+  height: 700px;
   overflow: hidden;
   border: none;
 }
 .about-container {
-  max-width: 600px; /* try 600px–750px */
+  max-width: 100%; /* try 600px–750px */
+
 }
+
 </style>
