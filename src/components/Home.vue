@@ -2,12 +2,13 @@
   <div class="site">
     <main class="content container-fluid py-4">
       <div
-        class="slideshow-container"
-        @touchstart.stop.prevent="handleTouchStart"
-        @touchmove.stop.prevent
-        @touchend.stop.prevent="handleTouchEnd"
-        @click.stop
-      >
+<div
+  class="slideshow-container"
+  @touchstart.stop="handleTouchStart"
+  @touchmove.stop="handleTouchMove"
+  @touchend.stop="handleTouchEnd"
+  @click.stop
+>
         <div
           v-for="(image, index) in images"
           :key="index"
@@ -82,51 +83,63 @@ export default {
     clearInterval(this.slideInterval);
     window.removeEventListener("keydown", this.handleKeydown);
   },
-  methods: {
-    startSlideshow() {
-      this.slideInterval = setInterval(() => {
-        this.currentSlide = (this.currentSlide + 1) % this.images.length;
-      }, 3000);
-    },
-
-    resetInterval() {
-      clearInterval(this.slideInterval);
-      this.startSlideshow();
-    },
-
-    nextSlide() {
+ methods: {
+  startSlideshow() {
+    this.slideInterval = setInterval(() => {
       this.currentSlide = (this.currentSlide + 1) % this.images.length;
-      this.resetInterval();
-    },
-
-    prevSlide() {
-      this.currentSlide =
-        (this.currentSlide - 1 + this.images.length) % this.images.length;
-      this.resetInterval();
-    },
-
-    goToSlide(index) {
-      this.currentSlide = index;
-      this.resetInterval();
-    },
-
-    handleTouchStart(event) {
-      this.touchStartX = event.changedTouches[0].screenX;
-    },
-
-    handleTouchEnd(event) {
-      this.touchEndX = event.changedTouches[0].screenX;
-      const diff = this.touchEndX - this.touchStartX;
-
-      if (Math.abs(diff) < 50) return;
-
-      if (diff > 0) {
-        this.prevSlide();
-      } else {
-        this.nextSlide();
-      }
-    },
+    }, 3000);
   },
+
+  resetInterval() {
+    clearInterval(this.slideInterval);
+    this.startSlideshow();
+  },
+
+  nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.images.length;
+    this.resetInterval();
+  },
+
+  prevSlide() {
+    this.currentSlide =
+      (this.currentSlide - 1 + this.images.length) % this.images.length;
+    this.resetInterval();
+  },
+
+  goToSlide(index) {
+    this.currentSlide = index;
+    this.resetInterval();
+  },
+
+  handleKeydown(e) {
+    if (e.key === "ArrowLeft") {
+      this.prevSlide();
+    } else if (e.key === "ArrowRight") {
+      this.nextSlide();
+    }
+  },
+
+  handleTouchStart(event) {
+    this.touchStartX = event.touches[0].clientX;
+    this.touchEndX = event.touches[0].clientX;
+  },
+
+  handleTouchMove(event) {
+    this.touchEndX = event.touches[0].clientX;
+  },
+
+  handleTouchEnd() {
+    const diff = this.touchEndX - this.touchStartX;
+
+    if (Math.abs(diff) < 50) return;
+
+    if (diff > 0) {
+      this.prevSlide();
+    } else {
+      this.nextSlide();
+    }
+  },
+}
 };
 </script>
 
@@ -135,7 +148,8 @@ export default {
   position: relative;
   max-width: 700px;
   margin: 0 auto;
-  overflow: visible;
+  overflow: hidden;
+  touch-action: pan-y;
 }
 
 .slide {
