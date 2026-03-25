@@ -44,3 +44,41 @@ const images = [
   { src: "/img/gallery/18.jpg", alt: "Arrangement 18" },
 ];
 </script>
+<style scoped>
+
+.gallery-card {
+  height: 400px;
+  overflow: hidden;
+  border: none;
+}
+
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-title {
+  display: block;
+  text-align: center;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.3;
+  margin: 0 0 1rem 0;
+  padding: 0 12px;
+  white-space: normal;
+  position: static;
+}
+
+@media (max-width: 576px) {
+  .gallery-title {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    padding: 0 16px;
+  }
+}
+
+.gallery-title mark {
+  line-height: inherit;
+}
+</style>

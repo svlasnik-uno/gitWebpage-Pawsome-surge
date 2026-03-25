@@ -6,7 +6,7 @@
           About Us
         </div>
 
-        <div class="card-body gallery-card">
+        <div class="card-body about-card">
           <p class="card-text">
             We create custom, long-lasting sola wood flower arrangements,
             hand-crocheted items, and other arts and crafts.
@@ -55,5 +55,13 @@
 .about-logo {
   max-width: 300px;
   margin: 0 auto;
+}
+.about-card {
+  height: 400px;
+  overflow: hidden;
+  border: none;
+}
+.about-container {
+  max-width: 600px; /* try 600px–750px */
 }
 </style>

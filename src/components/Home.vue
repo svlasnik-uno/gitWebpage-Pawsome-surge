@@ -1,32 +1,51 @@
 ﻿<template>
   <div class="site">
     <main class="content container-fluid py-4">
-      <div class="slideshow-container">
+      <div
+        class="slideshow-container"
+        @touchstart.stop.prevent="handleTouchStart"
+        @touchmove.stop.prevent
+        @touchend.stop.prevent="handleTouchEnd"
+        @click.stop
+      >
         <div
           v-for="(image, index) in images"
           :key="index"
-          class="Containers"
+          class="slide"
           v-show="currentSlide === index"
         >
-          <div class="card show-card">
-            <div class="show-wrapper">
-              <img class="show-img" :src="image.src" :alt="image.alt" />
-            </div>
-          </div>
+          <img class="show-img" :src="image.src" :alt="image.alt" />
         </div>
 
-        <button class="nav-btn prev" @click="prevSlide">&#10094;</button
-        ><!--left-->
-        <button class="nav-btn next" @click="nextSlide">&#10095;</button
-        ><!--right-->
+        <button
+          type="button"
+          class="nav-btn prev"
+          @click.stop.prevent="prevSlide"
+          @touchstart.stop.prevent
+          @touchend.stop.prevent="prevSlide"
+        >
+          &#10094;
+        </button>
+
+        <button
+          type="button"
+          class="nav-btn next"
+          @click.stop.prevent="nextSlide"
+          @touchstart.stop.prevent
+          @touchend.stop.prevent="nextSlide"
+        >
+          &#10095;
+        </button>
 
         <div class="dots">
           <span
             v-for="(image, index) in images"
-            :key="index"
+            :key="'dot-' + index"
             class="dot"
             :class="{ activeDot: currentSlide === index }"
-            @click="goToSlide(index)"
+            @click.stop.prevent="goToSlide(index)"
+            @touchstart.stop.prevent
+            @touchend.stop.prevent="goToSlide(index)"
           ></span>
         </div>
       </div>
@@ -41,6 +60,8 @@ export default {
     return {
       currentSlide: 0,
       slideInterval: null,
+      touchStartX: 0,
+      touchEndX: 0,
       images: [
         { src: "/img/flowers_1.jpg", alt: "Wood flower arrangement" },
         { src: "/img/flowers_2.jpg", alt: "Wood flower arrangement" },
@@ -55,17 +76,22 @@ export default {
   },
   mounted() {
     this.startSlideshow();
+    window.addEventListener("keydown", this.handleKeydown);
   },
-  beforeUnmount() {
-    if (this.slideInterval) {
-      clearInterval(this.slideInterval);
-    }
+  beforeDestroy() {
+    clearInterval(this.slideInterval);
+    window.removeEventListener("keydown", this.handleKeydown);
   },
   methods: {
     startSlideshow() {
       this.slideInterval = setInterval(() => {
-        this.nextSlide();
+        this.currentSlide = (this.currentSlide + 1) % this.images.length;
       }, 3000);
+    },
+
+    resetInterval() {
+      clearInterval(this.slideInterval);
+      this.startSlideshow();
     },
 
     nextSlide() {
@@ -79,20 +105,105 @@ export default {
       this.resetInterval();
     },
 
-    resetInterval() {
-      clearInterval(this.slideInterval);
-      this.startSlideshow();
-    },
-
     goToSlide(index) {
       this.currentSlide = index;
       this.resetInterval();
+    },
+
+    handleTouchStart(event) {
+      this.touchStartX = event.changedTouches[0].screenX;
+    },
+
+    handleTouchEnd(event) {
+      this.touchEndX = event.changedTouches[0].screenX;
+      const diff = this.touchEndX - this.touchStartX;
+
+      if (Math.abs(diff) < 50) return;
+
+      if (diff > 0) {
+        this.prevSlide();
+      } else {
+        this.nextSlide();
+      }
     },
   },
 };
 </script>
 
 <style scoped>
+.slideshow-container {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+  overflow: visible;
+}
 
+.slide {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
 
+.show-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+/* arrows */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.prev {
+  left: 12px;
+}
+
+.next {
+  right: 12px;
+}
+
+.dots {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 999;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+
+.activeDot {
+  background: black;
+}
 </style>

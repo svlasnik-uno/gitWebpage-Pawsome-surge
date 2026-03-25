@@ -52,4 +52,17 @@ const events = [
   background: rgba(0, 0, 0, 0.5);
   text-align: center;
 }
+/* Event page */
+.event-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.event-image-wrapper {
+  height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000; /* optional */
+}
 </style>
