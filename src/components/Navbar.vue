@@ -13,13 +13,19 @@
           {{ link.label }}
         </router-link>
       </li>
-
+      <li v-if="auth.isAuthenticated" class="nav-item separator">
+        <span class="nav-link">|</span>
+      </li>
       <li class="nav-item" v-if="auth.isAuthenticated">
         <router-link to="/itemList" class="nav-link">
           View Items
         </router-link>
       </li>
-
+      <li class="nav-item" v-if="auth.isAuthenticated">
+        <router-link to="/eventListAdmin" class="nav-link">
+          Manage Events
+        </router-link>
+      </li>
       <!-- Auth button -->
       <li class="nav-item">
         <!-- If logged in -->
@@ -27,10 +33,6 @@
           Logout
         </button>
 
-        <!-- If NOT logged in -->
-        <router-link v-else to="/Auth" class="nav-link">
-          Admin
-        </router-link>
       </li>
 
     </ul>
@@ -84,6 +86,26 @@ async function handleLogout() {
 }
 
 .nav-link.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.separator .nav-link {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.navbar-custom .nav-link {
+  color: black !important;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #333 !important;
+}
+.navbar-custom .nav-link.active {
+  color: black !important;
   font-weight: bold;
   text-decoration: underline;
 }

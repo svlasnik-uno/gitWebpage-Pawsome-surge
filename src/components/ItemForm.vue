@@ -69,7 +69,10 @@
                 <label class="form-label">Item Color</label>
                 <input v-model="form.ItemColor" type="text" class="form-control" />
               </div>
-
+              <div class="col-md-6">
+                <label class="form-label">Image Type</label>
+                <input v-model="form.ImageType" type="text" class="form-control" />
+              </div>
               <div class="col-12">
                 <label class="form-label">Item Description</label>
                 <textarea
@@ -159,6 +162,7 @@ export default {
         ItemAskingPrice: "",
         ItemCost: "",
         ItemStatus: "A",
+        ImageType: "",
         ItemColor: "",
         ItemImage: "",
         ItemDescription: "",

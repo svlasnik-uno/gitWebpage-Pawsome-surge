@@ -9,6 +9,8 @@ import Register from "@/components/Register.vue";
 import ItemList from "@/components/ItemList.vue";
 import ItemForm from "@/components/ItemForm.vue";
 import ItemDetail from "@/components/ItemDetail.vue";
+import EventListAdmin from "@/components/EventListAdmin.vue";
+import EventForm from "@/components/EventForm.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -20,6 +22,8 @@ const routes = [
   { path: "/itemDetail/:itemNumber", component: ItemDetail },
   { path: "/register", component: Register },
   { path: "/editItem/:itemNumber?", component: ItemForm },
+  { path: "/eventListAdmin", component: EventListAdmin },
+  { path: "/editEvent/:id?", component: EventForm },
 ];
 
 const router = createRouter({

@@ -2,6 +2,8 @@ import { supabase } from "../supabase";
 
 const TABLE_NAME = "tblItems";
 const IMAGE_BUCKET = "Images";
+const EVENT_TABLE_NAME = "tblEvents";
+const EVENT_IMAGE_BUCKET = "Images/Events";
 
 const APIService = {
   async signUp(email, password) {
@@ -48,7 +50,15 @@ const APIService = {
     if (error) throw error;
     return data;
   },
-
+  async getItemsByImageType(imageType) {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("*")
+      .eq("ImageType", imageType) // 'G' for gallery, 'E' for event, 'H' for home
+      .order("ItemNumber", { ascending: false });
+    if (error) throw error;
+    return data;
+  },
   async getItemById(itemNumber) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
@@ -127,6 +137,131 @@ const APIService = {
     if (!itemNumber || !imageName) return;
 
     const fullFileName = `${itemNumber}_${imageName}`;
+
+    const { error } = await supabase.storage
+      .from(IMAGE_BUCKET)
+      .remove([fullFileName]);
+
+    if (error) throw error;
+  },
+  // Event-related API methods
+  async getEvents() {
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+  async getEventsByDateRange(startDate, endDate) {
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .select("*")
+      .gte("eventDate", startDate) // start
+      .lte("eventDate", endDate) // end
+      .order("eventDate", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+  async getEventById(eventId) {
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .select("*")
+      .eq("id", eventId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+  async getEventsByYearAndSeason(year, season) {
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .select("*")
+      .eq("eventSeason", season)
+      .eq("eventYear", year)
+      .order("eventDate", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+  async getEventsByDisplay(eventDisplay = "Y") {
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .select("*")
+      .eq("eventDisplay", eventDisplay)
+      .order("id", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+  async createEvent(event) {
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .insert([event])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateEvent(eventId, event) {
+    const { id, ...updatePayload } = event;
+
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .update(updatePayload)
+      .eq("id", Number(eventId))
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteEvent(eventId) {
+    const { data, error } = await supabase
+      .from(EVENT_TABLE_NAME)
+      .delete()
+      .eq("id", eventId)
+      .select();
+
+    if (error) throw error;
+    return data;
+  },
+
+  getEventImageUrl(event) {
+    if (!event || !event.eventImage) return "";
+
+    const fullFileName = `Events/${event.id}_${event.eventImage}`;
+
+    const { data } = supabase.storage
+      .from(IMAGE_BUCKET)
+      .getPublicUrl(fullFileName);
+
+    return data.publicUrl;
+  },
+  async uploadEventImage(file, eventId) {
+    if (!file) return "";
+
+    const cleanFileName = file.name.replace(/\s+/g, "_");
+    const fullFileName = `Events/${eventId}_${cleanFileName}`;
+
+    const { error } = await supabase.storage
+      .from(IMAGE_BUCKET)
+      .upload(fullFileName, file, { upsert: true });
+
+    if (error) throw error;
+
+    return cleanFileName;
+  },
+
+  async deleteEventImage(eventId, imageName) {
+    if (!eventId || !imageName) return;
+
+    const fullFileName = `Events/${eventId}_${imageName}`;
 
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)

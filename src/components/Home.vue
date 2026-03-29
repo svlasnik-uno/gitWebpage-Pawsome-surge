@@ -1,27 +1,54 @@
 ﻿<template>
   <div class="site">
     <main class="content container-fluid py-4">
-
-      <div class="slideshow-container" @touchstart.stop="handleTouchStart" @touchmove.stop="handleTouchMove"
-        @touchend.stop="handleTouchEnd" @click.stop>
-        <div v-for="(image, index) in images" :key="index" class="slide" v-show="currentSlide === index">
+      <div
+        class="slideshow-container"
+        @touchstart.stop="handleTouchStart"
+        @touchmove.stop="handleTouchMove"
+        @touchend.stop="handleTouchEnd"
+        @click.stop
+      >
+        <div
+          v-for="(image, index) in images"
+          :key="index"
+          class="slide"
+          v-show="currentSlide === index"
+        >
           <img class="show-img" :src="image.src" :alt="image.alt" />
         </div>
 
-        <button type="button" class="nav-btn prev" @click.stop.prevent="prevSlide" @touchstart.stop.prevent
-          @touchend.stop.prevent="prevSlide">
+        <button
+          v-if="images.length > 1"
+          type="button"
+          class="nav-btn prev"
+          @click.stop.prevent="prevSlide"
+          @touchstart.stop.prevent
+          @touchend.stop.prevent="prevSlide"
+        >
           &#10094;
         </button>
 
-        <button type="button" class="nav-btn next" @click.stop.prevent="nextSlide" @touchstart.stop.prevent
-          @touchend.stop.prevent="nextSlide">
+        <button
+          v-if="images.length > 1"
+          type="button"
+          class="nav-btn next"
+          @click.stop.prevent="nextSlide"
+          @touchstart.stop.prevent
+          @touchend.stop.prevent="nextSlide"
+        >
           &#10095;
         </button>
 
-        <div class="dots">
-          <span v-for="(image, index) in images" :key="'dot-' + index" class="dot"
-            :class="{ activeDot: currentSlide === index }" @click.stop.prevent="goToSlide(index)"
-            @touchstart.stop.prevent @touchend.stop.prevent="goToSlide(index)"></span>
+        <div v-if="images.length > 1" class="dots">
+          <span
+            v-for="(image, index) in images"
+            :key="'dot-' + index"
+            class="dot"
+            :class="{ activeDot: currentSlide === index }"
+            @click.stop.prevent="goToSlide(index)"
+            @touchstart.stop.prevent
+            @touchend.stop.prevent="goToSlide(index)"
+          ></span>
         </div>
       </div>
     </main>
@@ -29,6 +56,8 @@
 </template>
 
 <script>
+import APIService from "@/api/APIService";
+
 export default {
   name: "Home",
   data() {
@@ -37,19 +66,11 @@ export default {
       slideInterval: null,
       touchStartX: 0,
       touchEndX: 0,
-      images: [
-        { src: "/img/flowers_1.jpg", alt: "Wood flower arrangement" },
-        { src: "/img/flowers_2.jpg", alt: "Wood flower arrangement" },
-        { src: "/img/flowers_3.jpg", alt: "Wood flower arrangement" },
-        { src: "/img/flowers_4.jpg", alt: "Wood flower arrangement" },
-        { src: "/img/flowers_5.jpg", alt: "Wood flower arrangement" },
-        { src: "/img/flowers_6.jpg", alt: "Wood flower arrangement" },
-        { src: "/img/flowers_7.jpg", alt: "Wood flower arrangement" },
-        { src: "/img/flowers_8.jpg", alt: "Wood flower arrangement" },
-      ],
+      images: [],
     };
   },
-  mounted() {
+  async mounted() {
+    await this.loadSlideshowImages();
     this.startSlideshow();
     window.addEventListener("keydown", this.handleKeydown);
   },
@@ -58,23 +79,44 @@ export default {
     window.removeEventListener("keydown", this.handleKeydown);
   },
   methods: {
+    async loadSlideshowImages() {
+      try {
+        const items = await APIService.getItemsByImageType("H");
+
+        this.images = items
+          .slice(0, 8)
+          .map((item) => ({
+            src: APIService.getImageUrl(item),
+            alt: item.ItemName || "Gallery image",
+          }))
+          .filter((image) => image.src);
+      } catch (error) {
+        console.error("Error loading slideshow images:", error);
+      }
+    },
+
     startSlideshow() {
+      clearInterval(this.slideInterval);
+
+      if (this.images.length <= 1) return;
+
       this.slideInterval = setInterval(() => {
         this.currentSlide = (this.currentSlide + 1) % this.images.length;
       }, 3000);
     },
 
     resetInterval() {
-      clearInterval(this.slideInterval);
       this.startSlideshow();
     },
 
     nextSlide() {
+      if (!this.images.length) return;
       this.currentSlide = (this.currentSlide + 1) % this.images.length;
       this.resetInterval();
     },
 
     prevSlide() {
+      if (!this.images.length) return;
       this.currentSlide =
         (this.currentSlide - 1 + this.images.length) % this.images.length;
       this.resetInterval();
@@ -103,6 +145,8 @@ export default {
     },
 
     handleTouchEnd() {
+      if (this.images.length <= 1) return;
+
       const diff = this.touchEndX - this.touchStartX;
 
       if (Math.abs(diff) < 50) return;
@@ -113,14 +157,14 @@ export default {
         this.nextSlide();
       }
     },
-  }
+  },
 };
 </script>
 
 <style scoped>
 .slideshow-container {
   position: relative;
-  max-width: 700px;
+  max-width: 650px;
   margin: 0 auto;
   overflow: hidden;
   touch-action: pan-y;

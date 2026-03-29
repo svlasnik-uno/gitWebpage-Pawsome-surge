@@ -12,13 +12,21 @@
         {{ link.label }}
       </router-link>
 
-      <a href="mailto:pawsomeArtsAndCrafts@yahoo.com">
+      <a href="mailto:pawsomeArtsAndCrafts@yahoo.com" class="foot-link">
         Contact Us
       </a>
 
-      <a href="https://www.facebook.com/Pawsome.Arts.and.Crafts/" target="_blank">
+      <a
+        href="https://www.facebook.com/profile.php?id=61587162195934"
+        target="_blank"
+        class="foot-link"
+      >
         <img src="/img/fbLogo.png" width="20" height="20" />
       </a>
+
+      <router-link to="/Auth" class="foot-link">
+        Admin
+      </router-link>
     </div>
 
     <!-- Bottom row -->
@@ -38,28 +46,45 @@ const links = [
   { label: "About Us", to: "/about" },
 ];
 </script>
-<style>
+
+<style scoped>
 .footer {
   text-align: center;
   padding: 16px;
+  color: #0d3b66; /* dark blue */
 }
 
+/* Layout */
 .footer-top,
 .footer-bottom {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap; /* prevents overlap on small screens */
+  flex-wrap: wrap;
   margin-bottom: 10px;
 }
 
-.foot-link {
+/* All links unified */
+.footer a,
+.footer .foot-link {
+  color: #0d3b66;
+  text-decoration: none;
   margin: 0 8px;
+  display: inline-flex;
+  align-items: center;
 }
 
+/* Hover effect */
+.footer a:hover,
+.footer .foot-link:hover {
+  text-decoration: underline;
+}
+
+/* Active router link */
 .active {
   font-weight: bold;
   text-decoration: underline;
+  color: #0d3b66;
 }
 </style>
