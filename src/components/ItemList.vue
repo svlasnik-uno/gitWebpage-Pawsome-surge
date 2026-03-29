@@ -136,7 +136,7 @@
 
 <script>
 import APIService from "@/api/APIService";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/AuthStore";
 
 export default {
   name: "ItemList",

@@ -39,7 +39,7 @@
 
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { useAuthStore } from "@/store/authStore"; // adjust path if needed
+import { useAuthStore } from "@/store/AuthStore"; // adjust path if needed
 import APIService from "@/api/APIService";
 
 const route = useRoute();

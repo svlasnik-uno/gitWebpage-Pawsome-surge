@@ -107,7 +107,7 @@ export default {
   }),
 
   computed: {
-    authStore() {
+    AuthStore() {
       return useAuthStore()
     },
   },
@@ -117,7 +117,7 @@ export default {
       this.showMsg = ''
       this.generalError = ''
       this.loading = true
-      this.authStore.clearAuth()
+      this.AuthStore.clearAuth()
 
       try {
         const result = await APIService.signIn(
@@ -127,7 +127,7 @@ export default {
 
         const user = result?.user || result?.session?.user
 
-        this.authStore.setAuth({
+        this.AuthStore.setAuth({
           user: user?.email || this.credentials.email,
           userId: user?.id || null,
           isAuthenticated: true,
@@ -136,7 +136,7 @@ export default {
         router.push('/')
       } catch (error) {
         console.error('error during login:', error)
-        this.authStore.clearAuth()
+        this.AuthStore.clearAuth()
 
         const msg = error?.message?.toLowerCase() || ''
 
