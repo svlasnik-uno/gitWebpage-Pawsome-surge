@@ -1,53 +1,27 @@
 ﻿<template>
   <div class="site">
     <main class="content container-fluid py-4">
-      <div
-<div
-  class="slideshow-container"
-  @touchstart.stop="handleTouchStart"
-  @touchmove.stop="handleTouchMove"
-  @touchend.stop="handleTouchEnd"
-  @click.stop
->
-        <div
-          v-for="(image, index) in images"
-          :key="index"
-          class="slide"
-          v-show="currentSlide === index"
-        >
+
+      <div class="slideshow-container" @touchstart.stop="handleTouchStart" @touchmove.stop="handleTouchMove"
+        @touchend.stop="handleTouchEnd" @click.stop>
+        <div v-for="(image, index) in images" :key="index" class="slide" v-show="currentSlide === index">
           <img class="show-img" :src="image.src" :alt="image.alt" />
         </div>
 
-        <button
-          type="button"
-          class="nav-btn prev"
-          @click.stop.prevent="prevSlide"
-          @touchstart.stop.prevent
-          @touchend.stop.prevent="prevSlide"
-        >
+        <button type="button" class="nav-btn prev" @click.stop.prevent="prevSlide" @touchstart.stop.prevent
+          @touchend.stop.prevent="prevSlide">
           &#10094;
         </button>
 
-        <button
-          type="button"
-          class="nav-btn next"
-          @click.stop.prevent="nextSlide"
-          @touchstart.stop.prevent
-          @touchend.stop.prevent="nextSlide"
-        >
+        <button type="button" class="nav-btn next" @click.stop.prevent="nextSlide" @touchstart.stop.prevent
+          @touchend.stop.prevent="nextSlide">
           &#10095;
         </button>
 
         <div class="dots">
-          <span
-            v-for="(image, index) in images"
-            :key="'dot-' + index"
-            class="dot"
-            :class="{ activeDot: currentSlide === index }"
-            @click.stop.prevent="goToSlide(index)"
-            @touchstart.stop.prevent
-            @touchend.stop.prevent="goToSlide(index)"
-          ></span>
+          <span v-for="(image, index) in images" :key="'dot-' + index" class="dot"
+            :class="{ activeDot: currentSlide === index }" @click.stop.prevent="goToSlide(index)"
+            @touchstart.stop.prevent @touchend.stop.prevent="goToSlide(index)"></span>
         </div>
       </div>
     </main>
@@ -79,67 +53,67 @@ export default {
     this.startSlideshow();
     window.addEventListener("keydown", this.handleKeydown);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.slideInterval);
     window.removeEventListener("keydown", this.handleKeydown);
   },
- methods: {
-  startSlideshow() {
-    this.slideInterval = setInterval(() => {
+  methods: {
+    startSlideshow() {
+      this.slideInterval = setInterval(() => {
+        this.currentSlide = (this.currentSlide + 1) % this.images.length;
+      }, 3000);
+    },
+
+    resetInterval() {
+      clearInterval(this.slideInterval);
+      this.startSlideshow();
+    },
+
+    nextSlide() {
       this.currentSlide = (this.currentSlide + 1) % this.images.length;
-    }, 3000);
-  },
+      this.resetInterval();
+    },
 
-  resetInterval() {
-    clearInterval(this.slideInterval);
-    this.startSlideshow();
-  },
+    prevSlide() {
+      this.currentSlide =
+        (this.currentSlide - 1 + this.images.length) % this.images.length;
+      this.resetInterval();
+    },
 
-  nextSlide() {
-    this.currentSlide = (this.currentSlide + 1) % this.images.length;
-    this.resetInterval();
-  },
+    goToSlide(index) {
+      this.currentSlide = index;
+      this.resetInterval();
+    },
 
-  prevSlide() {
-    this.currentSlide =
-      (this.currentSlide - 1 + this.images.length) % this.images.length;
-    this.resetInterval();
-  },
+    handleKeydown(e) {
+      if (e.key === "ArrowLeft") {
+        this.prevSlide();
+      } else if (e.key === "ArrowRight") {
+        this.nextSlide();
+      }
+    },
 
-  goToSlide(index) {
-    this.currentSlide = index;
-    this.resetInterval();
-  },
+    handleTouchStart(event) {
+      this.touchStartX = event.touches[0].clientX;
+      this.touchEndX = event.touches[0].clientX;
+    },
 
-  handleKeydown(e) {
-    if (e.key === "ArrowLeft") {
-      this.prevSlide();
-    } else if (e.key === "ArrowRight") {
-      this.nextSlide();
-    }
-  },
+    handleTouchMove(event) {
+      this.touchEndX = event.touches[0].clientX;
+    },
 
-  handleTouchStart(event) {
-    this.touchStartX = event.touches[0].clientX;
-    this.touchEndX = event.touches[0].clientX;
-  },
+    handleTouchEnd() {
+      const diff = this.touchEndX - this.touchStartX;
 
-  handleTouchMove(event) {
-    this.touchEndX = event.touches[0].clientX;
-  },
+      if (Math.abs(diff) < 50) return;
 
-  handleTouchEnd() {
-    const diff = this.touchEndX - this.touchStartX;
-
-    if (Math.abs(diff) < 50) return;
-
-    if (diff > 0) {
-      this.prevSlide();
-    } else {
-      this.nextSlide();
-    }
-  },
-}
+      if (diff > 0) {
+        this.prevSlide();
+      } else {
+        this.nextSlide();
+      }
+    },
+  }
 };
 </script>
 
