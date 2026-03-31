@@ -41,6 +41,43 @@ const APIService = {
     return data.user;
   },
 
+  async getItemsSortCriteria(sortCriteria = [], filterCriteria = []) {
+    let query = supabase.from(TABLE_NAME).select("*");
+
+    if (Array.isArray(filterCriteria)) {
+      filterCriteria.forEach((filter) => {
+        if (!filter || !filter.column || filter.value == null) return;
+
+        if (filter.operator === "eq") {
+          query = query.eq(filter.column, filter.value);
+        }
+
+        if (
+          filter.operator === "in" &&
+          Array.isArray(filter.value) &&
+          filter.value.length
+        ) {
+          query = query.in(filter.column, filter.value);
+        }
+      });
+    }
+
+    if (Array.isArray(sortCriteria) && sortCriteria.length) {
+      sortCriteria.forEach((sort) => {
+        if (!sort || !sort.column) return;
+
+        query = query.order(sort.column, {
+          ascending: sort.ascending !== false,
+        });
+      });
+    } else {
+      query = query.order("ItemNumber", { ascending: true });
+    }
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data;
+  },
   async getItems() {
     const { data, error } = await supabase
       .from(TABLE_NAME)

@@ -11,6 +11,7 @@ import ItemForm from "@/components/ItemForm.vue";
 import ItemDetail from "@/components/ItemDetail.vue";
 import EventListAdmin from "@/components/EventListAdmin.vue";
 import EventForm from "@/components/EventForm.vue";
+import CreatePDFReport from "../components/CreatePDFReport.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -24,6 +25,7 @@ const routes = [
   { path: "/editItem/:itemNumber?", component: ItemForm },
   { path: "/eventListAdmin", component: EventListAdmin },
   { path: "/editEvent/:id?", component: EventForm },
+  { path: "/create-pdf-report", name: "CreatePDFReport", component: CreatePDFReport },
 ];
 
 const router = createRouter({
