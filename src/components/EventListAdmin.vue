@@ -3,7 +3,12 @@
     <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
       <div class="d-flex align-items-center gap-3 flex-wrap">
         <label for="seasonSelect" class="fw-semibold mb-0">View Events by Season:</label>
-        <select id="seasonSelect" v-model="selectedSeason" class="form-select w-auto" @change="handleSeasonChange">
+        <select
+          id="seasonSelect"
+          v-model="selectedSeason"
+          class="form-select w-auto"
+          @change="handleSeasonChange"
+        >
           <option v-for="option in seasonOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
@@ -19,11 +24,18 @@
           Add New Event
         </button>
 
-        <input v-model="searchEventId" type="number" class="form-control event-id-search" placeholder="Enter Event ID"
-          @keyup.enter="findByEventId" />
+        <input
+          v-model="searchEventId"
+          type="number"
+          class="form-control event-id-search"
+          placeholder="Enter Event ID"
+          @keyup.enter="findByEventId"
+        />
+
         <button type="button" class="btn btn-outline-primary" @click="findByEventId">
           Find
         </button>
+
         <button type="button" class="btn btn-outline-secondary" @click="clearSearch">
           Clear Search
         </button>
@@ -48,12 +60,35 @@
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
               <tr>
-                <th v-for="header in headers" :key="header" @click="sortBy(header)" class="sortable-header text-center">
-                  <div class="th-content justify-content-center">
+                <th
+                  v-for="header in headers"
+                  :key="header"
+                  @click="sortBy(header)"
+                  :class="[
+                    'sortable-header',
+                    ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay'].includes(header)
+                      ? 'text-center'
+                      : 'text-start'
+                  ]"
+                >
+                  <div
+                    class="th-content"
+                    :class="[
+                      ['id', 'eventImage', 'eventDisplay'].includes(header)
+                        ? 'justify-content-center'
+                        : 'justify-content-start'
+                    ]"
+                  >
                     <span class="header-label">{{ headerLabels[header] || header }}</span>
                     <span class="sort-icon-slot">
-                      <i v-if="sortKey === header && sortDirection === 'asc'" class="bi bi-caret-up-fill"></i>
-                      <i v-else-if="sortKey === header && sortDirection === 'desc'" class="bi bi-caret-down-fill"></i>
+                      <i
+                        v-if="sortKey === header && sortDirection === 'asc'"
+                        class="bi bi-caret-up-fill"
+                      ></i>
+                      <i
+                        v-else-if="sortKey === header && sortDirection === 'desc'"
+                        class="bi bi-caret-down-fill"
+                      ></i>
                     </span>
                   </div>
                 </th>
@@ -63,15 +98,31 @@
 
             <tbody>
               <tr v-for="event in paginatedEvents" :key="event.id">
-                <td v-for="header in headers" :key="`${event.id}-${header}`"
-                  :class="{ 'text-center': ['id', 'eventYear'].includes(header) }">
-                  <button v-if="header === 'id'" type="button" class="btn btn-link p-0 text-decoration-underline"
-                    @click="viewEventDetail(event)">
+                <td
+                  v-for="header in headers"
+                  :key="`${event.id}-${header}`"
+                  :class="[
+                    ['id', 'eventImage', 'eventDisplay'].includes(header)
+                      ? 'text-center'
+                      : 'text-start'
+                  ]"
+                >
+                  <button
+                    v-if="header === 'id'"
+                    type="button"
+                    class="btn btn-link p-0 text-decoration-underline"
+                    @click="viewEventDetail(event)"
+                  >
                     {{ event[header] }}
                   </button>
 
-                  <img v-else-if="header === 'eventImage' && event[header]" :src="getEventImageUrl(event)"
-                    alt="Event Image" class="img-thumbnail" style="width: 75px; height: 75px; object-fit: cover;" />
+                  <img
+                    v-else-if="header === 'eventImage' && event[header]"
+                    :src="getEventImageUrl(event)"
+                    alt="Event Image"
+                    class="img-thumbnail"
+                    style="width: 75px; height: 75px; object-fit: cover;"
+                  />
 
                   <span v-else-if="header === 'eventDate'">
                     {{ formatDate(event[header]) }}
@@ -84,13 +135,21 @@
 
                 <td class="text-center">
                   <div class="d-inline-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary" @click="editEvent(event)"
-                      title="Edit Event">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      @click="editEvent(event)"
+                      title="Edit Event"
+                    >
                       <i class="bi bi-pencil-fill"></i>
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(event)"
-                      title="Delete Event">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      @click="confirmDelete(event)"
+                      title="Delete Event"
+                    >
                       <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
@@ -104,14 +163,28 @@
           <nav aria-label="Events pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToPreviousPage"
+                  :disabled="currentPage === 1"
+                >
                   Previous
                 </button>
               </li>
 
-              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }">
-                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
+              <li
+                v-for="(page, index) in visiblePages"
+                :key="`${page}-${index}`"
+                class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }"
+              >
+                <button
+                  v-if="page !== '...'"
+                  type="button"
+                  class="page-link"
+                  @click="goToPage(page)"
+                >
                   {{ page }}
                 </button>
 
@@ -121,8 +194,12 @@
               </li>
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                <button type="button" class="page-link" @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0"
+                >
                   Next
                 </button>
               </li>
@@ -178,7 +255,7 @@ export default {
   computed: {
     headers() {
       if (!this.events.length) return [];
-      return ["id", "eventName", "eventDate", "eventLocation", "eventImage", "eventSeason", "eventYear", "eventDisplay" ];
+      return ["id", "eventName", "eventDate", "eventLocation", "eventImage", "eventSeason", "eventYear", "eventDisplay"];
     },
 
     visiblePages() {

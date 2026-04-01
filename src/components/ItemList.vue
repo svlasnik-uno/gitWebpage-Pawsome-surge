@@ -1,40 +1,59 @@
 <template>
   <div class="container py-4 list-items-page bg-white shadow-sm rounded px-4">
-    <div class="container py-4 list-items-page bg-white shadow-sm rounded px-4">
-      <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
 
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-          <label for="categorySelect" class="fw-semibold mb-0">View Items by Category:</label>
-          <select id="categorySelect" v-model="selectedCategory" class="form-select w-auto"
-            @change="handleCategoryChange">
-            <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <label for="categorySelect" class="fw-semibold mb-0">View Items by Category:</label>
+        <select
+          id="categorySelect"
+          v-model="selectedCategory"
+          class="form-select w-auto"
+          @change="handleCategoryChange"
+        >
+          <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
 
-          <span>
-            Showing {{ startItem }} - {{ endItem }} of {{ items.length }} items
-          </span>
-        </div>
+        <label for="subTypeSelect" class="fw-semibold mb-0">View Items by Sub-type:</label>
+        <select
+          id="subTypeSelect"
+          v-model="selectedSubType"
+          class="form-select w-auto"
+          @change="handleCategoryChange"
+        >
+          <option v-for="option in subTypeOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
 
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <input v-model="searchItemNumber" type="number" class="form-control item-number-search"
-            placeholder="Find Item #" @keyup.enter="findByItemNumber" />
+        <span>
+          Showing {{ startItem }} - {{ endItem }} of {{ items.length }} items
+        </span>
+      </div>
 
-          <button type="button" class="btn btn-secondary" @click="findByItemNumber">
-            Find
-          </button>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <input
+          v-model="searchItemNumber"
+          type="number"
+          class="form-control item-number-search"
+          placeholder="Find Item #"
+          @keyup.enter="findByItemNumber"
+        />
 
-          <button type="button" class="btn btn-secondary" @click="clearSearch">
-            Clear Search
-          </button>
-          <button type="button" class="btn btn-secondary" @click="addNewItem">
-            Add New Item
-          </button>
-          <button type="button" class="btn btn-secondary" @click="goToCreatePdfReport">
-            Create PDF Report
-          </button>
-        </div>
+        <button type="button" class="btn btn-secondary" @click="findByItemNumber">
+          Find
+        </button>
+
+        <button type="button" class="btn btn-secondary" @click="clearSearch">
+          Clear Search
+        </button>
+        <button type="button" class="btn btn-secondary" @click="addNewItem">
+          Add New Item
+        </button>
+        <button type="button" class="btn btn-secondary" @click="goToCreatePdfReport">
+          Create PDF Report
+        </button>
       </div>
     </div>
 
@@ -56,10 +75,15 @@
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
               <tr>
-                <th v-for="header in headers" :key="header" @click="sortBy(header)" :class="[
-                  'text-center',
-                  header === 'ItemImage' ? 'not-sortable' : 'sortable-header'
-                ]">
+                <th
+                  v-for="header in headers"
+                  :key="header"
+                  @click="sortBy(header)"
+                  :class="[
+                    'text-center',
+                    header === 'ItemImage' ? 'not-sortable' : 'sortable-header'
+                  ]"
+                >
                   <div class="th-content justify-content-center">
                     <span class="header-label">{{ headerLabels[header] || header }}</span>
                     <span class="sort-icon-slot">
@@ -74,15 +98,27 @@
 
             <tbody>
               <tr v-for="item in paginatedItems" :key="item.ItemNumber">
-                <td v-for="header in headers" :key="`${item.ItemNumber}-${header}`"
-                  :class="{ 'text-center': ['ItemStatus', 'ItemNumber'].includes(header) }">
-                  <button v-if="header === 'ItemNumber'" type="button"
-                    class="btn btn-link p-0 text-decoration-underline" @click="viewItemDetail(item)">
+                <td
+                  v-for="header in headers"
+                  :key="`${item.ItemNumber}-${header}`"
+                  :class="{ 'text-center': ['ItemStatus', 'ItemNumber'].includes(header) }"
+                >
+                  <button
+                    v-if="header === 'ItemNumber'"
+                    type="button"
+                    class="btn btn-link p-0 text-decoration-underline"
+                    @click="viewItemDetail(item)"
+                  >
                     {{ item[header] }}
                   </button>
 
-                  <img v-else-if="header === 'ItemImage' && item[header]" :src="getImageUrl(item)" alt="Item Image"
-                    class="img-thumbnail" style="width: 75px; height: 75px; object-fit: cover;" />
+                  <img
+                    v-else-if="header === 'ItemImage' && item[header]"
+                    :src="getImageUrl(item)"
+                    alt="Item Image"
+                    class="img-thumbnail"
+                    style="width: 75px; height: 75px; object-fit: cover;"
+                  />
 
                   <span v-else-if="['ItemAskingPrice', 'ItemCost'].includes(header)">
                     {{ formatCurrency(item[header]) }}
@@ -95,13 +131,21 @@
 
                 <td class="text-center">
                   <div class="d-inline-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary" @click="editItem(item)"
-                      title="Edit Item">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      @click="editItem(item)"
+                      title="Edit Item"
+                    >
                       <i class="bi bi-pencil-fill"></i>
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)"
-                      title="Delete Item">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      @click="confirmDelete(item)"
+                      title="Delete Item"
+                    >
                       <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
@@ -120,8 +164,12 @@
                 </button>
               </li>
 
-              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }">
+              <li
+                v-for="(page, index) in visiblePages"
+                :key="`${page}-${index}`"
+                class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }"
+              >
                 <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
                   {{ page }}
                 </button>
@@ -132,8 +180,12 @@
               </li>
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                <button type="button" class="page-link" @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0"
+                >
                   Next
                 </button>
               </li>
@@ -159,6 +211,7 @@ export default {
       allItems: [],
       items: [],
       selectedCategory: "A",
+      selectedSubType: "All",
       searchItemNumber: "",
       categoryOptions: [
         { value: "A", label: "Available" },
@@ -166,6 +219,32 @@ export default {
         { value: "R", label: "Replace" },
         { value: "K", label: "Kept" },
         { value: "All", label: "All" },
+      ],
+      subTypeOptions: [
+        { value: "All", label: "All" },
+        { value: "Animal", label: "Animal" },
+        { value: "Bundle", label: "Bundle" },
+        { value: "Centerpiece-General", label: "Centerpiece-General" },
+        { value: "Christmas", label: "Christmas" },
+        { value: "Door Sign", label: "Door Sign" },
+        { value: "Easter", label: "Easter" },
+        { value: "Fall", label: "Fall" },
+        { value: "General", label: "General" },
+        { value: "Halloween", label: "Halloween" },
+        { value: "Hanging Item", label: "Hanging Item" },
+        { value: "Magnet", label: "Magnet" },
+        { value: "Ornament", label: "Ornament" },
+        { value: "Other", label: "Other" },
+        { value: "Patriotic", label: "Patriotic" },
+        { value: "Pop Culture", label: "Pop Culture" },
+        { value: "Roses", label: "Roses" },
+        { value: "Sports", label: "Sports" },
+        { value: "Spring", label: "Spring" },
+        { value: "Standing Wood Item", label: "Standing Wood Item" },
+        { value: "Summer", label: "Summer" },
+        { value: "Thanksgiving", label: "Thanksgiving" },
+        { value: "Vase", label: "Vase" },
+        { value: "Winter", label: "Winter" },
       ],
       loading: true,
       errorMessage: "",
@@ -191,12 +270,11 @@ export default {
   },
 
   computed: {
-    // set table headers based on keys of the first item (if exists)
     headers() {
       if (!this.items.length) return [];
       return Object.keys(this.items[0]);
     },
-    // set up pagination logic
+
     visiblePages() {
       if (this.totalPages <= 20) {
         return Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -235,7 +313,7 @@ export default {
     endItem() {
       return Math.min(this.currentPage * this.itemsPerPage, this.items.length);
     },
-    // Returns a sorted copy of the items array based on the current sort key and direction
+
     sortedItems() {
       if (!this.sortKey) return this.items;
       return [...this.items].sort((a, b) => {
@@ -254,26 +332,29 @@ export default {
         return 0;
       });
     },
-    goToCreatePdfReport() {
-      this.$router.push({ name: "CreatePDFReport" });
-    },
-    // Generates a descriptive title for the PDF report based on the selected category and sorting options
+
     pdfReportTitle() {
       const categoryLabel =
         this.selectedCategory === "All"
           ? "All Items"
           : this.categoryOptions.find((option) => option.value === this.selectedCategory)?.label ||
-          this.selectedCategory;
+            this.selectedCategory;
+
+      const subTypeLabel =
+        this.selectedSubType === "All"
+          ? "All Sub-types"
+          : this.selectedSubType;
+
       const sortLabel = this.sortKey
         ? this.headerLabels[this.sortKey] || this.sortKey
         : "Asc";
       const sortDirectionLabel = this.sortKey ? ` ${this.sortDirection.toUpperCase()}` : "";
-      return `Items Report - ${categoryLabel} - By ${sortLabel}${sortDirectionLabel}`;
+
+      return `Items Report - ${categoryLabel} - ${subTypeLabel} - By ${sortLabel}${sortDirectionLabel}`;
     },
   },
 
   methods: {
-    // Fetches items from the API and initializes the component state, including handling loading and error states
     async loadItems() {
       this.loading = true;
       this.errorMessage = "";
@@ -282,6 +363,7 @@ export default {
         this.allItems = Array.isArray(data) ? data : [];
         this.currentPage = 1;
         this.selectedCategory = "All";
+        this.selectedSubType = "All";
         this.searchItemNumber = "";
         this.handleCategoryChange();
       } catch (error) {
@@ -290,24 +372,32 @@ export default {
         this.loading = false;
       }
     },
-    // Filters items based on the entered item number, updating the displayed list accordingly
+
     findByItemNumber() {
       const itemNumber = Number(this.searchItemNumber);
       if (!this.searchItemNumber || Number.isNaN(itemNumber)) {
         this.handleCategoryChange();
         return;
       }
-      this.items = this.allItems.filter(
-        (item) => Number(item.ItemNumber) === itemNumber
-      );
+
+      this.items = this.allItems.filter((item) => {
+        const matchesItemNumber = Number(item.ItemNumber) === itemNumber;
+        const matchesCategory =
+          this.selectedCategory === "All" || item.ItemStatus === this.selectedCategory;
+        const matchesSubType =
+          this.selectedSubType === "All" || item.ItemSubType === this.selectedSubType;
+
+        return matchesItemNumber && matchesCategory && matchesSubType;
+      });
+
       this.currentPage = 1;
     },
-    // Clears the item number search input and resets the displayed items to match the currently selected category
+
     clearSearch() {
       this.searchItemNumber = "";
       this.handleCategoryChange();
     },
-    // Navigates to the item creation page, determining the next available item number based on existing items
+
     addNewItem() {
       const maxItemNumber = this.allItems.length
         ? Math.max(...this.allItems.map((item) => Number(item.ItemNumber) || 0))
@@ -315,41 +405,44 @@ export default {
       const nextItemNumber = maxItemNumber + 1;
       this.$router.push(`/editItem?itemNumber=${nextItemNumber}`);
     },
-    // Navigates to the detail view for a specific item when its item number is clicked
+
     viewItemDetail(item) {
       this.$router.push(`/itemDetail/${item.ItemNumber}`);
     },
-    // Navigates to the edit page for a specific item when the edit button is clicked
+
     editItem(item) {
       this.$router.push(`/editItem/${item.ItemNumber}`);
     },
-    // Handles changes to the category filter, updating the displayed items based on the selected category
+
     handleCategoryChange() {
       this.searchItemNumber = "";
-      if (this.selectedCategory === "All") {
-        this.items = this.allItems;
-      } else if (this.selectedCategory === "ItemNumber") {
-        const itemNumber = Number(this.searchItemNumber);
 
-        if (!this.searchItemNumber || Number.isNaN(itemNumber)) {
-          this.items = [];
-        } else {
-          this.items = this.allItems.filter(
-            (item) => Number(item.ItemNumber) === itemNumber
-          );
-        }
-      } else {
-        this.items = this.allItems.filter(
+      let filteredItems = [...this.allItems];
+
+      if (this.selectedCategory !== "All") {
+        filteredItems = filteredItems.filter(
           (item) => item.ItemStatus === this.selectedCategory
         );
       }
+
+      if (this.selectedSubType !== "All") {
+        filteredItems = filteredItems.filter(
+          (item) => item.ItemSubType === this.selectedSubType
+        );
+      }
+
+      this.items = filteredItems;
       this.currentPage = 1;
     },
-    // Constructs the URL for an item's image using the API service, allowing images to be displayed in the item list
+
+    goToCreatePdfReport() {
+      this.$router.push({ name: "CreatePDFReport" });
+    },
+
     getImageUrl(item) {
       return APIService.getImageUrl(item);
     },
-    // Formats a numeric value as currency, returning an empty string for null or empty values
+
     formatCurrency(value) {
       if (value == null || value === "") return "";
       return new Intl.NumberFormat("en-US", {
@@ -357,7 +450,7 @@ export default {
         currency: "USD",
       }).format(value);
     },
-    // Sorts the items based on a specified key, toggling between ascending and descending order when the same key is clicked
+
     sortBy(key) {
       if (key === "ItemImage") return;
 
@@ -370,7 +463,6 @@ export default {
       this.currentPage = 1;
     },
 
-    // Navigates to a specific page in the pagination when a page number is clicked
     goToPage(page) {
       this.currentPage = page;
     },
@@ -386,8 +478,7 @@ export default {
         this.currentPage += 1;
       }
     },
-    // Prompts the user to confirm deletion of an item, and if confirmed, 
-    // deletes the item via the API and reloads the item list
+
     async confirmDelete(item) {
       const ok = window.confirm(
         `Are you sure you want to delete item #${item.ItemNumber}?`
@@ -404,8 +495,7 @@ export default {
       }
     },
   },
-  // Checks user authentication status on component mount and loads items if authenticated, 
-  // otherwise redirects to home page
+
   async mounted() {
     this.auth = useAuthStore();
 
