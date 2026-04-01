@@ -168,8 +168,7 @@
                 v-for="(page, index) in visiblePages"
                 :key="`${page}-${index}`"
                 class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }"
-              >
+                :class="{ active: currentPage === page, disabled: page === '...' }">
                 <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
                   {{ page }}
                 </button>
@@ -184,8 +183,7 @@
                   type="button"
                   class="page-link"
                   @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0"
-                >
+                  :disabled="currentPage === totalPages || totalPages === 0">
                   Next
                 </button>
               </li>
@@ -198,8 +196,6 @@
 </template>
 
 <script>
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import APIService from "@/api/APIService";
 import { useAuthStore } from "@/store/AuthStore";
 

@@ -17,12 +17,7 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Item Number</label>
-                <input
-                  v-model="form.ItemNumber"
-                  type="number"
-                  class="form-control"
-                  :readonly="isEditMode"
-                />
+                <input v-model="form.ItemNumber" type="number" class="form-control" :readonly="isEditMode" />
               </div>
 
               <div class="col-md-6">
@@ -37,22 +32,18 @@
 
               <div class="col-md-6">
                 <label class="form-label">Price</label>
-                <input
-                  :value="formatCurrency(form.ItemAskingPrice)"
-                  @input="handleCurrencyInput($event, 'ItemAskingPrice')"
-                  type="text"
-                  class="form-control"
-                />
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input v-model.number="form.ItemAskingPrice" type="number" step="0.01" min="0" class="form-control" />
+                </div>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label">Item Cost</label>
-                <input
-                  :value="formatCurrency(form.ItemCost)"
-                  @input="handleCurrencyInput($event, 'ItemCost')"
-                  type="text"
-                  class="form-control"
-                />
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input v-model.number="form.ItemCost" type="number" step="0.01" min="0" class="form-control" />
+                </div>
               </div>
 
               <div class="col-md-6">
@@ -75,65 +66,50 @@
               </div>
               <div class="col-12">
                 <label class="form-label">Item Description</label>
-                <textarea
-                  v-model="form.ItemDescription"
-                  class="form-control"
-                  rows="4"
-                ></textarea>
+                <textarea v-model="form.ItemDescription" class="form-control" rows="4"></textarea>
               </div>
 
-              <div class="col-12 d-flex gap-2">
-                <button type="submit" class="btn btn-primary" :disabled="saving">
-                  {{ saving ? "Saving..." : "Save Item" }}
-                </button>
 
-                <button type="button" class="btn btn-secondary" @click="cancelEdit">
-                  Cancel
-                </button>
-              </div>
             </div>
           </div>
 
           <div class="col-lg-4">
             <div class="image-preview-card">
               <h5 class="mb-3">Item Image</h5>
-
               <div class="image-preview-box">
-                <img
-                  v-if="previewImageUrl"
-                  :src="previewImageUrl"
-                  alt="Item preview"
-                  class="img-fluid preview-image"
-                />
+                <img v-if="previewImageUrl" :src="previewImageUrl" alt="Item preview" class="img-fluid preview-image" />
                 <div v-else class="text-muted">
                   No image available
                 </div>
               </div>
-
               <div class="mt-3">
                 <label class="form-label">
                   {{ isEditMode ? "Replace Image" : "Add Image" }}
                 </label>
-                <input
-                  type="file"
-                  class="form-control"
-                  accept="image/*"
-                  @change="handleImageSelected"
-                />
+                <input type="file" class="form-control" accept="image/*" @change="handleImageSelected" />
               </div>
-
               <div v-if="selectedImageFile" class="mt-2 small text-muted">
                 Selected: {{ selectedImageFile.name }}
               </div>
-
               <div v-else-if="form.ItemImage" class="mt-2 small text-muted">
                 Current: {{ form.ItemImage }}
               </div>
-
               <div v-if="resizedImageInfo" class="mt-2 small text-muted">
                 Uploading resized image: {{ resizedImageInfo }}
               </div>
             </div>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary" :disabled="saving">
+              {{ saving ? "Saving..." : "Save Item" }}
+            </button>
+
+            <button type="button" class="btn btn-secondary" @click="cancelEdit">
+              Cancel
+            </button>
+            <button type="button" class="btn btn-secondary" @click="goBack">
+              Back to List
+            </button>
           </div>
         </div>
       </form>
@@ -171,24 +147,24 @@ export default {
   },
 
   computed: {
+    // Determine if we are in edit mode
     isEditMode() {
       return !!this.$route.params.itemNumber;
     },
-
+    // Compute the preview image URL based on the selected file or existing item image
     previewImageUrl() {
       if (this.selectedImagePreviewUrl) {
         return this.selectedImagePreviewUrl;
       }
-
       if (!this.form.ItemImage) {
         return "";
       }
-
       return APIService.getImageUrl(this.form);
     },
   },
 
   methods: {
+    // Load item details if in edit mode
     async loadItem() {
       if (!this.isEditMode) return;
 
@@ -205,16 +181,14 @@ export default {
         this.loading = false;
       }
     },
-
+    // Handle image selection
     handleImageSelected(event) {
       const file =
         event.target.files && event.target.files[0]
           ? event.target.files[0]
           : null;
-
       this.selectedImageFile = file;
       this.resizedImageInfo = "";
-
       if (this.selectedImagePreviewUrl) {
         URL.revokeObjectURL(this.selectedImagePreviewUrl);
         this.selectedImagePreviewUrl = "";
@@ -224,7 +198,7 @@ export default {
         this.selectedImagePreviewUrl = URL.createObjectURL(file);
       }
     },
-
+    // Resize the image before upload to optimize file size and dimensions
     async resizeImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) {
       if (!file) return null;
 
@@ -250,11 +224,11 @@ export default {
       if (!blob) {
         throw new Error("Failed to resize image.");
       }
-
+      // Create a new File object with the same name but .jpg extension
       const baseName = file.name.replace(/\.[^.]+$/, "");
       return new File([blob], `${baseName}.jpg`, { type: "image/jpeg" });
     },
-
+    // Prepare the image file for upload by resizing it and updating the info display
     async getPreparedUploadFile() {
       if (!this.selectedImageFile) return null;
 
@@ -262,7 +236,7 @@ export default {
       this.resizedImageInfo = `${resizedFile.name} (${Math.round(resizedFile.size / 1024)} KB)`;
       return resizedFile;
     },
-
+    // Save the item, handling both creation and update logic, including image upload and cleanup
     async saveItem() {
       this.saving = true;
       this.errorMessage = "";
@@ -275,7 +249,7 @@ export default {
         if (!itemNumber) {
           throw new Error("Item Number is required.");
         }
-
+        // If in edit mode, update the existing item. 
         if (this.isEditMode) {
           if (this.selectedImageFile) {
             const resizedFile = await this.getPreparedUploadFile();
@@ -284,12 +258,11 @@ export default {
               itemNumber
             );
           }
-
           const updatePayload = {
             ...this.form,
             ItemImage: uploadedImageName || this.form.ItemImage,
           };
-
+          //
           try {
             await APIService.updateItem(itemNumber, updatePayload);
           } catch (dbError) {
@@ -302,11 +275,9 @@ export default {
             }
             throw dbError;
           }
-
+          // If a new image was uploaded and there was an old image, attempt to delete the old image
           if (
-            uploadedImageName &&
-            oldImageName &&
-            oldImageName !== uploadedImageName
+            uploadedImageName && oldImageName && oldImageName !== uploadedImageName
           ) {
             try {
               await APIService.deleteItemImage(itemNumber, oldImageName);
@@ -314,24 +285,21 @@ export default {
               console.error("Failed to remove old image:", cleanupError);
             }
           }
+          //else if in create mode, create a new item first to get the item number for image upload.
         } else {
           const createPayload = {
             ...this.form,
             ItemImage: "",
           };
-
           let createdItem = null;
-
           try {
             createdItem = await APIService.createItem(createPayload);
-
             if (this.selectedImageFile) {
               const resizedFile = await this.getPreparedUploadFile();
               uploadedImageName = await APIService.uploadItemImage(
                 resizedFile,
                 itemNumber
               );
-
               await APIService.updateItem(itemNumber, {
                 ...createdItem,
                 ...this.form,
@@ -346,7 +314,6 @@ export default {
                 console.error("Failed to clean up uploaded image:", cleanupError);
               }
             }
-
             if (createdItem) {
               try {
                 await APIService.deleteItem(itemNumber);
@@ -354,7 +321,6 @@ export default {
                 console.error("Failed to clean up created item:", cleanupError);
               }
             }
-
             throw createError;
           }
         }
@@ -366,34 +332,25 @@ export default {
         this.saving = false;
       }
     },
-
+    // Navigate back to the item list without saving changes
     cancelEdit() {
       this.$router.push("/itemList");
     },
 
-    handleCurrencyInput(event, field) {
-      const raw = event.target.value.replace(/[^0-9.]/g, "");
-      this.form[field] = raw ? parseFloat(raw) : "";
-    },
-
-    formatCurrency(value) {
-      if (value == null || value === "") return "";
-
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(value);
+    // Navigate back to the item list page
+    goBack() {
+      this.$router.push("/itemList");
     },
   },
+  // When the component is mounted, check if we are in edit mode and load the item details if necessary
+  async mounted() {
+    if (!this.isEditMode && this.$route.query.itemNumber) {
+      this.form.ItemNumber = Number(this.$route.query.itemNumber);
+    }
 
-async mounted() {
-  if (!this.isEditMode && this.$route.query.itemNumber) {
-    this.form.ItemNumber = Number(this.$route.query.itemNumber);
-  }
-
-  await this.loadItem();
-},
-
+    await this.loadItem();
+  },
+  //  Before the component is unmounted, revoke any object URLs created for image previews to free up memory
   beforeUnmount() {
     if (this.selectedImagePreviewUrl) {
       URL.revokeObjectURL(this.selectedImagePreviewUrl);

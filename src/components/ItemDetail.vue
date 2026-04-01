@@ -52,9 +52,11 @@
             <div class="col-12">
               <label class="form-label">Item Description</label>
               <div class="form-control readonly-field readonly-textarea">{{ form.ItemDescription || "" }}</div>
-            </div>
-
-            <div class="col-12 d-flex gap-2">
+              <div class="col-12 d-flex gap-2">
+              </div>
+              <button type="button" class="btn btn-secondary" @click="editItem(item)">
+                Edit Item
+              </button>
               <button type="button" class="btn btn-secondary" @click="goBack">
                 Back to List
               </button>
@@ -67,12 +69,7 @@
             <h5 class="mb-3">Item Image</h5>
 
             <div class="image-preview-box">
-              <img
-                v-if="previewImageUrl"
-                :src="previewImageUrl"
-                alt="Item preview"
-                class="img-fluid preview-image"
-              />
+              <img v-if="previewImageUrl" :src="previewImageUrl" alt="Item preview" class="img-fluid preview-image" />
               <div v-else class="text-muted">
                 No image available
               </div>
@@ -128,12 +125,12 @@ export default {
       if (!this.form.ItemImage) {
         return "";
       }
-
       return APIService.getImageUrl(this.form);
     },
   },
 
   methods: {
+    // Load item details from the API
     async loadItem() {
       if (!this.resolvedItemNumber) {
         this.errorMessage = "No item number provided.";
@@ -152,11 +149,16 @@ export default {
         this.loading = false;
       }
     },
-
+    // Navigate to the edit item page
+    editItem() {
+      console.log("Navigating to edit item:", this.form.ItemNumber);
+      this.$router.push(`/editItem/${this.form.ItemNumber}`);
+    },
+    // Navigate back to the item list page
     goBack() {
       this.$router.push("/itemList");
     },
-
+    // Format a number as currency
     formatCurrency(value) {
       if (value == null || value === "") return "";
 
@@ -165,7 +167,7 @@ export default {
         currency: "USD",
       }).format(value);
     },
-
+    // Convert item status code to human-readable text
     formatStatus(value) {
       const statusMap = {
         A: "Available",
@@ -173,11 +175,10 @@ export default {
         R: "Replace",
         K: "Kept",
       };
-
       return statusMap[value] || value || "";
     },
   },
-
+  // Load item details when the component is mounted
   async mounted() {
     await this.loadItem();
   },
