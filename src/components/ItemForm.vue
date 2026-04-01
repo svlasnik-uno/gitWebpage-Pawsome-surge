@@ -22,12 +22,22 @@
 
               <div class="col-md-6">
                 <label class="form-label">Item Type</label>
-                <input v-model="form.ItemType" type="text" class="form-control" />
+                <select v-model="form.ItemType" class="form-select">
+                  <option value="">Select type</option>
+                  <option v-for="option in TypeOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label">Item Sub-type</label>
-                <input v-model="form.ItemSubType" type="text" class="form-control" />
+                <select v-model="form.ItemSubType" class="form-select">
+                  <option value="">Select sub-type</option>
+                  <option v-for="option in subTypeOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-6">
@@ -143,6 +153,37 @@ export default {
         ItemImage: "",
         ItemDescription: "",
       },
+      TypeOptions: [
+        {value: "Flowers", label: "Flowers"},
+        {value: "Crochet", label: "Crochet"},
+        {value: "Other", label: "Other"},
+      ],
+      subTypeOptions: [
+        { value: "All", label: "All" },
+        { value: "Animal", label: "Animal" },
+        { value: "Bundle", label: "Bundle" },
+        { value: "Centerpiece-General", label: "Centerpiece-General" },
+        { value: "Christmas", label: "Christmas" },
+        { value: "Door Sign", label: "Door Sign" },
+        { value: "Easter", label: "Easter" },
+        { value: "Fall", label: "Fall" },
+        { value: "General", label: "General" },
+        { value: "Halloween", label: "Halloween" },
+        { value: "Hanging Item", label: "Hanging Item" },
+        { value: "Magnet", label: "Magnet" },
+        { value: "Ornament", label: "Ornament" },
+        { value: "Other", label: "Other" },
+        { value: "Patriotic", label: "Patriotic" },
+        { value: "Pop Culture", label: "Pop Culture" },
+        { value: "Roses", label: "Roses" },
+        { value: "Sports", label: "Sports" },
+        { value: "Spring", label: "Spring" },
+        { value: "Standing Wood Item", label: "Standing Wood Item" },
+        { value: "Summer", label: "Summer" },
+        { value: "Thanksgiving", label: "Thanksgiving" },
+        { value: "Vase", label: "Vase" },
+        { value: "Winter", label: "Winter" },
+      ],
     };
   },
 
@@ -236,11 +277,39 @@ export default {
       this.resizedImageInfo = `${resizedFile.name} (${Math.round(resizedFile.size / 1024)} KB)`;
       return resizedFile;
     },
+    validateForm() {
+      const requiredFields = [
+        { key: "ItemNumber", label: "Item Number" },
+        { key: "ItemType", label: "Item Type" },
+        { key: "ItemSubType", label: "Item Sub-type" },
+        { key: "ItemAskingPrice", label: "Price" },
+        { key: "ItemStatus", label: "Item Status" },
+        { key: "ItemColor", label: "Item Color" },
+        { key: "ItemDescription", label: "Item Description" },
+      ];
+      // search for missing fields
+      const missingFields = requiredFields
+        .filter(({ key }) => {
+          const value = this.form[key];
+          return value === null || value === undefined || String(value).trim() === "";
+        })
+        .map(({ label }) => label);
+
+      if (missingFields.length) {
+        this.errorMessage = `Please complete the required fields: ${missingFields.join(", ")}.`;
+        return false;
+      }
+      return true;
+    },
     // Save the item, handling both creation and update logic, including image upload and cleanup
     async saveItem() {
-      this.saving = true;
       this.errorMessage = "";
-
+      // verify required fields are filled out before proceeding with save operation
+      if (!this.validateForm()) {
+        return;
+      }
+      
+      this.saving = true;
       const itemNumber = Number(this.form.ItemNumber);
       const oldImageName = this.isEditMode ? this.form.ItemImage : "";
       let uploadedImageName = "";
