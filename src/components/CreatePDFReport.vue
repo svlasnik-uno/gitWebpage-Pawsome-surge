@@ -1,135 +1,126 @@
 <template>
-    <div class="container py-4 pdf-form-page">
-        <div class="pdf-form-card">
-            <div class="create-pdf-report">
-                <h2>Create PDF Report</h2>
+    <div class="pdf-form-card">
+        <div class="create-pdf-report">
+            <h2>Create PDF Report</h2>
+            <form @submit.prevent="handleGenerateReport" class="report-form">
+                <fieldset>
+                    <legend>Filter Criteria</legend>
 
-                <form @submit.prevent="handleGenerateReport" class="report-form">
-                    <fieldset>
-                        <legend>Filter Criteria</legend>
+                    <div class="filter-block">
+                        <label>
+                            <input type="checkbox" v-model="enabledFilters.itemType" />
+                            Filter by Item Type
+                        </label>
 
-                        <div class="filter-block">
-                            <label>
-                                <input type="checkbox" v-model="enabledFilters.itemType" />
-                                Filter by Item Type
-                            </label>
-
-                            <div v-if="enabledFilters.itemType" class="checkbox-group">
-                                <label v-for="option in itemTypeOptions" :key="option.value">
-                                    <input type="checkbox" :value="option.value" v-model="selectedFilters.itemType" />
-                                    {{ option.label }}
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="filter-block">
-    <label>
-        <input type="checkbox" v-model="enabledFilters.itemSubType" />
-        Filter by Item SubType
-    </label>
-
-    <div v-if="enabledFilters.itemSubType" class="checkbox-group checkbox-group-subtype">
-
-        <!-- ✅ Top Actions Row -->
-        <div class="select-actions-row">
-            <label class="select-all">
-                <input type="checkbox"
-                    :checked="allSubTypesSelected"
-                    :indeterminate="isSubTypeIndeterminate"
-                    @change="toggleAllSubTypes" />
-                <strong>Select All</strong>
-            </label>
-
-            <button
-                type="button"
-                class="btn-link clear-all-btn"
-                @click="selectedFilters.itemSubType = []">
-                Clear All
-            </button>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- ✅ Options BELOW -->
-        <div class="options-grid">
-            <label v-for="option in itemSubTypeOptions" :key="option">
-                <input type="checkbox"
-                    :value="option"
-                    v-model="selectedFilters.itemSubType" />
-                {{ option }}
-            </label>
-        </div>
-
-    </div>
-</div>
-                        <div class="filter-block">
-                            <label>
-                                <input type="checkbox" v-model="enabledFilters.itemStatus" />
-                                Filter by Item Status
-                            </label>
-
-                            <div v-if="enabledFilters.itemStatus" class="checkbox-group">
-                                <label v-for="option in itemStatusOptions" :key="option.value">
-                                    <input type="checkbox" :value="option.value" v-model="selectedFilters.itemStatus" />
-                                    {{ option.label }}
-                                </label>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <fieldset>
-                        <legend>Sort Order</legend>
-
-                        <div class="sort-row">
-                            <label>
-                                1st Sort
-                                <select v-model="sortSelections.first">
-                                    <option value="">ItemNumber (default)</option>
-                                    <option v-for="option in sortOptions" :key="`first-${option.value}`"
-                                        :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
-                            </label>
-
-                            <label>
-                                2nd Sort
-                                <select v-model="sortSelections.second">
-                                    <option value="">None</option>
-                                    <option v-for="option in availableSecondSortOptions" :key="`second-${option.value}`"
-                                        :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
-                            </label>
-
-                            <label>
-                                3rd Sort
-                                <select v-model="sortSelections.third">
-                                    <option value="">None</option>
-                                    <option v-for="option in availableThirdSortOptions" :key="`third-${option.value}`"
-                                        :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
+                        <div v-if="enabledFilters.itemType" class="checkbox-group">
+                            <label v-for="option in itemTypeOptions" :key="option.value">
+                                <input type="checkbox" :value="option.value" v-model="selectedFilters.itemType" />
+                                {{ option.label }}
                             </label>
                         </div>
-                    </fieldset>
-
-                    <div class="actions">
-                        <button type="submit" :disabled="generatingPdf || loadingItems">
-                            {{ generatingPdf || loadingItems ? "Generating..." : "Generate PDF Report" }}
-                        </button>
-
-                        <button type="button" @click="goBack" :disabled="generatingPdf || loadingItems">
-                            Cancel
-                        </button>
                     </div>
-                </form>
 
-                <p v-if="loadingItems">Loading items...</p>
-                <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-            </div>
+                    <div class="filter-block">
+                        <label>
+                            <input type="checkbox" v-model="enabledFilters.itemSubType" />
+                            Filter by Item SubType
+                        </label>
+
+                        <div v-if="enabledFilters.itemSubType" class="checkbox-group checkbox-group-subtype">
+
+                            <!-- ✅ Top Actions Row -->
+                            <div class="select-actions-row">
+                                <label class="select-all">
+                                    <input type="checkbox" :checked="allSubTypesSelected"
+                                        :indeterminate="isSubTypeIndeterminate" @change="toggleAllSubTypes" />
+                                    <strong>Select All</strong>
+                                </label>
+
+                                <button type="button" class="btn-link clear-all-btn"
+                                    @click="selectedFilters.itemSubType = []">
+                                    Clear All
+                                </button>
+                            </div>
+
+                            <div class="divider"></div>
+
+                            <!-- ✅ Options BELOW -->
+                            <div class="options-grid">
+                                <label v-for="option in itemSubTypeOptions" :key="option">
+                                    <input type="checkbox" :value="option" v-model="selectedFilters.itemSubType" />
+                                    {{ option }}
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="filter-block">
+                        <label>
+                            <input type="checkbox" v-model="enabledFilters.itemStatus" />
+                            Filter by Item Status
+                        </label>
+
+                        <div v-if="enabledFilters.itemStatus" class="checkbox-group">
+                            <label v-for="option in itemStatusOptions" :key="option.value">
+                                <input type="checkbox" :value="option.value" v-model="selectedFilters.itemStatus" />
+                                {{ option.label }}
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Sort Order</legend>
+
+                    <div class="sort-row">
+                        <label>
+                            1st Sort
+                            <select v-model="sortSelections.first">
+                                <option value="">ItemNumber (default)</option>
+                                <option v-for="option in sortOptions" :key="`first-${option.value}`"
+                                    :value="option.value">
+                                    {{ option.label }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label>
+                            2nd Sort
+                            <select v-model="sortSelections.second">
+                                <option value="">None</option>
+                                <option v-for="option in availableSecondSortOptions" :key="`second-${option.value}`"
+                                    :value="option.value">
+                                    {{ option.label }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label>
+                            3rd Sort
+                            <select v-model="sortSelections.third">
+                                <option value="">None</option>
+                                <option v-for="option in availableThirdSortOptions" :key="`third-${option.value}`"
+                                    :value="option.value">
+                                    {{ option.label }}
+                                </option>
+                            </select>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="actions">
+                    <button type="submit" :disabled="generatingPdf || loadingItems">
+                        {{ generatingPdf || loadingItems ? "Generating..." : "Generate PDF Report" }}
+                    </button>
+
+                    <button type="button" @click="goBack" :disabled="generatingPdf || loadingItems">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+
+            <p v-if="loadingItems">Loading items...</p>
+            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
         </div>
     </div>
 </template>
@@ -510,7 +501,8 @@ export default {
 
 .checkbox-group-subtype {
     display: flex;
-    flex-direction: column; /* 🔥 forces vertical stacking */
+    flex-direction: column;
+    /* 🔥 forces vertical stacking */
 }
 
 .sort-row {
@@ -528,20 +520,12 @@ export default {
     color: #b00020;
 }
 
-.pdf-form-page {
-    background-color: #f5f6f8;
-    /* subtle page background */
-    min-height: 100vh;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-
-}
-
 .pdf-form-card {
     background: #ffffff;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     max-width: 1100px;
     margin: 0 auto;
 }
