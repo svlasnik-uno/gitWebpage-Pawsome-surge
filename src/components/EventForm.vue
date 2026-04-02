@@ -182,23 +182,21 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="col-12">
-                                        <div class="d-flex gap-2 mt-2 flex-wrap form-actions">
-                                            <button type="submit" class="btn btn-secondary" :disabled="saving">
-                                                {{ saving ? "Saving..." : "Save Event" }}
-                                            </button>
+                                <div class="d-flex gap-2 mt-4 flex-wrap form-actions">
+                                    <button type="submit" class="btn btn-secondary" :disabled="saving">
+                                        {{ saving ? "Saving..." : "Save Event" }}
+                                    </button>
 
-                                            <button
-                                                type="button"
-                                                class="btn btn-secondary"
-                                                @click="cancelEdit"
-                                                :disabled="saving"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        @click="cancelEdit"
+                                        :disabled="saving"
+                                    >
+                                        Cancel
+                                    </button>
                                 </div>
                             </form>
                         </div>

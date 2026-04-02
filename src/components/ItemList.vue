@@ -23,10 +23,20 @@
       </div>
 
       <div class="d-flex align-items-center gap-2 flex-wrap">
-        <input v-model="searchItemNumber" type="number" class="form-control item-number-search"
-          placeholder="Find Item #" @keyup.enter="findByItemNumber" />
+        <select v-model="searchField" class="form-select search-field-select">
+          <option value="ItemNumber">Item Number</option>
+          <option value="ItemDescription">Item Description</option>
+        </select>
 
-        <button type="button" class="btn btn-secondary" @click="findByItemNumber">
+        <input
+          v-model.trim="searchValue"
+          type="text"
+          class="form-control item-search-input"
+          :placeholder="searchField === 'ItemNumber' ? 'Find Item #' : 'Find Item Description'"
+          @keyup.enter="findItems"
+        />
+
+        <button type="button" class="btn btn-secondary" @click="findItems">
           Find
         </button>
 
@@ -58,7 +68,35 @@
       </div>
 
       <div v-else>
-        <!-- Desktop / tablet table -->
+                <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+          <nav aria-label="Items pagination">
+            <ul class="pagination mb-0">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
+                  Previous
+                </button>
+              </li>
+
+              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }">
+                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
+                  {{ page }}
+                </button>
+
+                <span v-else class="page-link">
+                  ...
+                </span>
+              </li>
+
+              <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
+                <button type="button" class="page-link" @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0">
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
         <div class="table-responsive d-none d-md-block">
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
@@ -118,7 +156,6 @@
           </table>
         </div>
 
-        <!-- Mobile accordion view -->
         <div class="d-md-none mobile-item-list">
           <div class="mobile-sort-bar d-flex align-items-center gap-2 mb-3">
             <label for="mobileSortSelect" class="small fw-semibold mb-0 text-nowrap">
@@ -247,7 +284,8 @@ export default {
       items: [],
       selectedCategory: "All",
       selectedSubType: "All",
-      searchItemNumber: "",
+      searchField: "ItemNumber",
+      searchValue: "",
       statusOptions: [],
       subTypeOptions: [],
       loading: true,
@@ -344,6 +382,7 @@ export default {
         return 0;
       });
     },
+
     mobileSortOptions() {
       return this.headers
         .filter((header) => header !== "ItemImage")
@@ -417,6 +456,8 @@ export default {
           sortKey: this.sortKey,
           sortDirection: this.sortDirection,
           page: String(this.currentPage),
+          searchField: this.searchField,
+          searchValue: this.searchValue,
         },
       });
     },
@@ -429,23 +470,29 @@ export default {
       this.sortKey = query.sortKey || "ItemNumber";
       this.sortDirection = query.sortDirection || "asc";
       this.currentPage = query.page ? Number(query.page) : 1;
+      this.searchField = query.searchField || "ItemNumber";
+      this.searchValue = query.searchValue || "";
     },
 
-    findByItemNumber() {
-      const itemNumber = Number(this.searchItemNumber);
-      if (!this.searchItemNumber || Number.isNaN(itemNumber)) {
+    findItems() {
+      const searchTerm = String(this.searchValue ?? "").trim().toLowerCase();
+
+      if (!searchTerm) {
         this.handleCategoryChange();
         return;
       }
 
       this.items = this.allItems.filter((item) => {
-        const matchesItemNumber = Number(item.ItemNumber) === itemNumber;
         const matchesCategory =
           this.selectedCategory === "All" || item.ItemStatus === this.selectedCategory;
+
         const matchesSubType =
           this.selectedSubType === "All" || item.ItemSubType === this.selectedSubType;
 
-        return matchesItemNumber && matchesCategory && matchesSubType;
+        const fieldValue = String(item[this.searchField] ?? "").toLowerCase();
+        const matchesSearch = fieldValue.includes(searchTerm);
+
+        return matchesCategory && matchesSubType && matchesSearch;
       });
 
       this.currentPage = 1;
@@ -454,7 +501,8 @@ export default {
     },
 
     clearSearch() {
-      this.searchItemNumber = "";
+      this.searchField = "ItemNumber";
+      this.searchValue = "";
       this.handleCategoryChange();
     },
 
@@ -489,8 +537,6 @@ export default {
     },
 
     handleCategoryChange(resetPage = true) {
-      this.searchItemNumber = "";
-
       let filteredItems = [...this.allItems];
 
       if (this.selectedCategory !== "All") {
@@ -502,6 +548,13 @@ export default {
       if (this.selectedSubType !== "All") {
         filteredItems = filteredItems.filter(
           (item) => item.ItemSubType === this.selectedSubType
+        );
+      }
+
+      const searchTerm = String(this.searchValue ?? "").trim().toLowerCase();
+      if (searchTerm) {
+        filteredItems = filteredItems.filter((item) =>
+          String(item[this.searchField] ?? "").toLowerCase().includes(searchTerm)
         );
       }
 
@@ -604,6 +657,7 @@ export default {
         window.alert(error.message || "Delete failed.");
       }
     },
+
     handleMobileSortChange() {
       this.currentPage = 1;
       this.expandedMobileItems = [];
@@ -674,8 +728,13 @@ export default {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.item-number-search {
-  max-width: 140px;
+.search-field-select {
+  max-width: 180px;
+}
+
+.item-search-input {
+  min-width: 180px;
+  max-width: 220px;
 }
 
 .mobile-item-card {
