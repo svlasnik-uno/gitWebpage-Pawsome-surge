@@ -171,6 +171,7 @@ export default {
                 { value: "R", label: "Replace" },
                 { value: "K", label: "Kept" },
                 { value: "All", label: "All" },
+                { value: "D", label: "Display" },
             ],
 
             sortOptions: [

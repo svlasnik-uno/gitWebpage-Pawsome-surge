@@ -63,6 +63,7 @@
                   <option value="S">Sold</option>
                   <option value="R">Replace</option>
                   <option value="K">Kept</option>
+                  <option value="D">Display</option>
                 </select>
               </div>
 
@@ -154,9 +155,9 @@ export default {
         ItemDescription: "",
       },
       TypeOptions: [
-        {value: "Flowers", label: "Flowers"},
-        {value: "Crochet", label: "Crochet"},
-        {value: "Other", label: "Other"},
+        { value: "Flowers", label: "Flowers" },
+        { value: "Crochet", label: "Crochet" },
+        { value: "Other", label: "Other" },
       ],
       subTypeOptions: [
         { value: "All", label: "All" },
@@ -308,7 +309,7 @@ export default {
       if (!this.validateForm()) {
         return;
       }
-      
+
       this.saving = true;
       const itemNumber = Number(this.form.ItemNumber);
       const oldImageName = this.isEditMode ? this.form.ItemImage : "";
@@ -393,8 +394,10 @@ export default {
             throw createError;
           }
         }
-
-        this.$router.push("/itemList");
+        this.$router.push({
+          path: "/itemList",
+          query: { ...this.$route.query },
+        });
       } catch (error) {
         this.errorMessage = error.message || "Failed to save item.";
       } finally {
@@ -403,12 +406,18 @@ export default {
     },
     // Navigate back to the item list without saving changes
     cancelEdit() {
-      this.$router.push("/itemList");
+      this.$router.push({
+        path: "/itemList",
+        query: { ...this.$route.query },
+      });
     },
 
     // Navigate back to the item list page
     goBack() {
-      this.$router.push("/itemList");
+      this.$router.push({
+        path: "/itemList",
+        query: { ...this.$route.query },
+      });
     },
   },
   // When the component is mounted, check if we are in edit mode and load the item details if necessary
