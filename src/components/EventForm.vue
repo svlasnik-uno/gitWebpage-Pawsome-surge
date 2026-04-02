@@ -1,7 +1,7 @@
 <template>
     <div class="container py-4 edit-event-page">
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-8">
+            <div class="col-12 col-xl-10">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h2 class="mb-4">
@@ -18,62 +18,103 @@
                             </div>
 
                             <form @submit.prevent="saveEvent">
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label for="id" class="form-label">Event ID</label>
-                                        <input id="id" v-model.number="event.id" type="number" class="form-control"
-                                            :disabled="isEditMode" required />
+                                <div class="row g-4">
+                                    <div class="col-lg-7">
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <label for="id" class="form-label">Event ID</label>
+                                                <input
+                                                    id="id"
+                                                    v-model.number="eventForm.id"
+                                                    type="number"
+                                                    class="form-control"
+                                                    :disabled="isEditMode"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label for="eventSeason" class="form-label">Season</label>
+                                                <select
+                                                    id="eventSeason"
+                                                    v-model="eventForm.eventSeason"
+                                                    class="form-select"
+                                                    required
+                                                >
+                                                    <option value="">Select season</option>
+                                                    <option value="Spring">Spring</option>
+                                                    <option value="Summer">Summer</option>
+                                                    <option value="Fall">Fall</option>
+                                                    <option value="Winter">Winter</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label for="eventYear" class="form-label">Year</label>
+                                                <input
+                                                    id="eventYear"
+                                                    v-model.number="eventForm.eventYear"
+                                                    type="number"
+                                                    class="form-control"
+                                                    min="2000"
+                                                    max="2100"
+                                                />
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label for="eventName" class="form-label">Event Name</label>
+                                                <input
+                                                    id="eventName"
+                                                    v-model="eventForm.eventName"
+                                                    type="text"
+                                                    class="form-control"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="eventDate" class="form-label">Event Date</label>
+                                                <input
+                                                    id="eventDate"
+                                                    v-model="eventForm.eventDate"
+                                                    type="date"
+                                                    class="form-control"
+                                                />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="eventLocation" class="form-label">Location</label>
+                                                <input
+                                                    id="eventLocation"
+                                                    v-model="eventForm.eventLocation"
+                                                    type="text"
+                                                    class="form-control"
+                                                />
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="eventDisplay" class="form-label">Display on Site (Y/N)</label>
+                                                <input
+                                                    id="eventDisplay"
+                                                    v-model="eventForm.eventDisplay"
+                                                    type="text"
+                                                    class="form-control"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <label for="eventSeason" class="form-label">Season</label>
-                                        <select id="eventSeason" v-model="event.eventSeason" class="form-select"
-                                            required>
-                                            <option value="">Select season</option>
-                                            <option value="Spring">Spring</option>
-                                            <option value="Summer">Summer</option>
-                                            <option value="Fall">Fall</option>
-                                            <option value="Winter">Winter</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label for="eventYear" class="form-label">Year</label>
-                                        <input id="eventYear" v-model.number="event.eventYear" type="number"
-                                            class="form-control" min="2000" max="2100" />
-                                    </div>
-
-                                    <div class="col-12">
-                                        <label for="eventName" class="form-label">Event Name</label>
-                                        <input id="eventName" v-model="event.eventName" type="text" class="form-control"
-                                            required />
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="eventDate" class="form-label">Event Date</label>
-                                        <input id="eventDate" v-model="event.eventDate" type="date"
-                                            class="form-control" />
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="eventLocation" class="form-label">Location</label>
-                                        <input id="eventLocation" v-model="event.eventLocation" type="text"
-                                            class="form-control" />
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="eventDisplay" class="form-label">Display on Site (Y/N)</label>
-                                        <input id="eventDisplay" v-model="event.eventDisplay" type="text"
-                                            class="form-control" />
-                                    </div>
-
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-4">
                                         <div class="image-preview-card">
                                             <h5 class="mb-3">Event Image</h5>
 
                                             <div class="image-preview-box">
-                                                <img v-if="selectedImagePreviewUrl" :src="selectedImagePreviewUrl"
-                                                    alt="Event preview" class="preview-image" />
+                                                <img
+                                                    v-if="selectedImagePreviewUrl"
+                                                    :src="selectedImagePreviewUrl"
+                                                    alt="Event preview"
+                                                    class="preview-image"
+                                                />
                                                 <div v-else class="text-muted">
                                                     No image available
                                                 </div>
@@ -83,16 +124,20 @@
                                                 <label class="form-label">
                                                     {{ isEditMode ? "Replace Image" : "Add Image" }}
                                                 </label>
-                                                <input type="file" class="form-control" accept="image/*"
-                                                    @change="handleImageSelected" />
+                                                <input
+                                                    type="file"
+                                                    class="form-control"
+                                                    accept="image/*"
+                                                    @change="handleImageSelected"
+                                                />
                                             </div>
 
                                             <div v-if="selectedImageFile" class="mt-2 small text-muted">
                                                 Selected: {{ selectedImageFile.name }}
                                             </div>
 
-                                            <div v-else-if="event.eventImage" class="mt-2 small text-muted">
-                                                Current: {{ event.eventImage }}
+                                            <div v-else-if="eventForm.eventImage" class="mt-2 small text-muted">
+                                                Current: {{ eventForm.eventImage }}
                                             </div>
 
                                             <div v-if="resizedImageInfo" class="mt-2 small text-muted">
@@ -100,17 +145,23 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="d-flex gap-2 mt-4 flex-wrap">
-                                    <button type="submit" class="btn btn-primary" :disabled="saving">
-                                        {{ saving ? "Saving..." : "Save Event" }}
-                                    </button>
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2 mt-2 flex-wrap">
+                                            <button type="submit" class="btn btn-outline-secondary" :disabled="saving">
+                                                {{ saving ? "Saving..." : "Save Event" }}
+                                            </button>
 
-                                    <button type="button" class="btn btn-outline-secondary" @click="cancelEdit"
-                                        :disabled="saving">
-                                        Cancel
-                                    </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-secondary"
+                                                @click="cancelEdit"
+                                                :disabled="saving"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -130,7 +181,7 @@ export default {
 
     data() {
         return {
-            event: {
+            eventForm: {
                 id: null,
                 eventName: "",
                 eventDate: "",
@@ -147,6 +198,8 @@ export default {
             saving: false,
             errorMessage: "",
             auth: null,
+            isUpdated: false,
+            suppressUpdatedTracking: false,
         };
     },
 
@@ -154,22 +207,49 @@ export default {
         isEditMode() {
             return !!this.$route.params.id;
         },
+
         eventId() {
             return this.$route.params.id || this.$route.query.id || null;
+        },
+
+        hasUnsavedChanges() {
+            return this.isUpdated;
+        },
+    },
+
+    watch: {
+        eventForm: {
+            deep: true,
+            handler() {
+                if (!this.suppressUpdatedTracking) {
+                    this.isUpdated = true;
+                }
+            },
+        },
+
+        selectedImageFile() {
+            if (!this.suppressUpdatedTracking) {
+                this.isUpdated = true;
+            }
         },
     },
 
     methods: {
+        resetUpdatedState() {
+            this.isUpdated = false;
+        },
+
         async loadEvent() {
             if (!this.eventId) return;
 
             this.loading = true;
             this.errorMessage = "";
+            this.suppressUpdatedTracking = true;
 
             try {
                 const data = await APIService.getEventById(this.eventId);
 
-                this.event = {
+                this.eventForm = {
                     id: data.id,
                     eventName: data.eventName || "",
                     eventDate: this.formatDateForInput(data.eventDate) || "",
@@ -180,12 +260,18 @@ export default {
                     eventDisplay: data.eventDisplay || "",
                 };
 
-                if (this.event.eventImage) {
-                    this.selectedImagePreviewUrl = APIService.getEventImageUrl(this.event);
+                if (this.eventForm.eventImage) {
+                    this.selectedImagePreviewUrl = APIService.getEventImageUrl(this.eventForm);
+                } else {
+                    this.selectedImagePreviewUrl = "";
                 }
+
+                this.selectedImageFile = null;
+                this.resetUpdatedState();
             } catch (error) {
                 this.errorMessage = error.message || "Failed to load event.";
             } finally {
+                this.suppressUpdatedTracking = false;
                 this.loading = false;
             }
         },
@@ -200,13 +286,17 @@ export default {
             this.selectedImageFile = file;
             this.resizedImageInfo = "";
 
-            if (!file) return;
-
             if (this.selectedImagePreviewUrl && this.selectedImagePreviewUrl.startsWith("blob:")) {
                 URL.revokeObjectURL(this.selectedImagePreviewUrl);
             }
 
-            this.selectedImagePreviewUrl = URL.createObjectURL(file);
+            if (file) {
+                this.selectedImagePreviewUrl = URL.createObjectURL(file);
+            } else if (this.eventForm.eventImage) {
+                this.selectedImagePreviewUrl = APIService.getEventImageUrl(this.eventForm);
+            } else {
+                this.selectedImagePreviewUrl = "";
+            }
         },
 
         async resizeImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.85) {
@@ -279,8 +369,8 @@ export default {
             this.errorMessage = "";
             this.resizedImageInfo = "";
 
-            const eventId = Number(this.event.id);
-            const oldImageName = this.isEditMode ? this.event.eventImage : "";
+            const eventId = Number(this.eventForm.id);
+            const oldImageName = this.isEditMode ? this.eventForm.eventImage : "";
             let uploadedImageName = "";
 
             try {
@@ -289,14 +379,14 @@ export default {
                 }
 
                 const payload = {
-                    id: this.event.id,
-                    eventName: this.event.eventName,
-                    eventDate: this.event.eventDate || null,
-                    eventLocation: this.event.eventLocation,
-                    eventImage: this.event.eventImage,
-                    eventSeason: this.event.eventSeason,
-                    eventYear: this.event.eventYear || null,
-                    eventDisplay: this.event.eventDisplay,
+                    id: this.eventForm.id,
+                    eventName: this.eventForm.eventName,
+                    eventDate: this.eventForm.eventDate || null,
+                    eventLocation: this.eventForm.eventLocation,
+                    eventImage: this.eventForm.eventImage,
+                    eventSeason: this.eventForm.eventSeason,
+                    eventYear: this.eventForm.eventYear || null,
+                    eventDisplay: this.eventForm.eventDisplay,
                 };
 
                 if (this.isEditMode) {
@@ -365,6 +455,7 @@ export default {
                     }
                 }
 
+                this.resetUpdatedState();
                 this.$router.push("/eventListAdmin");
             } catch (error) {
                 this.errorMessage = error.message || "Failed to save event.";
@@ -374,7 +465,20 @@ export default {
         },
 
         cancelEdit() {
-            this.$router.push("/eventListAdmin");
+            if (this.hasUnsavedChanges) {
+                const confirmed = window.confirm(
+                    "You have unsaved changes. Are you sure you want to cancel and lose your updates?"
+                );
+
+                if (!confirmed) {
+                    return;
+                }
+            }
+
+            this.$router.push({
+                path: "/eventListAdmin",
+                query: { ...this.$route.query },
+            });
         },
     },
 
@@ -389,6 +493,14 @@ export default {
 
         if (this.isEditMode) {
             await this.loadEvent();
+        } else {
+            if (this.eventId) {
+                this.suppressUpdatedTracking = true;
+                this.eventForm.id = Number(this.eventId);
+                this.suppressUpdatedTracking = false;
+            }
+
+            this.resetUpdatedState();
         }
     },
 
@@ -410,12 +522,12 @@ export default {
     border-radius: 0.5rem;
     padding: 1rem;
     height: 100%;
+    background: #fff;
 }
 
 .image-preview-box {
     width: 100%;
-    max-width: 320px;
-    aspect-ratio: 1 / 1;
+    min-height: 360px;
     border: 1px solid #dee2e6;
     border-radius: 0.5rem;
     overflow: hidden;
@@ -423,12 +535,15 @@ export default {
     align-items: center;
     justify-content: center;
     background: #f8f9fa;
+    padding: 0.75rem;
+    text-align: center;
 }
 
 .preview-image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    max-height: 500px;
+    object-fit: contain;
     display: block;
+    border-radius: 0.375rem;
 }
 </style>

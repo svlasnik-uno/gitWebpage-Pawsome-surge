@@ -230,7 +230,7 @@ const APIService = {
       .from(EVENT_TABLE_NAME)
       .select("*")
       .eq("eventDisplay", eventDisplay)
-      .order("id", { ascending: true });
+      .order("eventDate", { ascending: true });
 
     if (error) throw error;
     return data;

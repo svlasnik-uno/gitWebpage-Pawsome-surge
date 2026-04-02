@@ -5,7 +5,19 @@
             <form @submit.prevent="handleGenerateReport" class="report-form">
                 <fieldset>
                     <legend>Filter Criteria</legend>
+                    <div class="filter-block">
+                        <label>
+                            <input type="checkbox" v-model="enabledFilters.itemStatus" />
+                            Filter by Item Status
+                        </label>
 
+                        <div v-if="enabledFilters.itemStatus" class="checkbox-group">
+                            <label v-for="option in statusOptions" :key="option.value">
+                                <input type="checkbox" :value="option.value" v-model="selectedFilters.itemStatus" />
+                                {{ option.label }}
+                            </label>
+                        </div>
+                    </div>
                     <div class="filter-block">
                         <label>
                             <input type="checkbox" v-model="enabledFilters.itemType" />
@@ -27,8 +39,6 @@
                         </label>
 
                         <div v-if="enabledFilters.itemSubType" class="checkbox-group checkbox-group-subtype">
-
-                            <!-- ✅ Top Actions Row -->
                             <div class="select-actions-row">
                                 <label class="select-all">
                                     <input type="checkbox" :checked="allSubTypesSelected"
@@ -41,10 +51,7 @@
                                     Clear All
                                 </button>
                             </div>
-
                             <div class="divider"></div>
-
-                            <!-- ✅ Options BELOW -->
                             <div class="options-grid">
                                 <label v-for="option in subTypeOptions" :key="option">
                                     <input type="checkbox" :value="option" v-model="selectedFilters.itemSubType" />
@@ -54,24 +61,11 @@
 
                         </div>
                     </div>
-                    <div class="filter-block">
-                        <label>
-                            <input type="checkbox" v-model="enabledFilters.itemStatus" />
-                            Filter by Item Status
-                        </label>
 
-                        <div v-if="enabledFilters.itemStatus" class="checkbox-group">
-                            <label v-for="option in statusOptions" :key="option.value">
-                                <input type="checkbox" :value="option.value" v-model="selectedFilters.itemStatus" />
-                                {{ option.label }}
-                            </label>
-                        </div>
-                    </div>
                 </fieldset>
 
                 <fieldset>
                     <legend>Sort Order</legend>
-
                     <div class="sort-row">
                         <label>
                             1st Sort
@@ -114,7 +108,7 @@
                     </button>
 
                     <button type="button" @click="cancel" :disabled="generatingPdf || loadingItems">
-                        Cancel
+                        Return to List
                     </button>
                 </div>
             </form>
@@ -349,7 +343,6 @@ export default {
                 const subTypesFromApi = Array.isArray(data) ? data : [];
 
                 this.subTypeOptions = [
-                    "All",
                     ...subTypesFromApi
                         .filter((subType) => subType?.subTypeName)
                         .map((subType) => (
@@ -368,7 +361,6 @@ export default {
                 const statusesFromApi = Array.isArray(data) ? data : [];
 
                 this.statusOptions = [
-                    { value: "All", label: "All" },
                     ...statusesFromApi
                         .filter((status) => status?.statusOption)
                         .map((status) => ({
