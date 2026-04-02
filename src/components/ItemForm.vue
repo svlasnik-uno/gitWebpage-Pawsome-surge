@@ -132,7 +132,9 @@
                       <button type="submit" class="btn btn-secondary" :disabled="saving">
                         {{ saving ? "Saving..." : "Save Item" }}
                       </button>
-
+                      <button type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item">
+                        Delete Item
+                      </button>
                       <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
                         Back to List
                       </button>
@@ -456,7 +458,21 @@ export default {
         this.saving = false;
       }
     },
-
+    async confirmDelete() {
+      const ok = window.confirm(
+        `Are you sure you want to delete item #${this.form.ItemNumber}?`
+      );
+      if (!ok) return;
+      try {
+        await APIService.deleteItem(this.form.ItemNumber);
+        this.$router.push({
+          path: "/itemList",
+          query: { ...this.$route.query },
+        });
+      } catch (error) {
+        window.alert(error.message || "Delete failed.");
+      }
+    },
     goBackCancel() {
       if (this.hasUnsavedChanges) {
         const confirmed = window.confirm(

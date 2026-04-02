@@ -89,6 +89,9 @@
               <button type="button" class="btn btn-secondary" @click="editItem">
                 Edit Item
               </button>
+              <button type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item">
+                Delete Item
+              </button>
               <button type="button" class="btn btn-secondary" @click="goBack">
                 Back to List
               </button>
@@ -142,6 +145,9 @@
                 </div>
                 <button type="button" class="btn btn-secondary" @click="editItem">
                   Edit Item
+                </button>
+                <button type="button" class="btn btn-secondary ms-2" @click="confirmDelete" title="Delete Item">
+                  Delete Item
                 </button>
                 <button type="button" class="btn btn-secondary ms-2" @click="goBack">
                   Back to List
@@ -237,12 +243,31 @@ export default {
     },
 
     editItem() {
-      console.log("Navigating to edit item:", this.form.ItemNumber);
-      this.$router.push(`/editItem/${this.form.ItemNumber}`);
+      this.$router.push({
+        path: `/editItem/${this.form.ItemNumber}`,
+        query: { ...this.$route.query },
+      });
     },
-
+    async confirmDelete() {
+      const ok = window.confirm(
+        `Are you sure you want to delete item #${this.form.ItemNumber}?`
+      );
+      if (!ok) return;
+      try {
+        await APIService.deleteItem(this.form.ItemNumber);
+        this.$router.push({
+          path: "/itemList",
+          query: { ...this.$route.query },
+        });
+      } catch (error) {
+        window.alert(error.message || "Delete failed.");
+      }
+    },
     goBack() {
-      this.$router.push("/itemList");
+      this.$router.push({
+        path: "/itemList",
+        query: { ...this.$route.query },
+      });
     },
 
     formatCurrency(value) {
@@ -266,6 +291,7 @@ export default {
   },
 
   async mounted() {
+
     await this.loadItem();
   },
 };
