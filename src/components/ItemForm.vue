@@ -21,28 +21,15 @@
                     <div class="row g-3">
                       <div class="col-12 col-sm-6 col-md-5">
                         <label for="itemNumber" class="form-label">Item Number</label>
-                        <input
-                          id="itemNumber"
-                          v-model="form.ItemNumber"
-                          type="number"
-                          class="form-control mobile-form-control"
-                          :readonly="isEditMode"
-                        />
+                        <input id="itemNumber" v-model="form.ItemNumber" type="number"
+                          class="form-control mobile-form-control" :readonly="isEditMode" />
                       </div>
 
                       <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemType" class="form-label">Item Type</label>
-                        <select
-                          id="itemType"
-                          v-model="form.ItemType"
-                          class="form-select mobile-form-control"
-                        >
+                        <select id="itemType" v-model="form.ItemType" class="form-select mobile-form-control">
                           <option value="">Select type</option>
-                          <option
-                            v-for="option in TypeOptions"
-                            :key="option.value"
-                            :value="option.value"
-                          >
+                          <option v-for="option in TypeOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
                           </option>
                         </select>
@@ -50,17 +37,9 @@
 
                       <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemSubType" class="form-label">Item Sub-type</label>
-                        <select
-                          id="itemSubType"
-                          v-model="form.ItemSubType"
-                          class="form-select mobile-form-control"
-                        >
+                        <select id="itemSubType" v-model="form.ItemSubType" class="form-select mobile-form-control">
                           <option value="">Select sub-type</option>
-                          <option
-                            v-for="option in subTypeOptions"
-                            :key="option.value"
-                            :value="option.value"
-                          >
+                          <option v-for="option in subTypeOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
                           </option>
                         </select>
@@ -70,14 +49,8 @@
                         <label for="itemPrice" class="form-label">Price</label>
                         <div class="input-group">
                           <span class="input-group-text mobile-input-group-text">$</span>
-                          <input
-                            id="itemPrice"
-                            v-model.number="form.ItemAskingPrice"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="form-control mobile-form-control"
-                          />
+                          <input id="itemPrice" v-model.number="form.ItemAskingPrice" type="number" step="0.01" min="0"
+                            class="form-control mobile-form-control" />
                         </div>
                       </div>
 
@@ -85,30 +58,16 @@
                         <label for="itemCost" class="form-label">Item Cost</label>
                         <div class="input-group">
                           <span class="input-group-text mobile-input-group-text">$</span>
-                          <input
-                            id="itemCost"
-                            v-model.number="form.ItemCost"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="form-control mobile-form-control"
-                          />
+                          <input id="itemCost" v-model.number="form.ItemCost" type="number" step="0.01" min="0"
+                            class="form-control mobile-form-control" />
                         </div>
                       </div>
 
                       <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemStatus" class="form-label">Item Status</label>
-                        <select
-                          id="itemStatus"
-                          v-model="form.ItemStatus"
-                          class="form-select mobile-form-control"
-                        >
+                        <select id="itemStatus" v-model="form.ItemStatus" class="form-select mobile-form-control">
                           <option value="">Select status</option>
-                          <option
-                            v-for="option in statusOptions"
-                            :key="option.value"
-                            :value="option.value"
-                          >
+                          <option v-for="option in statusOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
                           </option>
                         </select>
@@ -116,32 +75,20 @@
 
                       <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemColor" class="form-label">Item Color</label>
-                        <input
-                          id="itemColor"
-                          v-model="form.ItemColor"
-                          type="text"
-                          class="form-control mobile-form-control"
-                        />
+                        <input id="itemColor" v-model="form.ItemColor" type="text"
+                          class="form-control mobile-form-control" />
                       </div>
 
                       <div class="col-12 col-sm-6 col-md-6">
                         <label for="imageType" class="form-label">Image Type</label>
-                        <input
-                          id="imageType"
-                          v-model="form.ImageType"
-                          type="text"
-                          class="form-control mobile-form-control"
-                        />
+                        <input id="imageType" v-model="form.ImageType" type="text"
+                          class="form-control mobile-form-control" />
                       </div>
 
                       <div class="col-12">
                         <label for="itemDescription" class="form-label">Item Description</label>
-                        <textarea
-                          id="itemDescription"
-                          v-model="form.ItemDescription"
-                          class="form-control mobile-form-control"
-                          rows="4"
-                        ></textarea>
+                        <textarea id="itemDescription" v-model="form.ItemDescription"
+                          class="form-control mobile-form-control" rows="4"></textarea>
                       </div>
                     </div>
                   </div>
@@ -151,12 +98,7 @@
                       <h5 class="mb-3">Item Image</h5>
 
                       <div class="image-preview-box">
-                        <img
-                          v-if="previewImageUrl"
-                          :src="previewImageUrl"
-                          alt="Item preview"
-                          class="preview-image"
-                        />
+                        <img v-if="previewImageUrl" :src="previewImageUrl" alt="Item preview" class="preview-image" />
                         <div v-else class="text-muted">
                           No image available
                         </div>
@@ -166,12 +108,8 @@
                         <label class="form-label">
                           {{ isEditMode ? "Replace Image" : "Add Image" }}
                         </label>
-                        <input
-                          type="file"
-                          class="form-control mobile-form-control"
-                          accept="image/*"
-                          @change="handleImageSelected"
-                        />
+                        <input type="file" class="form-control mobile-form-control" accept="image/*"
+                          @change="handleImageSelected" />
                       </div>
 
                       <div v-if="selectedImageFile" class="mt-2 small text-muted">
@@ -188,27 +126,18 @@
                     </div>
                   </div>
 
-                  <div class="col-12">
+                  <!-- MOVE BUTTONS HERE -->
+                  <div class="col-12 order-3">
                     <div class="d-flex gap-2 mt-2 flex-wrap form-actions">
                       <button type="submit" class="btn btn-secondary" :disabled="saving">
                         {{ saving ? "Saving..." : "Save Item" }}
                       </button>
 
-                      <button
-                        type="button"
-                        class="btn btn-secondary"
-                        @click="goBackCancel"
-                        :disabled="saving"
-                      >
+                      <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
                         Back to List
                       </button>
 
-                      <button
-                        type="button"
-                        class="btn btn-secondary"
-                        @click="goBackCancel"
-                        :disabled="saving"
-                      >
+                      <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
                         Cancel
                       </button>
                     </div>
@@ -610,6 +539,7 @@ export default {
   border-radius: 0.375rem;
 }
 
+/* Tablet */
 @media (max-width: 991.98px) {
   .edit-item-page .card-body {
     padding: 1rem;
@@ -620,6 +550,7 @@ export default {
   }
 }
 
+/* Mobile */
 @media (max-width: 575.98px) {
   .mobile-form-control {
     min-height: 44px;
@@ -632,11 +563,24 @@ export default {
   }
 
   .form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: #fff;
+    padding: 0.75rem;
+    border-top: 1px solid #dee2e6;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+
     flex-direction: column;
   }
 
   .form-actions .btn {
     width: 100%;
+  }
+
+  /* Prevent overlap with sticky footer */
+  .form-layout {
+    padding-bottom: 90px;
   }
 
   .image-preview-card {
