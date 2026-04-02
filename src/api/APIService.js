@@ -3,7 +3,9 @@ import { supabase } from "../supabase";
 const TABLE_NAME = "tblItems";
 const IMAGE_BUCKET = "Images";
 const EVENT_TABLE_NAME = "tblEvents";
-const EVENT_IMAGE_BUCKET = "Images/Events";
+const ITEMTYPES_TABLE_NAME = "tblItemTypes";
+const ITEMSUBTYPES_TABLE_NAME = "tblSubTypes";
+const ITEMSTATUS_TABLE_NAME = "tblItemStatus";
 
 const APIService = {
   async signUp(email, password) {
@@ -305,6 +307,144 @@ const APIService = {
       .remove([fullFileName]);
 
     if (error) throw error;
+  },
+  // Item Type -related API methods
+  async getItemTypes() {
+    const { data, error } = await supabase
+      .from(ITEMTYPES_TABLE_NAME)
+      .select("*")
+      .order("catType", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+ 
+  async createItemType(itemType) {
+    const { data, error } = await supabase
+      .from(ITEMTYPES_TABLE_NAME)
+      .insert([itemType])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateItemType(itemType) {
+    const { id, ...updatePayload } = item;
+
+    const { data, error } = await supabase
+      .from(ITEMTYPES_TABLE_NAME)
+      .update(updatePayload)
+      .eq("itemType", Text(itemType))
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteItemType(itemType) {
+    const { data, error } = await supabase
+      .from(ITEMTYPES_TABLE_NAME)
+      .delete()
+      .eq("itemType", itemType)
+      .select();
+
+    if (error) throw error;
+    return data;
+  },
+    // Item SubType -related API methods
+  async getItemSubTypes() {
+    const { data, error } = await supabase
+      .from(ITEMSUBTYPES_TABLE_NAME)
+      .select("*")
+      .order("subTypeName", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+ 
+  async createItemSubType(event) {
+    const { data, error } = await supabase
+      .from(ITEMSUBTYPES_TABLE_NAME)
+      .insert([event])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateItemSubType(itemSubType) {
+    const { id, ...updatePayload } = itemSubType;
+
+    const { data, error } = await supabase
+      .from(ITEMSUBTYPES_TABLE_NAME)
+      .update(updatePayload)
+      .eq("itemSubType", Text(itemSubType))
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteItemSubType(itemSubType) {
+    const { data, error } = await supabase
+      .from(ITEMSUBTYPES_TABLE_NAME)
+      .delete()
+      .eq("itemSubType", itemSubType)
+      .select();
+
+    if (error) throw error;
+    return data;
+  },
+   // Item Status -related API methods
+  async getItemStatuses() {
+    const { data, error } = await supabase
+      .from(ITEMSTATUS_TABLE_NAME)
+      .select("*")
+      .order("statusOption", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+ 
+  async createItemStatus(itemStatus) {
+    const { data, error } = await supabase
+      .from(ITEMSTATUS_TABLE_NAME)
+      .insert([itemStatus])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateItemStatus(itemStatus) {
+    const { id, ...updatePayload } = itemStatus;
+
+    const { data, error } = await supabase
+      .from(ITEMSTATUS_TABLE_NAME)
+      .update(updatePayload)
+      .eq("statusOption", Text(itemStatus))
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteItemStatus(itemStatus) {
+    const { data, error } = await supabase
+      .from(ITEMSTATUS_TABLE_NAME)
+      .delete()
+      .eq("statusOption", itemStatus)
+      .select();
+
+    if (error) throw error;
+    return data;
   },
 };
 

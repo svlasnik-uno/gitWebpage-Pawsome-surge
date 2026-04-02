@@ -46,7 +46,7 @@
 
                             <!-- ✅ Options BELOW -->
                             <div class="options-grid">
-                                <label v-for="option in itemSubTypeOptions" :key="option">
+                                <label v-for="option in subTypeOptions" :key="option">
                                     <input type="checkbox" :value="option" v-model="selectedFilters.itemSubType" />
                                     {{ option }}
                                 </label>
@@ -61,7 +61,7 @@
                         </label>
 
                         <div v-if="enabledFilters.itemStatus" class="checkbox-group">
-                            <label v-for="option in itemStatusOptions" :key="option.value">
+                            <label v-for="option in statusOptions" :key="option.value">
                                 <input type="checkbox" :value="option.value" v-model="selectedFilters.itemStatus" />
                                 {{ option.label }}
                             </label>
@@ -113,7 +113,7 @@
                         {{ generatingPdf || loadingItems ? "Generating..." : "Generate PDF Report" }}
                     </button>
 
-                    <button type="button" @click="goBack" :disabled="generatingPdf || loadingItems">
+                    <button type="button" @click="cancel" :disabled="generatingPdf || loadingItems">
                         Cancel
                     </button>
                 </div>
@@ -140,6 +140,7 @@ export default {
             errorMessage: "",
             items: [],
 
+
             enabledFilters: {
                 itemType: false,
                 itemSubType: false,
@@ -157,21 +158,11 @@ export default {
                 { value: "Crochet", label: "Crochet" },
             ],
 
-            itemSubTypeOptions: [
-                "Animal", "Bundle", "Centerpiece-General", "Christmas", "Door Sign",
-                "Easter", "Fall", "General", "Halloween", "Hanging Item",
-                "Magnet", "Ornament", "Other", "Patriotic", "Pop Culture",
-                "Roses", "Sports", "Spring", "Standing Wood Item", "Summer",
-                "Thanksgiving", "Vase", "Winter"
+            subTypeOptions: [
+                // This will be populated dynamically from the API
             ],
 
-            itemStatusOptions: [
-                { value: "A", label: "Available" },
-                { value: "S", label: "Sold" },
-                { value: "R", label: "Replace" },
-                { value: "K", label: "Kept" },
-                { value: "All", label: "All" },
-                { value: "D", label: "Display" },
+            statusOptions: [
             ],
 
             sortOptions: [
@@ -218,7 +209,7 @@ export default {
                 parts.push(`ItemSubTypes`);
             }
             if (this.enabledFilters.itemStatus && this.selectedFilters.itemStatus.length) {
-                const selectedStatusLabels = this.itemStatusOptions
+                const selectedStatusLabels = this.statusOptions
                     .filter((option) => this.selectedFilters.itemStatus.includes(option.value))
                     .map((option) => option.label);
                 parts.push(`${selectedStatusLabels.join(", ")}`);
@@ -267,22 +258,26 @@ export default {
         // Determines if all item subtypes are selected for the "Select All" checkbox state
         allSubTypesSelected() {
             return (
-                this.itemSubTypeOptions.length > 0 &&
-                this.selectedFilters.itemSubType.length === this.itemSubTypeOptions.length
+                this.subTypeOptions.length > 0 &&
+                this.selectedFilters.itemSubType.length === this.subTypeOptions.length
             );
         },
         // Determines if the "Select All" checkbox should be in an indeterminate state (some but not all subtypes selected)
         isSubTypeIndeterminate() {
             return (
                 this.selectedFilters.itemSubType.length > 0 &&
-                this.selectedFilters.itemSubType.length < this.itemSubTypeOptions.length
+                this.selectedFilters.itemSubType.length < this.subTypeOptions.length
             );
         },
     },
 
     methods: {
-        goBack() {
-            this.$router.back();
+        // Navigate back to the item list without creating report
+        cancel() {
+            this.$router.push({
+                path: "/itemList",
+                query: { ...this.$route.query },
+            });
         },
         // Builds the filter criteria array based on the enabled filters and selected values,
         // which will be sent to the API to retrieve the relevant items for the report
@@ -318,7 +313,7 @@ export default {
         // Toggles the selection of all item subtypes when the "Select All" checkbox is changed
         toggleAllSubTypes(event) {
             if (event.target.checked) {
-                this.selectedFilters.itemSubType = [...this.itemSubTypeOptions];
+                this.selectedFilters.itemSubType = [...this.subTypeOptions];
             } else {
                 this.selectedFilters.itemSubType = [];
             }
@@ -344,6 +339,45 @@ export default {
                 return false;
             } finally {
                 this.loadingItems = false;
+            }
+        },
+        // Load item sub-types from the API to populate the sub-type filter dropdown
+        async loadSubTypes() {
+            try {
+                const data = await APIService.getItemSubTypes();
+
+                const subTypesFromApi = Array.isArray(data) ? data : [];
+
+                this.subTypeOptions = [
+                    "All",
+                    ...subTypesFromApi
+                        .filter((subType) => subType?.subTypeName)
+                        .map((subType) => (
+                            subType.subTypeName
+                        )),
+                ];
+            } catch (error) {
+                console.error("Failed to load item sub-types:", error);
+            }
+        },
+        // Load item statuses from the API to populate the status filter dropdown
+        async loadStatusOptions() {
+            try {
+                const data = await APIService.getItemStatuses();
+                console
+                const statusesFromApi = Array.isArray(data) ? data : [];
+
+                this.statusOptions = [
+                    { value: "All", label: "All" },
+                    ...statusesFromApi
+                        .filter((status) => status?.statusOption)
+                        .map((status) => ({
+                            value: status.statusOption,
+                            label: status.statusLabel,
+                        })),
+                ];
+            } catch (error) {
+                console.error("Failed to load item statuses:", error);
             }
         },
         // Formats a cell value for inclusion in the PDF report, applying specific 
@@ -471,6 +505,11 @@ export default {
                 this.generatingPdf = false;
             }
         },
+
+    },
+    async mounted() {
+        await this.loadSubTypes();
+        this.loadStatusOptions();
     },
 };
 </script>

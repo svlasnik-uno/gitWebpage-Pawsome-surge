@@ -25,7 +25,7 @@ const routes = [
   { path: "/editItem/:itemNumber?", component: ItemForm },
   { path: "/eventListAdmin", component: EventListAdmin },
   { path: "/editEvent/:id?", component: EventForm },
-  { path: "/create-pdf-report", name: "CreatePDFReport", component: CreatePDFReport },
+  { path: "/create-pdf-report", component: CreatePDFReport },
 ];
 
 const router = createRouter({

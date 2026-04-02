@@ -6,7 +6,7 @@
         <label for="categorySelect" class="fw-semibold mb-0">View Items by Category:</label>
         <select id="categorySelect" v-model="selectedCategory" class="form-select w-auto"
           @change="handleCategoryChange">
-          <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
+          <option v-for="option in statusOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
         </select>
@@ -164,39 +164,9 @@ export default {
       selectedCategory: "All",
       selectedSubType: "All",
       searchItemNumber: "",
-      categoryOptions: [
-        { value: "A", label: "Available" },
-        { value: "S", label: "Sold" },
-        { value: "R", label: "Replace" },
-        { value: "K", label: "Kept" },
-        { value: "All", label: "All" },
-        { value: "D", label: "Display" },
+      statusOptions: [
       ],
       subTypeOptions: [
-        { value: "All", label: "All" },
-        { value: "Animal", label: "Animal" },
-        { value: "Bundle", label: "Bundle" },
-        { value: "Centerpiece-General", label: "Centerpiece-General" },
-        { value: "Christmas", label: "Christmas" },
-        { value: "Door Sign", label: "Door Sign" },
-        { value: "Easter", label: "Easter" },
-        { value: "Fall", label: "Fall" },
-        { value: "General", label: "General" },
-        { value: "Halloween", label: "Halloween" },
-        { value: "Hanging Item", label: "Hanging Item" },
-        { value: "Magnet", label: "Magnet" },
-        { value: "Ornament", label: "Ornament" },
-        { value: "Other", label: "Other" },
-        { value: "Patriotic", label: "Patriotic" },
-        { value: "Pop Culture", label: "Pop Culture" },
-        { value: "Roses", label: "Roses" },
-        { value: "Sports", label: "Sports" },
-        { value: "Spring", label: "Spring" },
-        { value: "Standing Wood Item", label: "Standing Wood Item" },
-        { value: "Summer", label: "Summer" },
-        { value: "Thanksgiving", label: "Thanksgiving" },
-        { value: "Vase", label: "Vase" },
-        { value: "Winter", label: "Winter" },
       ],
       loading: true,
       errorMessage: "",
@@ -224,7 +194,6 @@ export default {
   computed: {
     headers() {
       if (!this.items.length) return [];
-      console.log(this.items[0]);
       return Object.keys(this.items[0]);
     },
 
@@ -285,26 +254,6 @@ export default {
         return 0;
       });
     },
-
-    pdfReportTitle() {
-      const categoryLabel =
-        this.selectedCategory === "All"
-          ? "All Items"
-          : this.categoryOptions.find((option) => option.value === this.selectedCategory)?.label ||
-          this.selectedCategory;
-
-      const subTypeLabel =
-        this.selectedSubType === "All"
-          ? "All Sub-types"
-          : this.selectedSubType;
-
-      const sortLabel = this.sortKey
-        ? this.headerLabels[this.sortKey] || this.sortKey
-        : "Asc";
-      const sortDirectionLabel = this.sortKey ? ` ${this.sortDirection.toUpperCase()}` : "";
-
-      return `Items Report - ${categoryLabel} - ${subTypeLabel} - By ${sortLabel}${sortDirectionLabel}`;
-    },
   },
 
   methods: {
@@ -321,6 +270,46 @@ export default {
         this.errorMessage = error.message || "Failed to load items.";
       } finally {
         this.loading = false;
+      }
+    },
+    // Load item sub-types from the API to populate the sub-type filter dropdown
+    async loadSubTypes() {
+      try {
+        const data = await APIService.getItemSubTypes();
+
+        const subTypesFromApi = Array.isArray(data) ? data : [];
+
+        this.subTypeOptions = [
+          { value: "All", label: "All" },
+          ...subTypesFromApi
+            .filter((subType) => subType?.subTypeName)
+            .map((subType) => ({
+              value: subType.subTypeName,
+              label: subType.subTypeName,
+            })),
+        ];
+      } catch (error) {
+        console.error("Failed to load item sub-types:", error);
+      }
+    },
+    // Load item statuses from the API to populate the status filter dropdown
+    async loadStatusOptions() {
+      try {
+        const data = await APIService.getItemStatuses();
+        console
+        const statusesFromApi = Array.isArray(data) ? data : [];
+
+        this.statusOptions = [
+          { value: "All", label: "All" },
+          ...statusesFromApi
+            .filter((status) => status?.statusOption)
+            .map((status) => ({
+              value: status.statusOption,
+              label: status.statusLabel,
+            })),
+        ];
+      } catch (error) {
+        console.error("Failed to load item statuses:", error);
       }
     },
     // Sync the current state to the URL query parameters
@@ -433,7 +422,10 @@ export default {
     },
 
     goToCreatePdfReport() {
-      this.$router.push({ name: "CreatePDFReport" });
+      this.$router.push({
+        path: `/create-pdf-report`,
+        query: { ...this.$route.query },
+      });
     },
 
     getImageUrl(item) {
@@ -512,6 +504,8 @@ export default {
 
     this.restoreStateFromRoute();
     await this.loadItems();
+    await this.loadSubTypes();
+    await this.loadStatusOptions();
   },
 };
 </script>

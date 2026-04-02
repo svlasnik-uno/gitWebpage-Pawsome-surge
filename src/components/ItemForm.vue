@@ -59,11 +59,10 @@
               <div class="col-md-6">
                 <label class="form-label">Item Status</label>
                 <select v-model="form.ItemStatus" class="form-select">
-                  <option value="A">Available</option>
-                  <option value="S">Sold</option>
-                  <option value="R">Replace</option>
-                  <option value="K">Kept</option>
-                  <option value="D">Display</option>
+                  <option value="">Select status</option>
+                  <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
                 </select>
               </div>
 
@@ -160,30 +159,8 @@ export default {
         { value: "Other", label: "Other" },
       ],
       subTypeOptions: [
-        { value: "All", label: "All" },
-        { value: "Animal", label: "Animal" },
-        { value: "Bundle", label: "Bundle" },
-        { value: "Centerpiece-General", label: "Centerpiece-General" },
-        { value: "Christmas", label: "Christmas" },
-        { value: "Door Sign", label: "Door Sign" },
-        { value: "Easter", label: "Easter" },
-        { value: "Fall", label: "Fall" },
-        { value: "General", label: "General" },
-        { value: "Halloween", label: "Halloween" },
-        { value: "Hanging Item", label: "Hanging Item" },
-        { value: "Magnet", label: "Magnet" },
-        { value: "Ornament", label: "Ornament" },
-        { value: "Other", label: "Other" },
-        { value: "Patriotic", label: "Patriotic" },
-        { value: "Pop Culture", label: "Pop Culture" },
-        { value: "Roses", label: "Roses" },
-        { value: "Sports", label: "Sports" },
-        { value: "Spring", label: "Spring" },
-        { value: "Standing Wood Item", label: "Standing Wood Item" },
-        { value: "Summer", label: "Summer" },
-        { value: "Thanksgiving", label: "Thanksgiving" },
-        { value: "Vase", label: "Vase" },
-        { value: "Winter", label: "Winter" },
+      ],
+      statusOptions: [
       ],
     };
   },
@@ -223,6 +200,47 @@ export default {
         this.loading = false;
       }
     },
+    // Load item sub-types from the API to populate the sub-type filter dropdown
+    async loadSubTypes() {
+      try {
+        const data = await APIService.getItemSubTypes();
+
+        const subTypesFromApi = Array.isArray(data) ? data : [];
+
+        this.subTypeOptions = [
+          { value: "All", label: "All" },
+          ...subTypesFromApi
+            .filter((subType) => subType?.subTypeName)
+            .map((subType) => ({
+              value: subType.subTypeName,
+              label: subType.subTypeName,
+            })),
+        ];
+      } catch (error) {
+        console.error("Failed to load item sub-types:", error);
+      }
+    },
+    // Load item statuses from the API to populate the status filter dropdown
+    async loadStatusOptions() {
+      try {
+        const data = await APIService.getItemStatuses();
+        console
+        const statusesFromApi = Array.isArray(data) ? data : [];
+
+        this.statusOptions = [
+          { value: "All", label: "All" },
+          ...statusesFromApi
+            .filter((status) => status?.statusOption)
+            .map((status) => ({
+              value: status.statusOption,
+              label: status.statusLabel,
+            })),
+        ];
+      } catch (error) {
+        console.error("Failed to load item statuses:", error);
+      }
+    },
+    
     // Handle image selection
     handleImageSelected(event) {
       const file =
@@ -425,8 +443,10 @@ export default {
     if (!this.isEditMode && this.$route.query.itemNumber) {
       this.form.ItemNumber = Number(this.$route.query.itemNumber);
     }
-
     await this.loadItem();
+    this.loadSubTypes();
+    this.loadStatusOptions();
+
   },
   //  Before the component is unmounted, revoke any object URLs created for image previews to free up memory
   beforeUnmount() {
