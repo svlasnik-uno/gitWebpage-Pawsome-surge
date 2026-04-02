@@ -73,7 +73,7 @@
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
                 <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
-                  Previous
+                  <i class="bi bi-chevron-left"></i>
                 </button>
               </li>
 
@@ -91,7 +91,7 @@
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
                 <button type="button" class="page-link" @click="goToNextPage"
                   :disabled="currentPage === totalPages || totalPages === 0">
-                  Next
+                  <i class="bi bi-chevron-right"></i>
                 </button>
               </li>
             </ul>
@@ -242,7 +242,7 @@
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
                 <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
-                  Previous
+                  <i class="bi bi-chevron-left"></i>
                 </button>
               </li>
 
@@ -260,7 +260,7 @@
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
                 <button type="button" class="page-link" @click="goToNextPage"
                   :disabled="currentPage === totalPages || totalPages === 0">
-                  Next
+                  <i class="bi bi-chevron-right"></i>
                 </button>
               </li>
             </ul>
