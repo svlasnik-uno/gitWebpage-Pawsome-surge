@@ -18,27 +18,27 @@
                             </div>
 
                             <form @submit.prevent="saveEvent">
-                                <div class="row g-4">
-                                    <div class="col-lg-7">
+                                <div class="row g-4 form-layout">
+                                    <div class="col-12 col-lg-7 order-2 order-lg-1">
                                         <div class="row g-3">
-                                            <div class="col-md-5">
+                                            <div class="col-12 col-sm-6 col-md-5">
                                                 <label for="id" class="form-label">Event ID</label>
                                                 <input
                                                     id="id"
                                                     v-model.number="eventForm.id"
                                                     type="number"
-                                                    class="form-control"
+                                                    class="form-control mobile-form-control"
                                                     :disabled="isEditMode"
                                                     required
                                                 />
                                             </div>
 
-                                            <div class="col-md-4">
+                                            <div class="col-12 col-sm-6 col-md-4">
                                                 <label for="eventSeason" class="form-label">Season</label>
                                                 <select
                                                     id="eventSeason"
                                                     v-model="eventForm.eventSeason"
-                                                    class="form-select"
+                                                    class="form-select mobile-form-control"
                                                     required
                                                 >
                                                     <option value="">Select season</option>
@@ -49,13 +49,13 @@
                                                 </select>
                                             </div>
 
-                                            <div class="col-md-4">
+                                            <div class="col-12 col-sm-6 col-md-4">
                                                 <label for="eventYear" class="form-label">Year</label>
                                                 <input
                                                     id="eventYear"
                                                     v-model.number="eventForm.eventYear"
                                                     type="number"
-                                                    class="form-control"
+                                                    class="form-control mobile-form-control"
                                                     min="2000"
                                                     max="2100"
                                                 />
@@ -67,44 +67,44 @@
                                                     id="eventName"
                                                     v-model="eventForm.eventName"
                                                     type="text"
-                                                    class="form-control"
+                                                    class="form-control mobile-form-control"
                                                     required
                                                 />
                                             </div>
 
-                                            <div class="col-md-6">
+                                            <div class="col-12 col-md-6">
                                                 <label for="eventDate" class="form-label">Event Date</label>
                                                 <input
                                                     id="eventDate"
                                                     v-model="eventForm.eventDate"
                                                     type="date"
-                                                    class="form-control"
+                                                    class="form-control mobile-form-control"
                                                 />
                                             </div>
 
-                                            <div class="col-md-6">
+                                            <div class="col-12 col-md-6">
                                                 <label for="eventLocation" class="form-label">Location</label>
                                                 <input
                                                     id="eventLocation"
                                                     v-model="eventForm.eventLocation"
                                                     type="text"
-                                                    class="form-control"
+                                                    class="form-control mobile-form-control"
                                                 />
                                             </div>
 
-                                            <div class="col-md-6">
+                                            <div class="col-12 col-md-6">
                                                 <label for="eventDisplay" class="form-label">Display on Site (Y/N)</label>
                                                 <input
                                                     id="eventDisplay"
                                                     v-model="eventForm.eventDisplay"
                                                     type="text"
-                                                    class="form-control"
+                                                    class="form-control mobile-form-control"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-lg-4">
+                                    <div class="col-12 col-lg-4 order-1 order-lg-2">
                                         <div class="image-preview-card">
                                             <h5 class="mb-3">Event Image</h5>
 
@@ -126,7 +126,7 @@
                                                 </label>
                                                 <input
                                                     type="file"
-                                                    class="form-control"
+                                                    class="form-control mobile-form-control"
                                                     accept="image/*"
                                                     @change="handleImageSelected"
                                                 />
@@ -147,7 +147,7 @@
                                     </div>
 
                                     <div class="col-12">
-                                        <div class="d-flex gap-2 mt-2 flex-wrap">
+                                        <div class="d-flex gap-2 mt-2 flex-wrap form-actions">
                                             <button type="submit" class="btn btn-outline-secondary" :disabled="saving">
                                                 {{ saving ? "Saving..." : "Save Event" }}
                                             </button>
@@ -545,5 +545,43 @@ export default {
     object-fit: contain;
     display: block;
     border-radius: 0.375rem;
+}
+
+@media (max-width: 991.98px) {
+    .edit-event-page .card-body {
+        padding: 1rem;
+    }
+
+    .image-preview-box {
+        min-height: 220px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .mobile-form-control {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .image-preview-card {
+        padding: 0.875rem;
+    }
+
+    .image-preview-box {
+        min-height: 180px;
+        padding: 0.5rem;
+    }
+
+    .preview-image {
+        max-height: 280px;
+    }
 }
 </style>

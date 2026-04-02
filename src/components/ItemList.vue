@@ -1,7 +1,6 @@
 <template>
   <div class="container py-4 list-items-page bg-white shadow-sm rounded px-4">
     <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
-
       <div class="d-flex align-items-center gap-3 flex-wrap">
         <label for="categorySelect" class="fw-semibold mb-0">View Items by Category:</label>
         <select id="categorySelect" v-model="selectedCategory" class="form-select w-auto"
@@ -34,9 +33,11 @@
         <button type="button" class="btn btn-secondary" @click="clearSearch">
           Clear Search
         </button>
+
         <button type="button" class="btn btn-secondary" @click="addNewItem">
           Add New Item
         </button>
+
         <button type="button" class="btn btn-secondary" @click="goToCreatePdfReport">
           Create PDF Report
         </button>
@@ -57,7 +58,8 @@
       </div>
 
       <div v-else>
-        <div class="table-responsive">
+        <!-- Desktop / tablet table -->
+        <div class="table-responsive d-none d-md-block">
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
               <tr>
@@ -116,6 +118,64 @@
           </table>
         </div>
 
+        <!-- Mobile accordion view -->
+        <div class="d-md-none mobile-item-list">
+          <div v-for="item in paginatedItems" :key="`mobile-${item.ItemNumber}`"
+            class="mobile-item-card border rounded mb-3">
+            <div class="d-flex align-items-center justify-content-between p-3">
+              <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
+                @click="viewItemDetail(item)">
+                {{ item.ItemNumber }}
+              </button>
+
+              <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"
+                @click="toggleExpandedItem(item.ItemNumber)" :aria-expanded="isExpanded(item.ItemNumber)"
+                :aria-controls="`mobile-item-details-${item.ItemNumber}`">
+                <i class="bi" :class="isExpanded(item.ItemNumber) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
+              </button>
+            </div>
+
+            <div v-if="isExpanded(item.ItemNumber)" :id="`mobile-item-details-${item.ItemNumber}`" class="px-3 pb-3">
+              <div v-for="header in mobileDetailHeaders" :key="`${item.ItemNumber}-mobile-${header}`"
+                class="mobile-item-field py-2 border-top">
+                <div class="mobile-item-field-row">
+                  <div class="mobile-item-label fw-semibold small text-muted">
+                    {{ headerLabels[header] || header }}
+                  </div>
+
+                  <div class="mobile-item-value text-end">
+                    <template v-if="header === 'ItemImage' && item[header]">
+                      <img :src="getImageUrl(item)" alt="Item Image" class="img-thumbnail"
+                        style="width: 75px; height: 75px; object-fit: cover;" />
+                    </template>
+
+                    <template v-else-if="['ItemAskingPrice', 'ItemCost'].includes(header)">
+                      {{ formatCurrency(item[header]) }}
+                    </template>
+
+                    <template v-else>
+                      {{ item[header] || "-" }}
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2 pt-3 border-top mt-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" @click="editItem(item)" title="Edit Item">
+                  <i class="bi bi-pencil-fill me-1"></i>
+                  Edit
+                </button>
+
+                <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)"
+                  title="Delete Item">
+                  <i class="bi bi-trash-fill me-1"></i>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
           <nav aria-label="Items pagination">
             <ul class="pagination mb-0">
@@ -164,10 +224,8 @@ export default {
       selectedCategory: "All",
       selectedSubType: "All",
       searchItemNumber: "",
-      statusOptions: [
-      ],
-      subTypeOptions: [
-      ],
+      statusOptions: [],
+      subTypeOptions: [],
       loading: true,
       errorMessage: "",
       currentPage: 1,
@@ -176,6 +234,7 @@ export default {
       sortKey: "ItemNumber",
       sortDirection: "asc",
       generatingPdf: false,
+      expandedMobileItems: [],
 
       headerLabels: {
         ItemNumber: "ID",
@@ -195,6 +254,10 @@ export default {
     headers() {
       if (!this.items.length) return [];
       return Object.keys(this.items[0]);
+    },
+
+    mobileDetailHeaders() {
+      return this.headers.filter((header) => header !== "ItemNumber");
     },
 
     visiblePages() {
@@ -249,6 +312,7 @@ export default {
           valA = String(valA ?? "").toLowerCase();
           valB = String(valB ?? "").toLowerCase();
         }
+
         if (valA < valB) return this.sortDirection === "asc" ? -1 : 1;
         if (valA > valB) return this.sortDirection === "asc" ? 1 : -1;
         return 0;
@@ -257,7 +321,6 @@ export default {
   },
 
   methods: {
-    // Load items from the API and apply initial filtering/sorting
     async loadItems() {
       this.loading = true;
       this.errorMessage = "";
@@ -265,14 +328,14 @@ export default {
       try {
         const data = await APIService.getItems();
         this.allItems = Array.isArray(data) ? data : [];
-        this.handleCategoryChange(false); // don't force page reset here
+        this.handleCategoryChange(false);
       } catch (error) {
         this.errorMessage = error.message || "Failed to load items.";
       } finally {
         this.loading = false;
       }
     },
-    // Load item sub-types from the API to populate the sub-type filter dropdown
+
     async loadSubTypes() {
       try {
         const data = await APIService.getItemSubTypes();
@@ -292,11 +355,10 @@ export default {
         console.error("Failed to load item sub-types:", error);
       }
     },
-    // Load item statuses from the API to populate the status filter dropdown
+
     async loadStatusOptions() {
       try {
         const data = await APIService.getItemStatuses();
-        console
         const statusesFromApi = Array.isArray(data) ? data : [];
 
         this.statusOptions = [
@@ -312,7 +374,7 @@ export default {
         console.error("Failed to load item statuses:", error);
       }
     },
-    // Sync the current state to the URL query parameters
+
     syncStateToRoute() {
       this.$router.replace({
         query: {
@@ -324,7 +386,7 @@ export default {
         },
       });
     },
-    // Re-apply filters/sorting based on URL query parameters (used when navigating back/forward)
+
     restoreStateFromRoute() {
       const query = this.$route.query;
 
@@ -334,7 +396,7 @@ export default {
       this.sortDirection = query.sortDirection || "asc";
       this.currentPage = query.page ? Number(query.page) : 1;
     },
-    // Filter items based on the entered item number, while also applying current category and sub-type filters
+
     findByItemNumber() {
       const itemNumber = Number(this.searchItemNumber);
       if (!this.searchItemNumber || Number.isNaN(itemNumber)) {
@@ -353,14 +415,15 @@ export default {
       });
 
       this.currentPage = 1;
+      this.expandedMobileItems = [];
       this.syncStateToRoute();
     },
+
     clearSearch() {
       this.searchItemNumber = "";
       this.handleCategoryChange();
     },
-    // Navigate to the edit page for creating a new item, passing the next available item number and 
-    // current query parameters to preserve state
+
     addNewItem() {
       const maxItemNumber = this.allItems.length
         ? Math.max(...this.allItems.map((item) => Number(item.ItemNumber) || 0))
@@ -376,21 +439,21 @@ export default {
         },
       });
     },
-    // Navigate to the item detail page for the selected item, passing current query parameters to preserve state
+
     viewItemDetail(item) {
       this.$router.push({
         path: `/itemDetail/${item.ItemNumber}`,
         query: { ...this.$route.query },
       });
     },
-    // Navigate to the edit page for the selected item, passing current query parameters to preserve state
+
     editItem(item) {
       this.$router.push({
         path: `/editItem/${item.ItemNumber}`,
         query: { ...this.$route.query },
       });
     },
-    // Apply category and sub-type filters to the full item list, then reset pagination and sync state to route
+
     handleCategoryChange(resetPage = true) {
       this.searchItemNumber = "";
 
@@ -409,6 +472,7 @@ export default {
       }
 
       this.items = filteredItems;
+      this.expandedMobileItems = [];
 
       if (resetPage) {
         this.currentPage = 1;
@@ -451,29 +515,44 @@ export default {
       }
 
       this.currentPage = 1;
+      this.expandedMobileItems = [];
       this.syncStateToRoute();
     },
 
     goToPage(page) {
       this.currentPage = page;
+      this.expandedMobileItems = [];
       this.syncStateToRoute();
-
     },
 
     goToPreviousPage() {
       if (this.currentPage > 1) {
         this.currentPage -= 1;
+        this.expandedMobileItems = [];
         this.syncStateToRoute();
-
       }
     },
 
     goToNextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage += 1;
+        this.expandedMobileItems = [];
         this.syncStateToRoute();
-
       }
+    },
+
+    toggleExpandedItem(itemNumber) {
+      if (this.expandedMobileItems.includes(itemNumber)) {
+        this.expandedMobileItems = this.expandedMobileItems.filter(
+          (number) => number !== itemNumber
+        );
+      } else {
+        this.expandedMobileItems = [...this.expandedMobileItems, itemNumber];
+      }
+    },
+
+    isExpanded(itemNumber) {
+      return this.expandedMobileItems.includes(itemNumber);
     },
 
     async confirmDelete(item) {
@@ -551,5 +630,42 @@ export default {
 
 .item-number-search {
   max-width: 140px;
+}
+
+.mobile-item-card {
+  background: #fff;
+}
+
+.mobile-item-number {
+  font-size: 1rem;
+}
+
+.mobile-expand-btn {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.mobile-item-field:first-child {
+  border-top: none !important;
+}
+.mobile-item-field-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.mobile-item-label {
+  flex: 0 0 40%;
+}
+
+.mobile-item-value {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
 </style>

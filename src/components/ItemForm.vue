@@ -16,23 +16,27 @@
               </div>
 
               <form @submit.prevent="saveItem">
-                <div class="row g-4">
-                  <div class="col-lg-7">
+                <div class="row g-4 form-layout">
+                  <div class="col-12 col-lg-7 order-2 order-lg-1">
                     <div class="row g-3">
-                      <div class="col-md-5">
+                      <div class="col-12 col-sm-6 col-md-5">
                         <label for="itemNumber" class="form-label">Item Number</label>
                         <input
                           id="itemNumber"
                           v-model="form.ItemNumber"
                           type="number"
-                          class="form-control"
+                          class="form-control mobile-form-control"
                           :readonly="isEditMode"
                         />
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemType" class="form-label">Item Type</label>
-                        <select id="itemType" v-model="form.ItemType" class="form-select">
+                        <select
+                          id="itemType"
+                          v-model="form.ItemType"
+                          class="form-select mobile-form-control"
+                        >
                           <option value="">Select type</option>
                           <option
                             v-for="option in TypeOptions"
@@ -44,9 +48,13 @@
                         </select>
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemSubType" class="form-label">Item Sub-type</label>
-                        <select id="itemSubType" v-model="form.ItemSubType" class="form-select">
+                        <select
+                          id="itemSubType"
+                          v-model="form.ItemSubType"
+                          class="form-select mobile-form-control"
+                        >
                           <option value="">Select sub-type</option>
                           <option
                             v-for="option in subTypeOptions"
@@ -58,39 +66,43 @@
                         </select>
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemPrice" class="form-label">Price</label>
                         <div class="input-group">
-                          <span class="input-group-text">$</span>
+                          <span class="input-group-text mobile-input-group-text">$</span>
                           <input
                             id="itemPrice"
                             v-model.number="form.ItemAskingPrice"
                             type="number"
                             step="0.01"
                             min="0"
-                            class="form-control"
+                            class="form-control mobile-form-control"
                           />
                         </div>
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemCost" class="form-label">Item Cost</label>
                         <div class="input-group">
-                          <span class="input-group-text">$</span>
+                          <span class="input-group-text mobile-input-group-text">$</span>
                           <input
                             id="itemCost"
                             v-model.number="form.ItemCost"
                             type="number"
                             step="0.01"
                             min="0"
-                            class="form-control"
+                            class="form-control mobile-form-control"
                           />
                         </div>
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemStatus" class="form-label">Item Status</label>
-                        <select id="itemStatus" v-model="form.ItemStatus" class="form-select">
+                        <select
+                          id="itemStatus"
+                          v-model="form.ItemStatus"
+                          class="form-select mobile-form-control"
+                        >
                           <option value="">Select status</option>
                           <option
                             v-for="option in statusOptions"
@@ -102,23 +114,23 @@
                         </select>
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-12 col-sm-6 col-md-6">
                         <label for="itemColor" class="form-label">Item Color</label>
                         <input
                           id="itemColor"
                           v-model="form.ItemColor"
                           type="text"
-                          class="form-control"
+                          class="form-control mobile-form-control"
                         />
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-12 col-sm-6 col-md-6">
                         <label for="imageType" class="form-label">Image Type</label>
                         <input
                           id="imageType"
                           v-model="form.ImageType"
                           type="text"
-                          class="form-control"
+                          class="form-control mobile-form-control"
                         />
                       </div>
 
@@ -127,14 +139,14 @@
                         <textarea
                           id="itemDescription"
                           v-model="form.ItemDescription"
-                          class="form-control"
+                          class="form-control mobile-form-control"
                           rows="4"
                         ></textarea>
                       </div>
                     </div>
                   </div>
 
-                  <div class="col-lg-4">
+                  <div class="col-12 col-lg-4 order-1 order-lg-2">
                     <div class="image-preview-card">
                       <h5 class="mb-3">Item Image</h5>
 
@@ -156,7 +168,7 @@
                         </label>
                         <input
                           type="file"
-                          class="form-control"
+                          class="form-control mobile-form-control"
                           accept="image/*"
                           @change="handleImageSelected"
                         />
@@ -177,7 +189,7 @@
                   </div>
 
                   <div class="col-12">
-                    <div class="d-flex gap-2 mt-2 flex-wrap">
+                    <div class="d-flex gap-2 mt-2 flex-wrap form-actions">
                       <button type="submit" class="btn btn-outline-secondary" :disabled="saving">
                         {{ saving ? "Saving..." : "Save Item" }}
                       </button>
@@ -596,5 +608,48 @@ export default {
   object-fit: contain;
   display: block;
   border-radius: 0.375rem;
+}
+
+@media (max-width: 991.98px) {
+  .edit-item-page .card-body {
+    padding: 1rem;
+  }
+
+  .image-preview-box {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .mobile-form-control {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .mobile-input-group-text {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
+  .image-preview-card {
+    padding: 0.875rem;
+  }
+
+  .image-preview-box {
+    min-height: 180px;
+    padding: 0.5rem;
+  }
+
+  .preview-image {
+    max-height: 280px;
+  }
 }
 </style>

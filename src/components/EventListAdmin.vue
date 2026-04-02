@@ -15,10 +15,13 @@
       </div>
 
       <div class="d-flex align-items-center gap-2 flex-wrap">
-
-
-        <input v-model="searchEventId" type="number" class="form-control event-id-search" placeholder="Enter Event ID"
-          @keyup.enter="findByEventId" />
+        <input
+          v-model="searchEventId"
+          type="number"
+          class="form-control event-id-search"
+          placeholder="Enter Event ID"
+          @keyup.enter="findByEventId"
+        />
 
         <button type="button" class="btn btn-secondary" @click="findByEventId">
           Find
@@ -27,6 +30,7 @@
         <button type="button" class="btn btn-secondary" @click="clearSearch">
           Clear Search
         </button>
+
         <button type="button" class="btn btn-secondary" @click="addNewEvent">
           Add New Event
         </button>
@@ -47,21 +51,30 @@
       </div>
 
       <div v-else>
-        <div class="table-responsive">
+        <!-- Desktop / tablet table -->
+        <div class="table-responsive d-none d-md-block">
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
               <tr>
-                <th v-for="header in headers" :key="header" @click="sortBy(header)" :class="[
-                  'sortable-header',
-                  ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay'].includes(header)
-                    ? 'text-center'
-                    : 'text-start'
-                ]">
-                  <div class="th-content" :class="[
-                    ['id', 'eventImage', 'eventDisplay'].includes(header)
-                      ? 'justify-content-center'
-                      : 'justify-content-start'
-                  ]">
+                <th
+                  v-for="header in headers"
+                  :key="header"
+                  @click="sortBy(header)"
+                  :class="[
+                    'sortable-header',
+                    ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay'].includes(header)
+                      ? 'text-center'
+                      : 'text-start'
+                  ]"
+                >
+                  <div
+                    class="th-content"
+                    :class="[
+                      ['id', 'eventImage', 'eventDisplay'].includes(header)
+                        ? 'justify-content-center'
+                        : 'justify-content-start'
+                    ]"
+                  >
                     <span class="header-label">{{ headerLabels[header] || header }}</span>
                     <span class="sort-icon-slot">
                       <i v-if="sortKey === header && sortDirection === 'asc'" class="bi bi-caret-up-fill"></i>
@@ -75,18 +88,31 @@
 
             <tbody>
               <tr v-for="event in paginatedEvents" :key="event.id">
-                <td v-for="header in headers" :key="`${event.id}-${header}`" :class="[
-                  ['id', 'eventImage', 'eventDisplay'].includes(header)
-                    ? 'text-center'
-                    : 'text-start'
-                ]">
-                  <button v-if="header === 'id'" type="button" class="btn btn-link p-0 text-decoration-underline"
-                    @click="viewEventDetail(event)">
+                <td
+                  v-for="header in headers"
+                  :key="`${event.id}-${header}`"
+                  :class="[
+                    ['id', 'eventImage', 'eventDisplay'].includes(header)
+                      ? 'text-center'
+                      : 'text-start'
+                  ]"
+                >
+                  <button
+                    v-if="header === 'id'"
+                    type="button"
+                    class="btn btn-link p-0 text-decoration-underline"
+                    @click="viewEventDetail(event)"
+                  >
                     {{ event[header] }}
                   </button>
 
-                  <img v-else-if="header === 'eventImage' && event[header]" :src="getEventImageUrl(event)"
-                    alt="Event Image" class="img-thumbnail" style="width: 75px; height: 75px; object-fit: cover;" />
+                  <img
+                    v-else-if="header === 'eventImage' && event[header]"
+                    :src="getEventImageUrl(event)"
+                    alt="Event Image"
+                    class="img-thumbnail"
+                    style="width: 75px; height: 75px; object-fit: cover;"
+                  />
 
                   <span v-else-if="header === 'eventDate'">
                     {{ formatDate(event[header]) }}
@@ -99,13 +125,21 @@
 
                 <td class="text-center">
                   <div class="d-inline-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary" @click="editEvent(event)"
-                      title="Edit Event">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      @click="editEvent(event)"
+                      title="Edit Event"
+                    >
                       <i class="bi bi-pencil-fill"></i>
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(event)"
-                      title="Delete Event">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      @click="confirmDelete(event)"
+                      title="Delete Event"
+                    >
                       <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
@@ -113,6 +147,97 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Mobile accordion view -->
+        <div class="d-md-none mobile-event-list">
+          <div
+            v-for="event in paginatedEvents"
+            :key="`mobile-${event.id}`"
+            class="mobile-event-card border rounded mb-3"
+          >
+            <div class="d-flex align-items-center justify-content-between p-3">
+              <button
+                type="button"
+                class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-event-id"
+                @click="viewEventDetail(event)"
+              >
+                {{ event.id }}
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary mobile-expand-btn"
+                @click="toggleExpandedEvent(event.id)"
+                :aria-expanded="isExpanded(event.id)"
+                :aria-controls="`mobile-event-details-${event.id}`"
+              >
+                <i
+                  class="bi"
+                  :class="isExpanded(event.id) ? 'bi-dash-lg' : 'bi-plus-lg'"
+                ></i>
+              </button>
+            </div>
+
+            <div
+              v-if="isExpanded(event.id)"
+              :id="`mobile-event-details-${event.id}`"
+              class="px-3 pb-3"
+            >
+              <div
+                v-for="header in mobileDetailHeaders"
+                :key="`${event.id}-mobile-${header}`"
+                class="mobile-event-field py-2 border-top"
+              >
+                <div class="mobile-event-field-row">
+                  <div class="mobile-event-label fw-semibold small text-muted">
+                    {{ headerLabels[header] || header }}
+                  </div>
+
+                  <div class="mobile-event-value text-end">
+                    <template v-if="header === 'eventImage' && event[header]">
+                      <img
+                        :src="getEventImageUrl(event)"
+                        alt="Event Image"
+                        class="img-thumbnail"
+                        style="width: 75px; height: 75px; object-fit: cover;"
+                      />
+                    </template>
+
+                    <template v-else-if="header === 'eventDate'">
+                      {{ formatDate(event[header]) }}
+                    </template>
+
+                    <template v-else>
+                      {{ event[header] || "-" }}
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2 pt-3 border-top mt-2">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  @click="editEvent(event)"
+                  title="Edit Event"
+                >
+                  <i class="bi bi-pencil-fill me-1"></i>
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  @click="confirmDelete(event)"
+                  title="Delete Event"
+                >
+                  <i class="bi bi-trash-fill me-1"></i>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
@@ -124,8 +249,12 @@
                 </button>
               </li>
 
-              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }">
+              <li
+                v-for="(page, index) in visiblePages"
+                :key="`${page}-${index}`"
+                class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }"
+              >
                 <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
                   {{ page }}
                 </button>
@@ -136,8 +265,12 @@
               </li>
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                <button type="button" class="page-link" @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0"
+                >
                   Next
                 </button>
               </li>
@@ -176,6 +309,7 @@ export default {
       auth: null,
       sortKey: "",
       sortDirection: "asc",
+      expandedMobileEvents: [],
 
       headerLabels: {
         id: "ID",
@@ -194,6 +328,10 @@ export default {
     headers() {
       if (!this.events.length) return [];
       return ["id", "eventName", "eventDate", "eventLocation", "eventImage", "eventSeason", "eventYear", "eventDisplay"];
+    },
+
+    mobileDetailHeaders() {
+      return this.headers.filter((header) => header !== "id");
     },
 
     visiblePages() {
@@ -277,6 +415,7 @@ export default {
         this.currentPage = 1;
         this.selectedSeason = "All";
         this.searchEventId = "";
+        this.expandedMobileEvents = [];
         this.handleSeasonChange();
       } catch (error) {
         this.errorMessage = error.message || "Failed to load events.";
@@ -298,6 +437,7 @@ export default {
       );
 
       this.currentPage = 1;
+      this.expandedMobileEvents = [];
     },
 
     clearSearch() {
@@ -335,6 +475,7 @@ export default {
       }
 
       this.currentPage = 1;
+      this.expandedMobileEvents = [];
     },
 
     getEventImageUrl(event) {
@@ -354,6 +495,7 @@ export default {
       }
 
       this.currentPage = 1;
+      this.expandedMobileEvents = [];
     },
 
     formatDate(value) {
@@ -368,18 +510,35 @@ export default {
 
     goToPage(page) {
       this.currentPage = page;
+      this.expandedMobileEvents = [];
     },
 
     goToPreviousPage() {
       if (this.currentPage > 1) {
         this.currentPage -= 1;
+        this.expandedMobileEvents = [];
       }
     },
 
     goToNextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage += 1;
+        this.expandedMobileEvents = [];
       }
+    },
+
+    toggleExpandedEvent(eventId) {
+      if (this.expandedMobileEvents.includes(eventId)) {
+        this.expandedMobileEvents = this.expandedMobileEvents.filter(
+          (id) => id !== eventId
+        );
+      } else {
+        this.expandedMobileEvents = [...this.expandedMobileEvents, eventId];
+      }
+    },
+
+    isExpanded(eventId) {
+      return this.expandedMobileEvents.includes(eventId);
     },
 
     async confirmDelete(event) {
@@ -453,5 +612,43 @@ export default {
 
 .event-id-search {
   max-width: 140px;
+}
+
+.mobile-event-card {
+  background: #fff;
+}
+
+.mobile-event-id {
+  font-size: 1rem;
+}
+
+.mobile-expand-btn {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.mobile-event-field:first-child {
+  border-top: none !important;
+}
+
+.mobile-event-field-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.mobile-event-label {
+  flex: 0 0 40%;
+}
+
+.mobile-event-value {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
 </style>
