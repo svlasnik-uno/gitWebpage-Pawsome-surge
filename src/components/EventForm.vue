@@ -148,13 +148,13 @@
 
                                     <div class="col-12">
                                         <div class="d-flex gap-2 mt-2 flex-wrap form-actions">
-                                            <button type="submit" class="btn btn-outline-secondary" :disabled="saving">
+                                            <button type="submit" class="btn btn-secondary" :disabled="saving">
                                                 {{ saving ? "Saving..." : "Save Event" }}
                                             </button>
 
                                             <button
                                                 type="button"
-                                                class="btn btn-outline-secondary"
+                                                class="btn btn-secondary"
                                                 @click="cancelEdit"
                                                 :disabled="saving"
                                             >
