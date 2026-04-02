@@ -123,10 +123,22 @@
           <div v-for="item in paginatedItems" :key="`mobile-${item.ItemNumber}`"
             class="mobile-item-card border rounded mb-3">
             <div class="d-flex align-items-center justify-content-between p-3">
-              <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
-                @click="viewItemDetail(item)">
-                {{ item.ItemNumber }}
-              </button>
+              <div class="d-flex align-items-center gap-2 mobile-item-summary">
+                <img
+                  v-if="item.ItemImage"
+                  :src="getImageUrl(item)"
+                  alt="Item Image"
+                  class="img-thumbnail mobile-item-thumb"
+                />
+
+                <button
+                  type="button"
+                  class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
+                  @click="viewItemDetail(item)"
+                >
+                  {{ item.ItemNumber }}
+                </button>
+              </div>
 
               <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"
                 @click="toggleExpandedItem(item.ItemNumber)" :aria-expanded="isExpanded(item.ItemNumber)"
@@ -257,7 +269,9 @@ export default {
     },
 
     mobileDetailHeaders() {
-      return this.headers.filter((header) => header !== "ItemNumber");
+      return this.headers.filter(
+        (header) => !["ItemNumber", "ItemImage"].includes(header)
+      );
     },
 
     visiblePages() {
@@ -636,8 +650,20 @@ export default {
   background: #fff;
 }
 
+.mobile-item-summary {
+  min-width: 0;
+}
+
+.mobile-item-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .mobile-item-number {
   font-size: 1rem;
+  min-width: 0;
 }
 
 .mobile-expand-btn {
@@ -652,6 +678,7 @@ export default {
 .mobile-item-field:first-child {
   border-top: none !important;
 }
+
 .mobile-item-field-row {
   display: flex;
   align-items: flex-start;
