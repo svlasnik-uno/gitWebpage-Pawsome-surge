@@ -118,131 +118,87 @@
           </table>
         </div>
 
-       <!-- Mobile accordion view -->
-<div class="d-md-none mobile-item-list">
-  <div class="mobile-sort-bar d-flex align-items-center gap-2 mb-3">
-    <label for="mobileSortSelect" class="small fw-semibold mb-0 text-nowrap">
-      Sort by:
-    </label>
+        <!-- Mobile accordion view -->
+        <div class="d-md-none mobile-item-list">
+          <div class="mobile-sort-bar d-flex align-items-center gap-2 mb-3">
+            <label for="mobileSortSelect" class="small fw-semibold mb-0 text-nowrap">
+              Sort by:
+            </label>
 
-    <select
-      id="mobileSortSelect"
-      v-model="sortKey"
-      class="form-select form-select-sm"
-      @change="handleMobileSortChange"
-    >
-      <option
-        v-for="option in mobileSortOptions"
-        :key="option.value"
-        :value="option.value"
-      >
-        {{ option.label }}
-      </option>
-    </select>
+            <select id="mobileSortSelect" v-model="sortKey" class="form-select form-select-sm"
+              @change="handleMobileSortChange">
+              <option v-for="option in mobileSortOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
 
-    <button
-      type="button"
-      class="btn btn-sm btn-outline-secondary mobile-sort-direction-btn"
-      @click="toggleMobileSortDirection"
-      :aria-label="sortDirection === 'asc' ? 'Sort descending' : 'Sort ascending'"
-      :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'"
-    >
-      <i
-        class="bi"
-        :class="sortDirection === 'asc' ? 'bi-sort-down' : 'bi-sort-up'"
-      ></i>
-    </button>
-  </div>
-
-  <div
-    v-for="item in paginatedItems"
-    :key="`mobile-${item.ItemNumber}`"
-    class="mobile-item-card border rounded mb-3"
-  >
-    <div class="d-flex align-items-center justify-content-between p-3">
-      <div class="d-flex align-items-center gap-2 mobile-item-summary">
-        <img
-          v-if="item.ItemImage"
-          :src="getImageUrl(item)"
-          alt="Item Image"
-          class="img-thumbnail mobile-item-thumb"
-        />
-
-        <button
-          type="button"
-          class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
-          @click="viewItemDetail(item)"
-        >
-          {{ item.ItemNumber }}
-        </button>
-
-        <span class="mobile-item-subtype text-muted small">
-          {{ item.ItemSubType || "-" }}
-        </span>
-      </div>
-
-      <button
-        type="button"
-        class="btn btn-sm btn-outline-secondary mobile-expand-btn"
-        @click="toggleExpandedItem(item.ItemNumber)"
-        :aria-expanded="isExpanded(item.ItemNumber)"
-        :aria-controls="`mobile-item-details-${item.ItemNumber}`"
-      >
-        <i class="bi" :class="isExpanded(item.ItemNumber) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
-      </button>
-    </div>
-
-    <div
-      v-if="isExpanded(item.ItemNumber)"
-      :id="`mobile-item-details-${item.ItemNumber}`"
-      class="px-3 pb-3"
-    >
-      <div
-        v-for="header in mobileDetailHeaders"
-        :key="`${item.ItemNumber}-mobile-${header}`"
-        class="mobile-item-field py-2 border-top"
-      >
-        <div class="mobile-item-field-row">
-          <div class="mobile-item-label fw-semibold small text-muted">
-            {{ headerLabels[header] || header }}
+            <button type="button" class="btn btn-sm btn-outline-secondary mobile-sort-direction-btn"
+              @click="toggleMobileSortDirection"
+              :aria-label="sortDirection === 'asc' ? 'Sort descending' : 'Sort ascending'"
+              :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'">
+              <i class="bi" :class="sortDirection === 'asc' ? 'bi-sort-down' : 'bi-sort-up'"></i>
+            </button>
           </div>
 
-          <div class="mobile-item-value text-end">
-            <template v-if="['ItemAskingPrice', 'ItemCost'].includes(header)">
-              {{ formatCurrency(item[header]) }}
-            </template>
+          <div v-for="item in paginatedItems" :key="`mobile-${item.ItemNumber}`"
+            class="mobile-item-card border rounded mb-3">
+            <div class="d-flex align-items-center justify-content-between p-3">
+              <div class="d-flex align-items-center gap-2 mobile-item-summary">
+                <img v-if="item.ItemImage" :src="getImageUrl(item)" alt="Item Image"
+                  class="img-thumbnail mobile-item-thumb" />
 
-            <template v-else>
-              {{ item[header] || "-" }}
-            </template>
+                <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
+                  @click="viewItemDetail(item)">
+                  {{ item.ItemNumber }}
+                </button>
+
+                <span class="mobile-item-subtype text-muted small">
+                  {{ item.ItemSubType || "-" }}
+                </span>
+              </div>
+
+              <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"
+                @click="toggleExpandedItem(item.ItemNumber)" :aria-expanded="isExpanded(item.ItemNumber)"
+                :aria-controls="`mobile-item-details-${item.ItemNumber}`">
+                <i class="bi" :class="isExpanded(item.ItemNumber) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
+              </button>
+            </div>
+
+            <div v-if="isExpanded(item.ItemNumber)" :id="`mobile-item-details-${item.ItemNumber}`" class="px-3 pb-3">
+              <div v-for="header in mobileDetailHeaders" :key="`${item.ItemNumber}-mobile-${header}`"
+                class="mobile-item-field py-2 border-top">
+                <div class="mobile-item-field-row">
+                  <div class="mobile-item-label fw-semibold small text-muted">
+                    {{ headerLabels[header] || header }}
+                  </div>
+
+                  <div class="mobile-item-value text-end">
+                    <template v-if="['ItemAskingPrice', 'ItemCost'].includes(header)">
+                      {{ formatCurrency(item[header]) }}
+                    </template>
+
+                    <template v-else>
+                      {{ item[header] || "-" }}
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2 pt-3 border-top mt-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" @click="editItem(item)" title="Edit Item">
+                  <i class="bi bi-pencil-fill me-1"></i>
+                  Edit
+                </button>
+
+                <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)"
+                  title="Delete Item">
+                  <i class="bi bi-trash-fill me-1"></i>
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="d-flex gap-2 pt-3 border-top mt-2">
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-primary"
-          @click="editItem(item)"
-          title="Edit Item"
-        >
-          <i class="bi bi-pencil-fill me-1"></i>
-          Edit
-        </button>
-
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-danger"
-          @click="confirmDelete(item)"
-          title="Delete Item"
-        >
-          <i class="bi bi-trash-fill me-1"></i>
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
         <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
           <nav aria-label="Items pagination">
@@ -765,10 +721,12 @@ export default {
 .mobile-item-label {
   flex: 0 0 40%;
 }
+
 .mobile-item-subtype {
   min-width: 0;
   word-break: break-word;
 }
+
 .mobile-item-value {
   flex: 1;
   min-width: 0;
@@ -782,5 +740,4 @@ export default {
 .mobile-sort-direction-btn {
   min-width: 2.5rem;
 }
-
 </style>

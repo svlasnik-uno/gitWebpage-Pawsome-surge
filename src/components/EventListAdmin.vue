@@ -156,14 +156,24 @@
             :key="`mobile-${event.id}`"
             class="mobile-event-card border rounded mb-3"
           >
-            <div class="d-flex align-items-center justify-content-between p-3">
-              <button
-                type="button"
-                class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-event-id"
-                @click="viewEventDetail(event)"
-              >
-                {{ event.id }}
-              </button>
+            <div class="mobile-event-card-header p-3">
+              <div class="mobile-event-summary">
+                <button
+                  type="button"
+                  class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-event-id"
+                  @click="viewEventDetail(event)"
+                >
+                  {{ event.id }}
+                </button>
+
+                <span class="mobile-event-name">
+                  {{ event.eventName || "-" }}
+                </span>
+
+                <span class="mobile-event-date">
+                  {{ formatDate(event.eventDate) || "-" }}
+                </span>
+              </div>
 
               <button
                 type="button"
@@ -172,10 +182,7 @@
                 :aria-expanded="isExpanded(event.id)"
                 :aria-controls="`mobile-event-details-${event.id}`"
               >
-                <i
-                  class="bi"
-                  :class="isExpanded(event.id) ? 'bi-dash-lg' : 'bi-plus-lg'"
-                ></i>
+                <i class="bi" :class="isExpanded(event.id) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
               </button>
             </div>
 
@@ -244,7 +251,12 @@
           <nav aria-label="Events pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToPreviousPage"
+                  :disabled="currentPage === 1"
+                >
                   Previous
                 </button>
               </li>
@@ -255,7 +267,12 @@
                 class="page-item"
                 :class="{ active: currentPage === page, disabled: page === '...' }"
               >
-                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
+                <button
+                  v-if="page !== '...'"
+                  type="button"
+                  class="page-link"
+                  @click="goToPage(page)"
+                >
                   {{ page }}
                 </button>
 
@@ -618,8 +635,38 @@ export default {
   background: #fff;
 }
 
+.mobile-event-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mobile-event-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
 .mobile-event-id {
   font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.mobile-event-name {
+  font-weight: 600;
+  color: #212529;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.mobile-event-date {
+  color: #6c757d;
+  font-size: 0.95rem;
+  flex-shrink: 0;
 }
 
 .mobile-expand-btn {

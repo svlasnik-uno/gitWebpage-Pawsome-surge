@@ -20,7 +20,42 @@
                             <form @submit.prevent="saveEvent">
                                 <div class="row g-4 form-layout">
                                     <div class="col-12 col-lg-7 order-2 order-lg-1">
-                                        <div class="row g-3">
+                                        <div class="mobile-event-summary d-sm-none">
+                                            <div class="mobile-event-summary-row">
+                                                <div class="mobile-event-summary-text">
+                                                    <span class="mobile-event-id">
+                                                        #{{ eventForm.id || "New" }}
+                                                    </span>
+
+                                                    <span
+                                                        v-if="eventForm.eventName"
+                                                        class="mobile-event-name"
+                                                    >
+                                                        {{ eventForm.eventName }}
+                                                    </span>
+
+                                                    <span
+                                                        v-if="eventForm.eventDate"
+                                                        class="mobile-event-date"
+                                                    >
+                                                        {{ formatDisplayDate(eventForm.eventDate) }}
+                                                    </span>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-secondary mobile-event-expand"
+                                                    @click="showMobileDetails = !showMobileDetails"
+                                                >
+                                                    {{ showMobileDetails ? "−" : "+" }}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="row g-3"
+                                            v-show="showMobileDetails || !isMobileView"
+                                        >
                                             <div class="col-12 col-sm-6 col-md-5">
                                                 <label for="id" class="form-label">Event ID</label>
                                                 <input
@@ -93,7 +128,9 @@
                                             </div>
 
                                             <div class="col-12 col-md-6">
-                                                <label for="eventDisplay" class="form-label">Display on Site (Y/N)</label>
+                                                <label for="eventDisplay" class="form-label">
+                                                    Display on Site (Y/N)
+                                                </label>
                                                 <input
                                                     id="eventDisplay"
                                                     v-model="eventForm.eventDisplay"
@@ -200,6 +237,8 @@ export default {
             auth: null,
             isUpdated: false,
             suppressUpdatedTracking: false,
+            showMobileDetails: false,
+            isMobileView: false,
         };
     },
 
@@ -239,6 +278,32 @@ export default {
             this.isUpdated = false;
         },
 
+        formatDateForInput(value) {
+            if (!value) return "";
+            return String(value).slice(0, 10);
+        },
+
+        formatDisplayDate(value) {
+            if (!value) return "";
+
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return value;
+
+            return date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+            });
+        },
+
+        updateMobileView() {
+            this.isMobileView = window.innerWidth <= 575.98;
+
+            if (!this.isMobileView) {
+                this.showMobileDetails = true;
+            }
+        },
+
         async loadEvent() {
             if (!this.eventId) return;
 
@@ -274,11 +339,6 @@ export default {
                 this.suppressUpdatedTracking = false;
                 this.loading = false;
             }
-        },
-
-        formatDateForInput(value) {
-            if (!value) return "";
-            return String(value).slice(0, 10);
         },
 
         handleImageSelected(e) {
@@ -484,6 +544,8 @@ export default {
 
     async mounted() {
         this.auth = useAuthStore();
+        this.updateMobileView();
+        window.addEventListener("resize", this.updateMobileView);
 
         if (!this.auth.isAuthenticated) {
             window.alert("You must be logged in to manage events.");
@@ -502,12 +564,20 @@ export default {
 
             this.resetUpdatedState();
         }
+
+        if (this.isMobileView) {
+            this.showMobileDetails = false;
+        } else {
+            this.showMobileDetails = true;
+        }
     },
 
     beforeUnmount() {
         if (this.selectedImagePreviewUrl && this.selectedImagePreviewUrl.startsWith("blob:")) {
             URL.revokeObjectURL(this.selectedImagePreviewUrl);
         }
+
+        window.removeEventListener("resize", this.updateMobileView);
     },
 };
 </script>
@@ -582,6 +652,55 @@ export default {
 
     .preview-image {
         max-height: 280px;
+    }
+
+    .mobile-event-summary {
+        margin-bottom: 1rem;
+    }
+
+    .mobile-event-summary-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        background: #f8f9fa;
+    }
+
+    .mobile-event-summary-text {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .mobile-event-id {
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .mobile-event-name {
+        font-weight: 600;
+        color: #212529;
+        word-break: break-word;
+    }
+
+    .mobile-event-date {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .mobile-event-expand {
+        min-width: 42px;
+        min-height: 42px;
+        padding: 0.25rem 0.5rem;
+        font-size: 1.25rem;
+        line-height: 1;
+        flex-shrink: 0;
     }
 }
 </style>

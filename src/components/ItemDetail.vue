@@ -17,12 +17,8 @@
           <div class="mobile-detail-card border rounded p-3 mb-4">
             <div class="d-flex align-items-center gap-3 mb-3">
               <div class="mobile-detail-thumb-wrap">
-                <img
-                  v-if="previewImageUrl"
-                  :src="previewImageUrl"
-                  alt="Item preview"
-                  class="img-thumbnail mobile-detail-thumb"
-                />
+                <img v-if="previewImageUrl" :src="previewImageUrl" alt="Item preview"
+                  class="img-thumbnail mobile-detail-thumb" />
                 <div v-else class="mobile-detail-thumb-placeholder text-muted small">
                   No image
                 </div>
