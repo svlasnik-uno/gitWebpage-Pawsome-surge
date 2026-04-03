@@ -292,6 +292,7 @@ export default {
       errorMessage: "",
       currentPage: 1,
       itemsPerPage: 15,
+      minPagesForFullDisplay: 8,
       auth: null,
       sortKey: "ItemNumber",
       sortDirection: "asc",
@@ -325,7 +326,7 @@ export default {
     },
 
     visiblePages() {
-      if (this.totalPages <= 20) {
+      if (this.totalPages <= this.minPagesForFullDisplay) {
         return Array.from({ length: this.totalPages }, (_, i) => i + 1);
       }
       const pages = [1];
