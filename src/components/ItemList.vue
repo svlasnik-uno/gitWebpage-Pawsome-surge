@@ -28,13 +28,9 @@
           <option value="ItemDescription">Item Description</option>
         </select>
 
-        <input
-          v-model.trim="searchValue"
-          type="text"
-          class="form-control item-search-input"
+        <input v-model.trim="searchValue" type="text" class="form-control item-search-input"
           :placeholder="searchField === 'ItemNumber' ? 'Find Item #' : 'Find Item Description'"
-          @keyup.enter="findItems"
-        />
+          @keyup.enter="findItems" />
 
         <button type="button" class="btn btn-secondary" @click="findItems">
           Find
@@ -68,7 +64,7 @@
       </div>
 
       <div v-else>
-                <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+        <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
           <nav aria-label="Items pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
@@ -292,12 +288,13 @@ export default {
       errorMessage: "",
       currentPage: 1,
       itemsPerPage: 15,
-      minPagesForFullDisplay: 6,
+      minPagesForFullDisplay: 10,
       auth: null,
       sortKey: "ItemNumber",
       sortDirection: "asc",
       generatingPdf: false,
       expandedMobileItems: [],
+      isMobile: window.innerWidth < 768,
 
       headerLabels: {
         ItemNumber: "Item Number",
@@ -326,22 +323,33 @@ export default {
     },
 
     visiblePages() {
-      if (this.totalPages <= this.minPagesForFullDisplay) {
+      if (this.totalPages <= 0) return [];
+
+      const siblingCount = this.isMobile ? 1 : 2;
+      const fullDisplayCount = this.isMobile ? 4 : this.minPagesForFullDisplay;
+
+      if (this.totalPages <= fullDisplayCount) {
         return Array.from({ length: this.totalPages }, (_, i) => i + 1);
       }
+
       const pages = [1];
-      const start = Math.max(2, this.currentPage - 2);
-      const end = Math.min(this.totalPages - 1, this.currentPage + 2);
+      const start = Math.max(2, this.currentPage - siblingCount);
+      const end = Math.min(this.totalPages - 1, this.currentPage + siblingCount);
+
       if (start > 2) {
         pages.push("...");
       }
+
       for (let page = start; page <= end; page++) {
         pages.push(page);
       }
+
       if (end < this.totalPages - 1) {
         pages.push("...");
       }
+
       pages.push(this.totalPages);
+
       return pages;
     },
 
@@ -572,7 +580,9 @@ export default {
 
       this.syncStateToRoute();
     },
-
+    handleResize() {
+      this.isMobile = window.innerWidth < 768;
+    },
     goToCreatePdfReport() {
       this.$router.push({
         path: `/create-pdf-report`,
@@ -681,11 +691,15 @@ export default {
       this.$router.push("/");
       return;
     }
+    window.addEventListener("resize", this.handleResize);
 
     this.restoreStateFromRoute();
     await this.loadItems();
     await this.loadSubTypes();
     await this.loadStatusOptions();
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.handleResize);
   },
 };
 </script>
@@ -799,5 +813,23 @@ export default {
 
 .mobile-sort-direction-btn {
   min-width: 2.5rem;
+}
+.pagination {
+  flex-wrap: wrap;
+}
+
+.page-link {
+  padding: 0.375rem 0.65rem;
+}
+
+@media (max-width: 767.98px) {
+  .pagination {
+    gap: 0.15rem;
+  }
+
+  .page-link {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
 }
 </style>
