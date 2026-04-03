@@ -292,7 +292,7 @@ export default {
       errorMessage: "",
       currentPage: 1,
       itemsPerPage: 15,
-      minPagesForFullDisplay: 7,
+      minPagesForFullDisplay: 6,
       auth: null,
       sortKey: "ItemNumber",
       sortDirection: "asc",
