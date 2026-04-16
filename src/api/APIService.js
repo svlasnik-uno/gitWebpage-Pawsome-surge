@@ -318,7 +318,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
- 
+
   async createItemType(itemType) {
     const { data, error } = await supabase
       .from(ITEMTYPES_TABLE_NAME)
@@ -331,7 +331,7 @@ const APIService = {
   },
 
   async updateItemType(itemType) {
-    const { id, ...updatePayload } = item;
+    const { id, ...updatePayload } = itemType;
 
     const { data, error } = await supabase
       .from(ITEMTYPES_TABLE_NAME)
@@ -354,7 +354,15 @@ const APIService = {
     if (error) throw error;
     return data;
   },
-    // Item SubType -related API methods
+  async listItemImages(itemNumber) {
+    const { data, error } = await supabase.storage.from(IMAGE_BUCKET).list("", {
+      search: `${itemNumber}_`,
+    });
+
+    if (error) throw error;
+    return data;
+  },
+  // Item SubType -related API methods
   async getItemSubTypes() {
     const { data, error } = await supabase
       .from(ITEMSUBTYPES_TABLE_NAME)
@@ -364,7 +372,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
- 
+
   async createItemSubType(event) {
     const { data, error } = await supabase
       .from(ITEMSUBTYPES_TABLE_NAME)
@@ -400,7 +408,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
-   // Item Status -related API methods
+  // Item Status -related API methods
   async getItemStatuses() {
     const { data, error } = await supabase
       .from(ITEMSTATUS_TABLE_NAME)
@@ -410,7 +418,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
- 
+
   async createItemStatus(itemStatus) {
     const { data, error } = await supabase
       .from(ITEMSTATUS_TABLE_NAME)

@@ -374,36 +374,45 @@ export default {
         }
 
         if (this.isEditMode) {
+          const oldImageName = this.form.ItemImage || "";
+          let finalImageName = oldImageName;
+
           if (this.selectedImageFile) {
             const resizedFile = await this.getPreparedUploadFile();
             uploadedImageName = await APIService.uploadItemImage(resizedFile, itemNumber);
+            finalImageName = uploadedImageName;
           }
 
           const updatePayload = {
             ...this.form,
-            ItemImage: uploadedImageName || this.form.ItemImage,
+            ItemImage: finalImageName,
           };
 
           try {
             await APIService.updateItem(itemNumber, updatePayload);
           } catch (dbError) {
-            if (uploadedImageName) {
-              try {
-                await APIService.deleteItemImage(itemNumber, uploadedImageName);
-              } catch (cleanupError) {
-                console.error("Failed to clean up uploaded image:", cleanupError);
-              }
+            if (uploadedImageName && uploadedImageName !== oldImageName) {
+              await APIService.deleteItemImage(itemNumber, uploadedImageName);
             }
             throw dbError;
           }
 
-          if (uploadedImageName && oldImageName && oldImageName !== uploadedImageName) {
-            try {
-              await APIService.deleteItemImage(itemNumber, oldImageName);
-            } catch (cleanupError) {
-              console.error("Failed to remove old image:", cleanupError);
-            }
+          if (
+            this.selectedImageFile &&
+            oldImageName &&
+            uploadedImageName &&
+            oldImageName !== uploadedImageName
+          ) {
+            console.log("Deleting old image", {
+              itemNumber,
+              oldImageName,
+              uploadedImageName,
+            });
+
+            await APIService.deleteItemImage(itemNumber, oldImageName);
           }
+
+          this.form.ItemImage = finalImageName;
         } else {
           const createPayload = {
             ...this.form,
@@ -457,6 +466,10 @@ export default {
       } finally {
         this.saving = false;
       }
+      /* debugging code to verify image upload and retrieval
+      const files = await APIService.listItemImages(itemNumber);
+      console.log("Files after save:", files);
+      */
     },
     async confirmDelete() {
       const ok = window.confirm(
@@ -495,6 +508,126 @@ export default {
       event.preventDefault();
       event.returnValue = "";
     },
+    // process all images in the tblItems table - 
+    // resizing to max 1200x1200 and converting to JPEG with 80% quality
+    async resizeAllItemImages() {
+      this.errorMessage = "";
+      this.saving = true;
+
+      let results = {
+        total: 0,
+        processed: 0,
+        skipped: 0,
+        failed: 0,
+      };
+
+      try {
+        const items = await APIService.getItems(); // assumes this returns all tblItems rows
+        const itemList = Array.isArray(items) ? items : [];
+
+        results.total = itemList.length;
+
+        for (const item of itemList) {
+          try {
+            const itemNumber = Number(item.ItemNumber);
+            const oldImageName = item.ItemImage;
+
+            if (!itemNumber || !oldImageName) {
+              results.skipped++;
+              continue;
+            }
+
+            // Fetch the existing image and turn it into a File so resizeImage() can use it
+            const originalFile = await this.getItemImageFile(item);
+
+            if (!originalFile) {
+              results.skipped++;
+              continue;
+            }
+
+            // Reuse your existing resize method
+            const resizedFile = await this.resizeImage(originalFile, 1200, 1200, 0.8);
+
+            // Upload resized image
+            const uploadedImageName = await APIService.uploadItemImage(resizedFile, itemNumber);
+
+            try {
+              // Update tblItems with the new image name
+              await APIService.updateItem(itemNumber, {
+                ...item,
+                ItemImage: uploadedImageName,
+              });
+            } catch (dbError) {
+              // cleanup uploaded image if DB update fails
+              if (uploadedImageName) {
+                try {
+                  await APIService.deleteItemImage(itemNumber, uploadedImageName);
+                } catch (cleanupError) {
+                  console.error(`Failed cleanup for item ${itemNumber}:`, cleanupError);
+                }
+              }
+              throw dbError;
+            }
+
+            // Remove old image only if the uploaded image name changed
+            if (uploadedImageName && oldImageName && uploadedImageName !== oldImageName) {
+              try {
+                await APIService.deleteItemImage(itemNumber, oldImageName);
+              } catch (cleanupError) {
+                console.error(`Failed to remove old image for item ${itemNumber}:`, cleanupError);
+              }
+            }
+
+            results.processed++;
+          } catch (itemError) {
+            results.failed++;
+            console.error(`Failed processing item ${item?.ItemNumber}:`, itemError);
+          }
+
+        }
+
+        window.alert(
+          `Image resize complete.\n` +
+          `Total: ${results.total}\n` +
+          `Processed: ${results.processed}\n` +
+          `Skipped: ${results.skipped}\n` +
+          `Failed: ${results.failed}`
+        );
+      } catch (error) {
+        console.error("Bulk image resize failed:", error);
+        this.errorMessage = error.message || "Failed to bulk resize item images.";
+      } finally {
+        this.saving = false;
+      }
+    },
+
+    async getItemImageFile(item) {
+      if (!item?.ItemImage) return null;
+
+      const imageUrl = APIService.getImageUrl(item);
+      const response = await fetch(imageUrl);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image for item ${item.ItemNumber}`);
+      }
+
+      const blob = await response.blob();
+
+      const originalName = item.ItemImage || `item-${item.ItemNumber}.jpg`;
+      const extension = blob.type === "image/png"
+        ? ".png"
+        : blob.type === "image/webp"
+          ? ".webp"
+          : ".jpg";
+
+      const baseName = originalName.replace(/\.[^.]+$/, "") || `item-${item.ItemNumber}`;
+
+      return new File([blob], `${baseName}${extension}`, {
+        type: blob.type || "image/jpeg",
+      });
+    },
+
+
   },
 
   async mounted() {
