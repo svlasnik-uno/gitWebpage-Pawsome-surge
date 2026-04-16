@@ -591,7 +591,7 @@ export default {
     },
 
     getImageUrl(item) {
-      return APIService.getImageUrl(item);
+      return APIService.getImageUrl(item)+ `?t=${Date.now()}`; // Append timestamp to prevent caching
     },
 
     formatCurrency(value) {

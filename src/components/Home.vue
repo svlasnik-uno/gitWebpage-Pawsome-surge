@@ -86,7 +86,7 @@ export default {
         this.images = items
           .slice(0, 8)
           .map((item) => ({
-            src: APIService.getImageUrl(item),
+            src: APIService.getImageUrl(item)+ `?t=${Date.now()}`,
             alt: item.ItemName || "Gallery image",
           }))
           .filter((image) => image.src);
