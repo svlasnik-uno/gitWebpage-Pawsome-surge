@@ -189,6 +189,9 @@
                 <span class="mobile-item-subtype text-muted small">
                   {{ item.ItemSubType || "-" }}
                 </span>
+                <span class="mobile-item-price fw-semibold">
+                  {{ formatCurrency(item.ItemAskingPrice) }}
+                </span>
               </div>
 
               <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"

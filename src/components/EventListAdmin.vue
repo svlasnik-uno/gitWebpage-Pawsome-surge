@@ -53,7 +53,7 @@
               <tr>
                 <th v-for="header in headers" :key="header" @click="sortBy(header)" :class="[
                   'sortable-header',
-                  ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay'].includes(header)
+                  ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay', 'eventGrossSales'].includes(header)
                     ? 'text-center'
                     : 'text-start'
                 ]">
@@ -85,14 +85,16 @@
                     {{ event[header] }}
                   </button>
 
-                  <img v-else-if="header === 'eventImage' && event[header]" :src="event.thumbnailUrl"
-                    alt="Event Image" class="img-thumbnail" loading="lazy" decoding="async" width="75" height="75"
+                  <img v-else-if="header === 'eventImage' && event[header]" :src="event.thumbnailUrl" alt="Event Image"
+                    class="img-thumbnail" loading="lazy" decoding="async" width="75" height="75"
                     style="width: 75px; height: 75px; object-fit: cover;" />
 
                   <span v-else-if="header === 'eventDate'">
                     {{ formatDate(event[header]) }}
                   </span>
-
+                  <span v-else-if="header === 'eventGrossSales'">
+                    {{ formatCurrency(event[header]) }}
+                  </span>
                   <span v-else>
                     {{ event[header] }}
                   </span>
@@ -134,6 +136,9 @@
                 <span class="mobile-event-date">
                   {{ formatDate(event.eventDate) || "-" }}
                 </span>
+                <span class="mobile-eventGrossSales fw-semibold">
+                  {{ formatCurrency(event.eventGrossSales) }}
+                </span>
               </div>
 
               <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"
@@ -160,7 +165,9 @@
                     <template v-else-if="header === 'eventDate'">
                       {{ formatDate(event[header]) }}
                     </template>
-
+                    <template v-else-if="header === 'eventGrossSales'">
+                      {{ formatCurrency(event[header]) }}
+                    </template>
                     <template v-else>
                       {{ event[header] || "-" }}
                     </template>
@@ -233,10 +240,10 @@ export default {
       selectedSeason: "All",
       searchEventId: "",
       seasonOptions: [
-        { value: "Spring", label: "Spring" },
-        { value: "Summer", label: "Summer" },
-        { value: "Fall", label: "Fall" },
-        { value: "Winter", label: "Winter" },
+        { value: "SPRING", label: "Spring" },
+        { value: "SUMMER", label: "Summer" },
+        { value: "FALL", label: "Fall" },
+        { value: "WINTER", label: "Winter" },
         { value: "All", label: "All" },
       ],
       loading: true,
@@ -256,6 +263,7 @@ export default {
         eventImage: "Image",
         eventSeason: "Season",
         eventYear: "Year",
+        grossSales: "Gross Sales",
         eventDisplay: "Display on Site",
       },
     };
@@ -264,7 +272,7 @@ export default {
   computed: {
     headers() {
       if (!this.events.length) return [];
-      return ["id", "eventName", "eventDate", "eventLocation", "eventImage", "eventSeason", "eventYear", "eventDisplay"];
+      return ["id", "eventName", "eventDate", "eventLocation", "eventImage", "eventSeason", "eventYear", "eventDisplay", "eventGrossSales"];
     },
 
     mobileDetailHeaders() {
@@ -446,7 +454,14 @@ export default {
         day: "numeric",
       }).format(new Date(value));
     },
+    formatCurrency(value) {
+      if (value == null || value === "") return "";
 
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(value);
+    },
     goToPage(page) {
       this.currentPage = page;
       this.expandedMobileEvents = [];
