@@ -15,13 +15,8 @@
       </div>
 
       <div class="d-flex align-items-center gap-2 flex-wrap">
-        <input
-          v-model="searchEventId"
-          type="number"
-          class="form-control event-id-search"
-          placeholder="Enter Event ID"
-          @keyup.enter="findByEventId"
-        />
+        <input v-model="searchEventId" type="number" class="form-control event-id-search" placeholder="Enter Event ID"
+          @keyup.enter="findByEventId" />
 
         <button type="button" class="btn btn-secondary" @click="findByEventId">
           Find
@@ -56,25 +51,17 @@
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
               <tr>
-                <th
-                  v-for="header in headers"
-                  :key="header"
-                  @click="sortBy(header)"
-                  :class="[
-                    'sortable-header',
-                    ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay'].includes(header)
-                      ? 'text-center'
-                      : 'text-start'
-                  ]"
-                >
-                  <div
-                    class="th-content"
-                    :class="[
-                      ['id', 'eventImage', 'eventDisplay'].includes(header)
-                        ? 'justify-content-center'
-                        : 'justify-content-start'
-                    ]"
-                  >
+                <th v-for="header in headers" :key="header" @click="sortBy(header)" :class="[
+                  'sortable-header',
+                  ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay'].includes(header)
+                    ? 'text-center'
+                    : 'text-start'
+                ]">
+                  <div class="th-content" :class="[
+                    ['id', 'eventImage', 'eventDisplay'].includes(header)
+                      ? 'justify-content-center'
+                      : 'justify-content-start'
+                  ]">
                     <span class="header-label">{{ headerLabels[header] || header }}</span>
                     <span class="sort-icon-slot">
                       <i v-if="sortKey === header && sortDirection === 'asc'" class="bi bi-caret-up-fill"></i>
@@ -88,31 +75,19 @@
 
             <tbody>
               <tr v-for="event in paginatedEvents" :key="event.id">
-                <td
-                  v-for="header in headers"
-                  :key="`${event.id}-${header}`"
-                  :class="[
-                    ['id', 'eventImage', 'eventDisplay'].includes(header)
-                      ? 'text-center'
-                      : 'text-start'
-                  ]"
-                >
-                  <button
-                    v-if="header === 'id'"
-                    type="button"
-                    class="btn btn-link p-0 text-decoration-underline"
-                    @click="viewEventDetail(event)"
-                  >
+                <td v-for="header in headers" :key="`${event.id}-${header}`" :class="[
+                  ['id', 'eventImage', 'eventDisplay'].includes(header)
+                    ? 'text-center'
+                    : 'text-start'
+                ]">
+                  <button v-if="header === 'id'" type="button" class="btn btn-link p-0 text-decoration-underline"
+                    @click="viewEventDetail(event)">
                     {{ event[header] }}
                   </button>
 
-                  <img
-                    v-else-if="header === 'eventImage' && event[header]"
-                    :src="getEventImageUrl(event)"
-                    alt="Event Image"
-                    class="img-thumbnail"
-                    style="width: 75px; height: 75px; object-fit: cover;"
-                  />
+                  <img v-else-if="header === 'eventImage' && event[header]" :src="event.thumbnailUrl"
+                    alt="Event Image" class="img-thumbnail" loading="lazy" decoding="async" width="75" height="75"
+                    style="width: 75px; height: 75px; object-fit: cover;" />
 
                   <span v-else-if="header === 'eventDate'">
                     {{ formatDate(event[header]) }}
@@ -125,21 +100,13 @@
 
                 <td class="text-center">
                   <div class="d-inline-flex gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-primary"
-                      @click="editEvent(event)"
-                      title="Edit Event"
-                    >
+                    <button type="button" class="btn btn-sm btn-outline-primary" @click="editEvent(event)"
+                      title="Edit Event">
                       <i class="bi bi-pencil-fill"></i>
                     </button>
 
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-danger"
-                      @click="confirmDelete(event)"
-                      title="Delete Event"
-                    >
+                    <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(event)"
+                      title="Delete Event">
                       <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
@@ -151,18 +118,12 @@
 
         <!-- Mobile accordion view -->
         <div class="d-md-none mobile-event-list">
-          <div
-            v-for="event in paginatedEvents"
-            :key="`mobile-${event.id}`"
-            class="mobile-event-card border rounded mb-3"
-          >
+          <div v-for="event in paginatedEvents" :key="`mobile-${event.id}`"
+            class="mobile-event-card border rounded mb-3">
             <div class="mobile-event-card-header p-3">
               <div class="mobile-event-summary">
-                <button
-                  type="button"
-                  class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-event-id"
-                  @click="viewEventDetail(event)"
-                >
+                <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-event-id"
+                  @click="viewEventDetail(event)">
                   {{ event.id }}
                 </button>
 
@@ -175,27 +136,16 @@
                 </span>
               </div>
 
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary mobile-expand-btn"
-                @click="toggleExpandedEvent(event.id)"
-                :aria-expanded="isExpanded(event.id)"
-                :aria-controls="`mobile-event-details-${event.id}`"
-              >
+              <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"
+                @click="toggleExpandedEvent(event.id)" :aria-expanded="isExpanded(event.id)"
+                :aria-controls="`mobile-event-details-${event.id}`">
                 <i class="bi" :class="isExpanded(event.id) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
               </button>
             </div>
 
-            <div
-              v-if="isExpanded(event.id)"
-              :id="`mobile-event-details-${event.id}`"
-              class="px-3 pb-3"
-            >
-              <div
-                v-for="header in mobileDetailHeaders"
-                :key="`${event.id}-mobile-${header}`"
-                class="mobile-event-field py-2 border-top"
-              >
+            <div v-if="isExpanded(event.id)" :id="`mobile-event-details-${event.id}`" class="px-3 pb-3">
+              <div v-for="header in mobileDetailHeaders" :key="`${event.id}-mobile-${header}`"
+                class="mobile-event-field py-2 border-top">
                 <div class="mobile-event-field-row">
                   <div class="mobile-event-label fw-semibold small text-muted">
                     {{ headerLabels[header] || header }}
@@ -203,12 +153,8 @@
 
                   <div class="mobile-event-value text-end">
                     <template v-if="header === 'eventImage' && event[header]">
-                      <img
-                        :src="getEventImageUrl(event)"
-                        alt="Event Image"
-                        class="img-thumbnail"
-                        style="width: 75px; height: 75px; object-fit: cover;"
-                      />
+                      <img :src="event.thumbnailUrl" alt="Event Image" class="img-thumbnail" loading="lazy"
+                        decoding="async" width="75" height="75" style="width: 75px; height: 75px; object-fit: cover;" />
                     </template>
 
                     <template v-else-if="header === 'eventDate'">
@@ -223,22 +169,14 @@
               </div>
 
               <div class="d-flex gap-2 pt-3 border-top mt-2">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary"
-                  @click="editEvent(event)"
-                  title="Edit Event"
-                >
+                <button type="button" class="btn btn-sm btn-outline-primary" @click="editEvent(event)"
+                  title="Edit Event">
                   <i class="bi bi-pencil-fill me-1"></i>
                   Edit
                 </button>
 
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  @click="confirmDelete(event)"
-                  title="Delete Event"
-                >
+                <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(event)"
+                  title="Delete Event">
                   <i class="bi bi-trash-fill me-1"></i>
                   Delete
                 </button>
@@ -251,28 +189,14 @@
           <nav aria-label="Events pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button
-                  type="button"
-                  class="page-link"
-                  @click="goToPreviousPage"
-                  :disabled="currentPage === 1"
-                >
+                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
                   Previous
                 </button>
               </li>
 
-              <li
-                v-for="(page, index) in visiblePages"
-                :key="`${page}-${index}`"
-                class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }"
-              >
-                <button
-                  v-if="page !== '...'"
-                  type="button"
-                  class="page-link"
-                  @click="goToPage(page)"
-                >
+              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }">
+                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
                   {{ page }}
                 </button>
 
@@ -282,12 +206,8 @@
               </li>
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                <button
-                  type="button"
-                  class="page-link"
-                  @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0"
-                >
+                <button type="button" class="page-link" @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0">
                   Next
                 </button>
               </li>
@@ -428,8 +348,10 @@ export default {
 
       try {
         const data = await APIService.getEvents();
-        this.allEvents = Array.isArray(data) ? data : [];
-        this.currentPage = 1;
+        this.allEvents = (Array.isArray(data) ? data : []).map((event) => ({
+          ...event,
+          thumbnailUrl: APIService.getEventImageThumbnailUrl(event),
+        })); this.currentPage = 1;
         this.selectedSeason = "All";
         this.searchEventId = "";
         this.expandedMobileEvents = [];
@@ -473,7 +395,7 @@ export default {
     },
 
     viewEventDetail(event) {
-      this.$router.push(`/eventDetail/${event.id}`);
+      this.$router.push(`/editEvent/${event.id}`);
     },
 
     editEvent(event) {
@@ -496,8 +418,8 @@ export default {
     },
 
     getEventImageUrl(event) {
-      return APIService.getEventImageUrl
-        ? APIService.getEventImageUrl(event)
+      return APIService.getEventImageThumbnailUrl
+        ? APIService.getEventImageThumbnailUrl(event)
         : event.eventImage || "";
     },
 

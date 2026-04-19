@@ -204,7 +204,7 @@ export default {
       if (!this.form.ItemImage) {
         return "";
       }
-      return APIService.getImageUrl(this.form)+ `?t=${Date.now()}`;// Append timestamp to prevent caching
+      return APIService.getImageUrl(this.form);
     },
 
     hasUnsavedChanges() {
@@ -604,7 +604,7 @@ export default {
     async getItemImageFile(item) {
       if (!item?.ItemImage) return null;
 
-      const imageUrl = APIService.getImageUrl(item)+ `?t=${Date.now()}`;// Append timestamp to prevent caching
+      const imageUrl = APIService.getImageUrl(item);
       const response = await fetch(imageUrl);
 
       if (!response.ok) {

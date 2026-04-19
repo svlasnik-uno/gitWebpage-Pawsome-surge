@@ -123,7 +123,8 @@
                   </button>
 
                   <img v-else-if="header === 'ItemImage' && item[header]" :src="getImageUrl(item)" alt="Item Image"
-                    class="img-thumbnail" style="width: 75px; height: 75px; object-fit: cover;" />
+                    class="img-thumbnail" loading="lazy" decoding="async"
+                    style="width: 75px; height: 75px; object-fit: cover;" />
 
                   <span v-else-if="['ItemAskingPrice', 'ItemCost'].includes(header)">
                     {{ formatCurrency(item[header]) }}
@@ -178,7 +179,7 @@
             <div class="d-flex align-items-center justify-content-between p-3">
               <div class="d-flex align-items-center gap-2 mobile-item-summary">
                 <img v-if="item.ItemImage" :src="getImageUrl(item)" alt="Item Image"
-                  class="img-thumbnail mobile-item-thumb" />
+                  class="img-thumbnail mobile-item-thumb" loading="lazy" decoding="async" width="48" height="48" />
 
                 <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
                   @click="viewItemDetail(item)">
@@ -591,7 +592,7 @@ export default {
     },
 
     getImageUrl(item) {
-      return APIService.getImageUrl(item)+ `?t=${Date.now()}`; // Append timestamp to prevent caching
+      return APIService.getImageUrl(item);
     },
 
     formatCurrency(value) {
@@ -814,6 +815,7 @@ export default {
 .mobile-sort-direction-btn {
   min-width: 2.5rem;
 }
+
 .pagination {
   flex-wrap: wrap;
 }

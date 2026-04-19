@@ -34,7 +34,7 @@ const loadGalleryImages = async () => {
 
     images.value = items
       .map((item) => ({
-        src: APIService.getImageUrl(item)+ `?t=${Date.now()}`,// Append timestamp to prevent caching
+        src: APIService.getGalleryImageUrl(item),
         alt: item.ItemName || "Gallery image",
       }))
       .filter((image) => image.src);

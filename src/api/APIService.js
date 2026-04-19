@@ -165,7 +165,10 @@ const APIService = {
 
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)
-      .upload(fullFileName, file, { upsert: true });
+      .upload(fullFileName, file, {
+        upsert: true,
+        cacheControl: "31536000",
+      });
 
     if (error) throw error;
 
@@ -182,6 +185,17 @@ const APIService = {
       .remove([fullFileName]);
 
     if (error) throw error;
+  },
+  getGalleryImageUrl(item) {
+    if (!item || !item.ItemImage) return "";
+
+    const fullFileName = `${item.ItemNumber}_${item.ItemImage}`;
+
+    const { data } = supabase.storage
+      .from(IMAGE_BUCKET)
+      .getPublicUrl(fullFileName);
+
+    return data.publicUrl;
   },
   // Event-related API methods
   async getEvents() {
@@ -282,6 +296,18 @@ const APIService = {
 
     return data.publicUrl;
   },
+
+  getEventImageThumbnailUrl(event) {
+    if (!event || !event.eventImage) return "";
+
+    const fullFileName = `Events/${event.id}_${event.eventImage}`;
+
+    const { data } = supabase.storage
+      .from(IMAGE_BUCKET)
+      .getPublicUrl(fullFileName);
+
+    return data.publicUrl;
+  },
   async uploadEventImage(file, eventId) {
     if (!file) return "";
 
@@ -290,7 +316,10 @@ const APIService = {
 
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)
-      .upload(fullFileName, file, { upsert: true });
+      .upload(fullFileName, file, {
+        upsert: true,
+        cacheControl: "31536000",
+      });
 
     if (error) throw error;
 

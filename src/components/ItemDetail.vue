@@ -218,7 +218,7 @@ export default {
       if (!this.form.ItemImage) {
         return "";
       }
-      return APIService.getImageUrl(this.form)+ `?t=${Date.now()}`;// Append timestamp to prevent caching
+      return APIService.getImageUrl(this.form);
     },
   },
 

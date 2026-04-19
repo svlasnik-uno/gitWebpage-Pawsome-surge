@@ -324,7 +324,7 @@ export default {
                 };
 
                 if (this.eventForm.eventImage) {
-                    this.selectedImagePreviewUrl = APIService.getEventImageUrl(this.eventForm);
+                    this.selectedImagePreviewUrl = APIService.getEventImageUrl(this.eventForm) ;
                 } else {
                     this.selectedImagePreviewUrl = "";
                 }
