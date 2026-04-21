@@ -126,15 +126,17 @@
                     </div>
                   </div>
 
-                  <!-- MOVE BUTTONS HERE -->
                   <div class="col-12 order-3">
                     <div class="d-flex gap-2 mt-2 flex-wrap form-actions">
                       <button type="submit" class="btn btn-secondary" :disabled="saving">
                         {{ saving ? "Saving..." : "Save Item" }}
                       </button>
-                      <button type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item">
+
+                      <button type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item"
+                        :disabled="saving || !isEditMode">
                         Delete Item
                       </button>
+
                       <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
                         Back to List
                       </button>
@@ -156,6 +158,7 @@
 
 <script>
 import APIService from "@/api/APIService";
+import { useItemStore } from "@/store/ItemStore";
 
 export default {
   name: "ItemForm",
@@ -170,6 +173,7 @@ export default {
       resizedImageInfo: "",
       initialFormSnapshot: "",
       initialSelectedImageName: "",
+      itemStore: null,
       form: {
         ItemNumber: "",
         ItemType: "",
@@ -201,15 +205,19 @@ export default {
       if (this.selectedImagePreviewUrl) {
         return this.selectedImagePreviewUrl;
       }
+
       if (!this.form.ItemImage) {
         return "";
       }
+
       return APIService.getImageUrl(this.form);
     },
 
     hasUnsavedChanges() {
       const currentFormSnapshot = JSON.stringify(this.form);
-      const currentSelectedImageName = this.selectedImageFile ? this.selectedImageFile.name : "";
+      const currentSelectedImageName = this.selectedImageFile
+        ? this.selectedImageFile.name
+        : "";
 
       return (
         currentFormSnapshot !== this.initialFormSnapshot ||
@@ -221,7 +229,9 @@ export default {
   methods: {
     captureInitialState() {
       this.initialFormSnapshot = JSON.stringify(this.form);
-      this.initialSelectedImageName = this.selectedImageFile ? this.selectedImageFile.name : "";
+      this.initialSelectedImageName = this.selectedImageFile
+        ? this.selectedImageFile.name
+        : "";
     },
 
     async loadItem() {
@@ -232,8 +242,17 @@ export default {
 
       try {
         const itemNumber = this.$route.params.itemNumber;
-        const data = await APIService.getItemById(itemNumber);
-        this.form = { ...this.form, ...data };
+
+        const cachedItem = this.itemStore.items.find(
+          (item) => String(item.ItemNumber) === String(itemNumber)
+        );
+
+        if (cachedItem) {
+          this.form = { ...this.form, ...cachedItem };
+        } else {
+          const data = await APIService.getItemById(itemNumber);
+          this.form = { ...this.form, ...data };
+        }
       } catch (error) {
         this.errorMessage = error.message || "Failed to load item.";
       } finally {
@@ -243,8 +262,15 @@ export default {
 
     async loadSubTypes() {
       try {
-        const data = await APIService.getItemSubTypes();
-        const subTypesFromApi = Array.isArray(data) ? data : [];
+        let subTypesFromApi = [];
+
+        if (this.itemStore.subTypes.length) {
+          subTypesFromApi = this.itemStore.subTypes;
+        } else {
+          const data = await APIService.getItemSubTypes();
+          subTypesFromApi = Array.isArray(data) ? data : [];
+          this.itemStore.setSubTypes(subTypesFromApi);
+        }
 
         this.subTypeOptions = subTypesFromApi
           .filter((subType) => subType?.subTypeName)
@@ -259,8 +285,15 @@ export default {
 
     async loadStatusOptions() {
       try {
-        const data = await APIService.getItemStatuses();
-        const statusesFromApi = Array.isArray(data) ? data : [];
+        let statusesFromApi = [];
+
+        if (this.itemStore.statuses.length) {
+          statusesFromApi = this.itemStore.statuses;
+        } else {
+          const data = await APIService.getItemStatuses();
+          statusesFromApi = Array.isArray(data) ? data : [];
+          this.itemStore.setStatuses(statusesFromApi);
+        }
 
         this.statusOptions = statusesFromApi
           .filter((status) => status?.statusOption)
@@ -323,11 +356,12 @@ export default {
     },
 
     async getPreparedUploadFile(file, height, width, quality) {
-      //thumbails are 300x300, full images max 1200x1200 0.8 - height and width parameters
       if (!this.selectedImageFile) return null;
 
       const resizedFile = await this.resizeImage(file, height, width, quality);
-      this.resizedImageInfo = `${resizedFile.name} (${Math.round(resizedFile.size / 1024)} KB)`;
+      this.resizedImageInfo = `${resizedFile.name} (${Math.round(
+        resizedFile.size / 1024
+      )} KB)`;
       return resizedFile;
     },
 
@@ -350,7 +384,9 @@ export default {
         .map(({ label }) => label);
 
       if (missingFields.length) {
-        this.errorMessage = `Please complete the required fields: ${missingFields.join(", ")}.`;
+        this.errorMessage = `Please complete the required fields: ${missingFields.join(
+          ", "
+        )}.`;
         return false;
       }
 
@@ -366,7 +402,6 @@ export default {
 
       this.saving = true;
       const itemNumber = Number(this.form.ItemNumber);
-      const oldImageName = this.isEditMode ? this.form.ItemImage : "";
       let uploadedImageName = "";
 
       try {
@@ -379,9 +414,14 @@ export default {
           let finalImageName = oldImageName;
 
           if (this.selectedImageFile) {
-            const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 1200, 1200, 0.8);
-            const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8);
-            uploadedImageName = await APIService.uploadItemImage(resizedFile, thumbFile, itemNumber);
+            const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 600, 600, 0.8 );
+            const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8 );
+
+            uploadedImageName = await APIService.uploadItemImage(
+              resizedFile,
+              thumbFile,
+              itemNumber
+            );
             finalImageName = uploadedImageName;
           }
 
@@ -390,12 +430,17 @@ export default {
             ItemImage: finalImageName,
           };
 
+          let savedItem;
+
           try {
-            await APIService.updateItem(itemNumber, updatePayload);
+            savedItem = await APIService.updateItem(itemNumber, updatePayload);
           } catch (dbError) {
             if (uploadedImageName && uploadedImageName !== oldImageName) {
               await APIService.deleteItemImage(itemNumber, uploadedImageName);
-              await APIService.deleteItemImage(itemNumber, `thumbs/${uploadedImageName}`);
+              await APIService.deleteItemImage(
+                itemNumber,
+                `thumbs/${uploadedImageName}`
+              );
             }
             throw dbError;
           }
@@ -406,17 +451,18 @@ export default {
             uploadedImageName &&
             oldImageName !== uploadedImageName
           ) {
-            console.log("Deleting old image", {
-              itemNumber,
-              oldImageName,
-              uploadedImageName,
-            });
-
             await APIService.deleteItemImage(itemNumber, oldImageName);
             await APIService.deleteItemImage(itemNumber, `thumbs/${oldImageName}`);
           }
 
           this.form.ItemImage = finalImageName;
+
+          this.itemStore.updateItem(
+            savedItem || {
+              ...updatePayload,
+              ItemImage: finalImageName,
+            }
+          );
         } else {
           const createPayload = {
             ...this.form,
@@ -424,16 +470,23 @@ export default {
           };
 
           let createdItem = null;
+          let finalCreatedItem = null;
 
           try {
             createdItem = await APIService.createItem(createPayload);
+            finalCreatedItem = createdItem;
 
             if (this.selectedImageFile) {
-              const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 1200, 1200, 0.8);
-              const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8);
-              uploadedImageName = await APIService.uploadItemImage(resizedFile, thumbFile, itemNumber);
+              const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 600, 600, 0.8);
+              const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8 );
 
-              await APIService.updateItem(itemNumber, {
+              uploadedImageName = await APIService.uploadItemImage(
+                resizedFile,
+                thumbFile,
+                itemNumber
+              );
+
+              finalCreatedItem = await APIService.updateItem(itemNumber, {
                 ...createdItem,
                 ...this.form,
                 ItemImage: uploadedImageName,
@@ -443,7 +496,10 @@ export default {
             if (uploadedImageName) {
               try {
                 await APIService.deleteItemImage(itemNumber, uploadedImageName);
-                await APIService.deleteItemImage(itemNumber, `thumbs/${uploadedImageName}`);
+                await APIService.deleteItemImage(
+                  itemNumber,
+                  `thumbs/${uploadedImageName}`
+                );
               } catch (cleanupError) {
                 console.error("Failed to clean up uploaded image:", cleanupError);
               }
@@ -459,6 +515,14 @@ export default {
 
             throw createError;
           }
+
+          this.itemStore.addItem(
+            finalCreatedItem || {
+              ...this.form,
+              ItemNumber: itemNumber,
+              ItemImage: uploadedImageName || "",
+            }
+          );
         }
 
         this.captureInitialState();
@@ -472,27 +536,35 @@ export default {
       } finally {
         this.saving = false;
       }
-      /* debugging code to verify image upload and retrieval
-      const files = await APIService.listItemImages(itemNumber);
-      console.log("Files after save:", files);
-      */
     },
+
     async confirmDelete() {
+      if (!this.isEditMode) return;
+
       const ok = window.confirm(
         `Are you sure you want to delete item #${this.form.ItemNumber}?`
       );
       if (!ok) return;
+
       try {
-        filename = this.form.ItemImage;
+        const filename = this.form.ItemImage;
+
         if (filename) {
           await APIService.deleteItemImage(this.form.ItemNumber, filename);
-          await APIService.deleteItemImage(this.form.ItemNumber, `thumbs/${filename}`);
+          await APIService.deleteItemImage(
+            this.form.ItemNumber,
+            `thumbs/${filename}`
+          );
         }
       } catch (error) {
         window.alert(error.message || "Delete image failed.");
+        return;
       }
+
       try {
         await APIService.deleteItem(this.form.ItemNumber);
+        this.itemStore.removeItem(this.form.ItemNumber);
+
         this.$router.push({
           path: "/itemList",
           query: { ...this.$route.query },
@@ -501,6 +573,7 @@ export default {
         window.alert(error.message || "Delete failed.");
       }
     },
+
     goBackCancel() {
       if (this.hasUnsavedChanges) {
         const confirmed = window.confirm(
@@ -523,8 +596,7 @@ export default {
       event.preventDefault();
       event.returnValue = "";
     },
-    // process all images in the tblItems table - THIS IS NOT CURRENTLY CALLED
-    // resizing to max 1200x1200 and converting to JPEG with 80% quality
+
     async resizeAllItemImages() {
       this.errorMessage = "";
       this.saving = true;
@@ -537,7 +609,7 @@ export default {
       };
 
       try {
-        const items = await APIService.getItems(); // assumes this returns all tblItems rows
+        const items = await APIService.getItems();
         const itemList = Array.isArray(items) ? items : [];
 
         results.total = itemList.length;
@@ -552,7 +624,6 @@ export default {
               continue;
             }
 
-            // Fetch the existing image and turn it into a File so resizeImage() can use it
             const originalFile = await this.getItemImageFile(item);
 
             if (!originalFile) {
@@ -560,45 +631,55 @@ export default {
               continue;
             }
 
-            // Reuse your existing resize method
             const resizedFile = await this.resizeImage(originalFile, 1200, 1200, 0.8);
 
-            // Upload resized image
-            const uploadedImageName = await APIService.uploadItemImage(resizedFile, itemNumber);
+            const uploadedImageName = await APIService.uploadItemImage(
+              resizedFile,
+              itemNumber
+            );
 
             try {
-              // Update tblItems with the new image name
               await APIService.updateItem(itemNumber, {
                 ...item,
                 ItemImage: uploadedImageName,
               });
             } catch (dbError) {
-              // cleanup uploaded image if DB update fails
               if (uploadedImageName) {
                 try {
                   await APIService.deleteItemImage(itemNumber, uploadedImageName);
                 } catch (cleanupError) {
-                  console.error(`Failed cleanup for item ${itemNumber}:`, cleanupError);
+                  console.error(
+                    `Failed cleanup for item ${itemNumber}:`,
+                    cleanupError
+                  );
                 }
               }
               throw dbError;
             }
 
-            // Remove old image only if the uploaded image name changed
-            if (uploadedImageName && oldImageName && uploadedImageName !== oldImageName) {
+            if (
+              uploadedImageName &&
+              oldImageName &&
+              uploadedImageName !== oldImageName
+            ) {
               try {
                 await APIService.deleteItemImage(itemNumber, oldImageName);
               } catch (cleanupError) {
-                console.error(`Failed to remove old image for item ${itemNumber}:`, cleanupError);
+                console.error(
+                  `Failed to remove old image for item ${itemNumber}:`,
+                  cleanupError
+                );
               }
             }
 
             results.processed++;
           } catch (itemError) {
             results.failed++;
-            console.error(`Failed processing item ${item?.ItemNumber}:`, itemError);
+            console.error(
+              `Failed processing item ${item?.ItemNumber}:`,
+              itemError
+            );
           }
-
         }
 
         window.alert(
@@ -629,30 +710,32 @@ export default {
       const blob = await response.blob();
 
       const originalName = item.ItemImage || `item-${item.ItemNumber}.jpg`;
-      const extension = blob.type === "image/png"
-        ? ".png"
-        : blob.type === "image/webp"
-          ? ".webp"
-          : ".jpg";
+      const extension =
+        blob.type === "image/png"
+          ? ".png"
+          : blob.type === "image/webp"
+            ? ".webp"
+            : ".jpg";
 
-      const baseName = originalName.replace(/\.[^.]+$/, "") || `item-${item.ItemNumber}`;
+      const baseName =
+        originalName.replace(/\.[^.]+$/, "") || `item-${item.ItemNumber}`;
 
       return new File([blob], `${baseName}${extension}`, {
         type: blob.type || "image/jpeg",
       });
     },
-
-
   },
 
   async mounted() {
+    this.itemStore = useItemStore();
+
     if (!this.isEditMode && this.$route.query.itemNumber) {
       this.form.ItemNumber = Number(this.$route.query.itemNumber);
     }
 
     await this.loadItem();
-    this.loadSubTypes();
-    this.loadStatusOptions();
+    await this.loadSubTypes();
+    await this.loadStatusOptions();
 
     this.captureInitialState();
     window.addEventListener("beforeunload", this.handleBeforeUnload);
@@ -734,7 +817,6 @@ export default {
     padding: 0.75rem;
     border-top: 1px solid #dee2e6;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
-
     flex-direction: column;
   }
 
@@ -742,7 +824,6 @@ export default {
     width: 100%;
   }
 
-  /* Prevent overlap with sticky footer */
   .form-layout {
     padding-bottom: 90px;
   }

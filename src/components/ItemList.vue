@@ -3,22 +3,31 @@
     <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
       <div class="d-flex align-items-center gap-3 flex-wrap">
         <label for="categorySelect" class="fw-semibold mb-0">View Items by Category:</label>
-        <select id="categorySelect" v-model="selectedCategory" class="form-select w-auto"
-          @change="handleCategoryChange">
+        <select
+          id="categorySelect"
+          v-model="selectedCategory"
+          class="form-select w-auto"
+          @change="handleFilterChange"
+        >
           <option v-for="option in statusOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
         </select>
 
         <label for="subTypeSelect" class="fw-semibold mb-0">View Items by Sub-type:</label>
-        <select id="subTypeSelect" v-model="selectedSubType" class="form-select w-auto" @change="handleCategoryChange">
+        <select
+          id="subTypeSelect"
+          v-model="selectedSubType"
+          class="form-select w-auto"
+          @change="handleFilterChange"
+        >
           <option v-for="option in subTypeOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
         </select>
 
         <span>
-          Showing {{ startItem }} - {{ endItem }} of {{ items.length }} items
+          Showing {{ startItem }} - {{ endItem }} of {{ filteredItems.length }} items
         </span>
       </div>
 
@@ -28,9 +37,13 @@
           <option value="ItemDescription">Item Description</option>
         </select>
 
-        <input v-model.trim="searchValue" type="text" class="form-control item-search-input"
+        <input
+          v-model.trim="searchValue"
+          type="text"
+          class="form-control item-search-input"
           :placeholder="searchField === 'ItemNumber' ? 'Find Item #' : 'Find Item Description'"
-          @keyup.enter="findItems" />
+          @keyup.enter="findItems"
+        />
 
         <button type="button" class="btn btn-secondary" @click="findItems">
           Find
@@ -59,7 +72,7 @@
     </div>
 
     <div v-else>
-      <div v-if="items.length === 0" class="alert alert-info">
+      <div v-if="filteredItems.length === 0" class="alert alert-info">
         No items found.
       </div>
 
@@ -68,14 +81,28 @@
           <nav aria-label="Items pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToPreviousPage"
+                  :disabled="currentPage === 1"
+                >
                   <i class="bi bi-chevron-left"></i>
                 </button>
               </li>
 
-              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }">
-                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
+              <li
+                v-for="(page, index) in visiblePages"
+                :key="`${page}-${index}`"
+                class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }"
+              >
+                <button
+                  v-if="page !== '...'"
+                  type="button"
+                  class="page-link"
+                  @click="goToPage(page)"
+                >
                   {{ page }}
                 </button>
 
@@ -85,27 +112,43 @@
               </li>
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                <button type="button" class="page-link" @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0"
+                >
                   <i class="bi bi-chevron-right"></i>
                 </button>
               </li>
             </ul>
           </nav>
         </div>
+
         <div class="table-responsive d-none d-md-block">
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
               <tr>
-                <th v-for="header in headers" :key="header" @click="sortBy(header)" :class="[
-                  'text-center',
-                  header === 'ItemImage' ? 'not-sortable' : 'sortable-header'
-                ]">
+                <th
+                  v-for="header in headers"
+                  :key="header"
+                  @click="sortBy(header)"
+                  :class="[
+                    'text-center',
+                    header === 'ItemImage' ? 'not-sortable' : 'sortable-header'
+                  ]"
+                >
                   <div class="th-content justify-content-center">
                     <span class="header-label">{{ headerLabels[header] || header }}</span>
                     <span class="sort-icon-slot">
-                      <i v-if="sortKey === header && sortDirection === 'asc'" class="bi bi-caret-up-fill"></i>
-                      <i v-else-if="sortKey === header && sortDirection === 'desc'" class="bi bi-caret-down-fill"></i>
+                      <i
+                        v-if="sortKey === header && sortDirection === 'asc'"
+                        class="bi bi-caret-up-fill"
+                      ></i>
+                      <i
+                        v-else-if="sortKey === header && sortDirection === 'desc'"
+                        class="bi bi-caret-down-fill"
+                      ></i>
                     </span>
                   </div>
                 </th>
@@ -115,16 +158,29 @@
 
             <tbody>
               <tr v-for="item in paginatedItems" :key="item.ItemNumber">
-                <td v-for="header in headers" :key="`${item.ItemNumber}-${header}`"
-                  :class="{ 'text-center': ['ItemStatus', 'ItemNumber'].includes(header) }">
-                  <button v-if="header === 'ItemNumber'" type="button"
-                    class="btn btn-link p-0 text-decoration-underline" @click="viewItemDetail(item)">
+                <td
+                  v-for="header in headers"
+                  :key="`${item.ItemNumber}-${header}`"
+                  :class="{ 'text-center': ['ItemStatus', 'ItemNumber'].includes(header) }"
+                >
+                  <button
+                    v-if="header === 'ItemNumber'"
+                    type="button"
+                    class="btn btn-link p-0 text-decoration-underline"
+                    @click="viewItemDetail(item)"
+                  >
                     {{ item[header] }}
                   </button>
 
-                  <img v-else-if="header === 'ItemImage' && item[header]" :src="getImageThumbnailUrl(item)"
-                    alt="Item Image" class="img-thumbnail" loading="lazy" decoding="async"
-                    style="width: 75px; height: 75px; object-fit: cover;" />
+                  <img
+                    v-else-if="header === 'ItemImage' && item[header]"
+                    :src="getImageThumbnailUrl(item)"
+                    alt="Item Image"
+                    class="img-thumbnail"
+                    loading="lazy"
+                    decoding="async"
+                    style="width: 75px; height: 75px; object-fit: cover;"
+                  />
 
                   <span v-else-if="['ItemAskingPrice', 'ItemCost'].includes(header)">
                     {{ formatCurrency(item[header]) }}
@@ -137,13 +193,21 @@
 
                 <td class="text-center">
                   <div class="d-inline-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary" @click="editItem(item)"
-                      title="Edit Item">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      @click="editItem(item)"
+                      title="Edit Item"
+                    >
                       <i class="bi bi-pencil-fill"></i>
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)"
-                      title="Delete Item">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      @click="confirmDelete(item)"
+                      title="Delete Item"
+                    >
                       <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
@@ -159,30 +223,51 @@
               Sort by:
             </label>
 
-            <select id="mobileSortSelect" v-model="sortKey" class="form-select form-select-sm"
-              @change="handleMobileSortChange">
+            <select
+              id="mobileSortSelect"
+              v-model="sortKey"
+              class="form-select form-select-sm"
+              @change="handleMobileSortChange"
+            >
               <option v-for="option in mobileSortOptions" :key="option.value" :value="option.value">
                 {{ option.label }}
               </option>
             </select>
 
-            <button type="button" class="btn btn-sm btn-outline-secondary mobile-sort-direction-btn"
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary mobile-sort-direction-btn"
               @click="toggleMobileSortDirection"
               :aria-label="sortDirection === 'asc' ? 'Sort descending' : 'Sort ascending'"
-              :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'">
+              :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'"
+            >
               <i class="bi" :class="sortDirection === 'asc' ? 'bi-sort-down' : 'bi-sort-up'"></i>
             </button>
           </div>
 
-          <div v-for="item in paginatedItems" :key="`mobile-${item.ItemNumber}`"
-            class="mobile-item-card border rounded mb-3">
+          <div
+            v-for="item in paginatedItems"
+            :key="`mobile-${item.ItemNumber}`"
+            class="mobile-item-card border rounded mb-3"
+          >
             <div class="d-flex align-items-center justify-content-between p-3">
               <div class="d-flex align-items-center gap-2 mobile-item-summary">
-                <img v-if="item.ItemImage" :src="getImageThumbnailUrl(item)" alt="Item Image"
-                  class="img-thumbnail mobile-item-thumb" loading="lazy" decoding="async" width="48" height="48" />
+                <img
+                  v-if="item.ItemImage"
+                  :src="getImageThumbnailUrl(item)"
+                  alt="Item Image"
+                  class="img-thumbnail mobile-item-thumb"
+                  loading="lazy"
+                  decoding="async"
+                  width="48"
+                  height="48"
+                />
 
-                <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
-                  @click="viewItemDetail(item)">
+                <button
+                  type="button"
+                  class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
+                  @click="viewItemDetail(item)"
+                >
                   {{ item.ItemNumber }}
                 </button>
 
@@ -194,16 +279,27 @@
                 </span>
               </div>
 
-              <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"
-                @click="toggleExpandedItem(item.ItemNumber)" :aria-expanded="isExpanded(item.ItemNumber)"
-                :aria-controls="`mobile-item-details-${item.ItemNumber}`">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary mobile-expand-btn"
+                @click="toggleExpandedItem(item.ItemNumber)"
+                :aria-expanded="isExpanded(item.ItemNumber)"
+                :aria-controls="`mobile-item-details-${item.ItemNumber}`"
+              >
                 <i class="bi" :class="isExpanded(item.ItemNumber) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
               </button>
             </div>
 
-            <div v-if="isExpanded(item.ItemNumber)" :id="`mobile-item-details-${item.ItemNumber}`" class="px-3 pb-3">
-              <div v-for="header in mobileDetailHeaders" :key="`${item.ItemNumber}-mobile-${header}`"
-                class="mobile-item-field py-2 border-top">
+            <div
+              v-if="isExpanded(item.ItemNumber)"
+              :id="`mobile-item-details-${item.ItemNumber}`"
+              class="px-3 pb-3"
+            >
+              <div
+                v-for="header in mobileDetailHeaders"
+                :key="`${item.ItemNumber}-mobile-${header}`"
+                class="mobile-item-field py-2 border-top"
+              >
                 <div class="mobile-item-field-row">
                   <div class="mobile-item-label fw-semibold small text-muted">
                     {{ headerLabels[header] || header }}
@@ -222,13 +318,22 @@
               </div>
 
               <div class="d-flex gap-2 pt-3 border-top mt-2">
-                <button type="button" class="btn btn-sm btn-outline-primary" @click="editItem(item)" title="Edit Item">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  @click="editItem(item)"
+                  title="Edit Item"
+                >
                   <i class="bi bi-pencil-fill me-1"></i>
                   Edit
                 </button>
 
-                <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)"
-                  title="Delete Item">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  @click="confirmDelete(item)"
+                  title="Delete Item"
+                >
                   <i class="bi bi-trash-fill me-1"></i>
                   Delete
                 </button>
@@ -241,14 +346,28 @@
           <nav aria-label="Items pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToPreviousPage"
+                  :disabled="currentPage === 1"
+                >
                   <i class="bi bi-chevron-left"></i>
                 </button>
               </li>
 
-              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }">
-                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
+              <li
+                v-for="(page, index) in visiblePages"
+                :key="`${page}-${index}`"
+                class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }"
+              >
+                <button
+                  v-if="page !== '...'"
+                  type="button"
+                  class="page-link"
+                  @click="goToPage(page)"
+                >
                   {{ page }}
                 </button>
 
@@ -258,8 +377,12 @@
               </li>
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                <button type="button" class="page-link" @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0"
+                >
                   <i class="bi bi-chevron-right"></i>
                 </button>
               </li>
@@ -274,18 +397,18 @@
 <script>
 import APIService from "@/api/APIService";
 import { useAuthStore } from "@/store/AuthStore";
+import { useItemStore } from "@/store/ItemStore";
 
 export default {
   name: "ItemList",
 
   data() {
     return {
-      allItems: [],
-      items: [],
       selectedCategory: "All",
       selectedSubType: "All",
       searchField: "ItemNumber",
       searchValue: "",
+      appliedSearchValue: "",
       statusOptions: [],
       subTypeOptions: [],
       loading: true,
@@ -294,6 +417,7 @@ export default {
       itemsPerPage: 15,
       minPagesForFullDisplay: 10,
       auth: null,
+      itemStore: null,
       sortKey: "ItemNumber",
       sortDirection: "asc",
       generatingPdf: false,
@@ -315,15 +439,81 @@ export default {
   },
 
   computed: {
+    sourceItems() {
+      return Array.isArray(this.itemStore?.items) ? this.itemStore.items : [];
+    },
+
     headers() {
-      if (!this.items.length) return [];
-      return Object.keys(this.items[0]);
+      if (!this.sourceItems.length) return [];
+      return Object.keys(this.sourceItems[0]);
     },
 
     mobileDetailHeaders() {
       return this.headers.filter(
         (header) => !["ItemNumber", "ItemImage"].includes(header)
       );
+    },
+
+    filteredItems() {
+      const searchTerm = String(this.appliedSearchValue ?? "").trim().toLowerCase();
+
+      return this.sourceItems.filter((item) => {
+        const matchesCategory =
+          this.selectedCategory === "All" || item.ItemStatus === this.selectedCategory;
+
+        const matchesSubType =
+          this.selectedSubType === "All" || item.ItemSubType === this.selectedSubType;
+
+        const matchesSearch =
+          !searchTerm ||
+          String(item[this.searchField] ?? "").toLowerCase().includes(searchTerm);
+
+        return matchesCategory && matchesSubType && matchesSearch;
+      });
+    },
+
+    sortedItems() {
+      if (!this.sortKey) return this.filteredItems;
+
+      return [...this.filteredItems].sort((a, b) => {
+        let valA = a[this.sortKey];
+        let valB = b[this.sortKey];
+
+        const numA = Number(valA);
+        const numB = Number(valB);
+        const bothNumeric = !Number.isNaN(numA) && !Number.isNaN(numB);
+
+        if (bothNumeric) {
+          valA = numA;
+          valB = numB;
+        } else {
+          valA = String(valA ?? "").toLowerCase();
+          valB = String(valB ?? "").toLowerCase();
+        }
+
+        if (valA < valB) return this.sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return this.sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    },
+
+    totalPages() {
+      return Math.ceil(this.sortedItems.length / this.itemsPerPage);
+    },
+
+    paginatedItems() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.sortedItems.slice(start, end);
+    },
+
+    startItem() {
+      if (this.filteredItems.length === 0) return 0;
+      return (this.currentPage - 1) * this.itemsPerPage + 1;
+    },
+
+    endItem() {
+      return Math.min(this.currentPage * this.itemsPerPage, this.filteredItems.length);
     },
 
     visiblePages() {
@@ -357,45 +547,6 @@ export default {
       return pages;
     },
 
-    totalPages() {
-      return Math.ceil(this.items.length / this.itemsPerPage);
-    },
-
-    paginatedItems() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.sortedItems.slice(start, end);
-    },
-
-    startItem() {
-      if (this.items.length === 0) return 0;
-      return (this.currentPage - 1) * this.itemsPerPage + 1;
-    },
-
-    endItem() {
-      return Math.min(this.currentPage * this.itemsPerPage, this.items.length);
-    },
-
-    sortedItems() {
-      if (!this.sortKey) return this.items;
-      return [...this.items].sort((a, b) => {
-        let valA = a[this.sortKey];
-        let valB = b[this.sortKey];
-
-        if (!isNaN(valA) && !isNaN(valB)) {
-          valA = Number(valA);
-          valB = Number(valB);
-        } else {
-          valA = String(valA ?? "").toLowerCase();
-          valB = String(valB ?? "").toLowerCase();
-        }
-
-        if (valA < valB) return this.sortDirection === "asc" ? -1 : 1;
-        if (valA > valB) return this.sortDirection === "asc" ? 1 : -1;
-        return 0;
-      });
-    },
-
     mobileSortOptions() {
       return this.headers
         .filter((header) => header !== "ItemImage")
@@ -407,14 +558,18 @@ export default {
   },
 
   methods: {
-    async loadItems() {
+    async loadItems(forceRefresh = false) {
       this.loading = true;
       this.errorMessage = "";
 
       try {
+        if (!forceRefresh && this.itemStore.items.length) {
+          return;
+        }
+
         const data = await APIService.getItems();
-        this.allItems = Array.isArray(data) ? data : [];
-        this.handleCategoryChange(false);
+        const items = Array.isArray(data) ? data : [];
+        this.itemStore.setItems(items);
       } catch (error) {
         this.errorMessage = error.message || "Failed to load items.";
       } finally {
@@ -424,9 +579,15 @@ export default {
 
     async loadSubTypes() {
       try {
-        const data = await APIService.getItemSubTypes();
+        let subTypesFromApi = [];
 
-        const subTypesFromApi = Array.isArray(data) ? data : [];
+        if (this.itemStore.subTypes.length) {
+          subTypesFromApi = this.itemStore.subTypes;
+        } else {
+          const data = await APIService.getItemSubTypes();
+          subTypesFromApi = Array.isArray(data) ? data : [];
+          this.itemStore.setSubTypes(subTypesFromApi);
+        }
 
         this.subTypeOptions = [
           { value: "All", label: "All" },
@@ -444,8 +605,15 @@ export default {
 
     async loadStatusOptions() {
       try {
-        const data = await APIService.getItemStatuses();
-        const statusesFromApi = Array.isArray(data) ? data : [];
+        let statusesFromApi = [];
+
+        if (this.itemStore.statuses.length) {
+          statusesFromApi = this.itemStore.statuses;
+        } else {
+          const data = await APIService.getItemStatuses();
+          statusesFromApi = Array.isArray(data) ? data : [];
+          this.itemStore.setStatuses(statusesFromApi);
+        }
 
         this.statusOptions = [
           { value: "All", label: "All" },
@@ -471,6 +639,7 @@ export default {
           page: String(this.currentPage),
           searchField: this.searchField,
           searchValue: this.searchValue,
+          appliedSearchValue: this.appliedSearchValue,
         },
       });
     },
@@ -485,29 +654,11 @@ export default {
       this.currentPage = query.page ? Number(query.page) : 1;
       this.searchField = query.searchField || "ItemNumber";
       this.searchValue = query.searchValue || "";
+      this.appliedSearchValue = query.appliedSearchValue || "";
     },
 
     findItems() {
-      const searchTerm = String(this.searchValue ?? "").trim().toLowerCase();
-
-      if (!searchTerm) {
-        this.handleCategoryChange();
-        return;
-      }
-
-      this.items = this.allItems.filter((item) => {
-        const matchesCategory =
-          this.selectedCategory === "All" || item.ItemStatus === this.selectedCategory;
-
-        const matchesSubType =
-          this.selectedSubType === "All" || item.ItemSubType === this.selectedSubType;
-
-        const fieldValue = String(item[this.searchField] ?? "").toLowerCase();
-        const matchesSearch = fieldValue.includes(searchTerm);
-
-        return matchesCategory && matchesSubType && matchesSearch;
-      });
-
+      this.appliedSearchValue = this.searchValue;
       this.currentPage = 1;
       this.expandedMobileItems = [];
       this.syncStateToRoute();
@@ -516,12 +667,21 @@ export default {
     clearSearch() {
       this.searchField = "ItemNumber";
       this.searchValue = "";
-      this.handleCategoryChange();
+      this.appliedSearchValue = "";
+      this.currentPage = 1;
+      this.expandedMobileItems = [];
+      this.syncStateToRoute();
+    },
+
+    handleFilterChange() {
+      this.currentPage = 1;
+      this.expandedMobileItems = [];
+      this.syncStateToRoute();
     },
 
     addNewItem() {
-      const maxItemNumber = this.allItems.length
-        ? Math.max(...this.allItems.map((item) => Number(item.ItemNumber) || 0))
+      const maxItemNumber = this.sourceItems.length
+        ? Math.max(...this.sourceItems.map((item) => Number(item.ItemNumber) || 0))
         : 0;
 
       const nextItemNumber = maxItemNumber + 1;
@@ -549,44 +709,10 @@ export default {
       });
     },
 
-    handleCategoryChange(resetPage = true) {
-      let filteredItems = [...this.allItems];
-
-      if (this.selectedCategory !== "All") {
-        filteredItems = filteredItems.filter(
-          (item) => item.ItemStatus === this.selectedCategory
-        );
-      }
-
-      if (this.selectedSubType !== "All") {
-        filteredItems = filteredItems.filter(
-          (item) => item.ItemSubType === this.selectedSubType
-        );
-      }
-
-      const searchTerm = String(this.searchValue ?? "").trim().toLowerCase();
-      if (searchTerm) {
-        filteredItems = filteredItems.filter((item) =>
-          String(item[this.searchField] ?? "").toLowerCase().includes(searchTerm)
-        );
-      }
-
-      this.items = filteredItems;
-      this.expandedMobileItems = [];
-
-      if (resetPage) {
-        this.currentPage = 1;
-      }
-
-      if (this.currentPage > this.totalPages && this.totalPages > 0) {
-        this.currentPage = this.totalPages;
-      }
-
-      this.syncStateToRoute();
-    },
     handleResize() {
       this.isMobile = window.innerWidth < 768;
     },
+
     goToCreatePdfReport() {
       this.$router.push({
         path: `/create-pdf-report`,
@@ -662,12 +788,19 @@ export default {
         `Are you sure you want to delete item #${item.ItemNumber}?`
       );
       if (!ok) return;
+
       try {
         await APIService.deleteItem(item.ItemNumber);
-        await this.loadItems();
+
+        this.itemStore.removeItem(item.ItemNumber);
+
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
+        } else if (this.totalPages === 0) {
+          this.currentPage = 1;
         }
+
+        this.syncStateToRoute();
       } catch (error) {
         window.alert(error.message || "Delete failed.");
       }
@@ -689,19 +822,27 @@ export default {
 
   async mounted() {
     this.auth = useAuthStore();
+    this.itemStore = useItemStore();
 
     if (!this.auth.isAuthenticated) {
       window.alert("You must be logged in to view items.");
       this.$router.push("/");
       return;
     }
+
     window.addEventListener("resize", this.handleResize);
 
     this.restoreStateFromRoute();
     await this.loadItems();
     await this.loadSubTypes();
     await this.loadStatusOptions();
+
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+      this.syncStateToRoute();
+    }
   },
+
   beforeUnmount() {
     window.removeEventListener("resize", this.handleResize);
   },
