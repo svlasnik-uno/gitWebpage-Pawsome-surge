@@ -75,11 +75,13 @@ const APIService = {
     } else {
       query = query.order("ItemNumber", { ascending: true });
     }
+
     const { data, error } = await query;
 
     if (error) throw error;
     return data;
   },
+
   async getItems() {
     const { data, error } = await supabase
       .from(TABLE_NAME)
@@ -89,15 +91,18 @@ const APIService = {
     if (error) throw error;
     return data;
   },
+
   async getItemsByImageType(imageType) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .select("*")
       .eq("ImageType", imageType) // 'G' for gallery, 'E' for event, 'H' for home
       .order("ItemNumber", { ascending: false });
+
     if (error) throw error;
     return data;
   },
+
   async getItemById(itemNumber) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
@@ -157,11 +162,25 @@ const APIService = {
     return data.publicUrl;
   },
 
-  async uploadItemImage(file, itemNumber) {
+  getImageThumbnailUrl(item) {
+    if (!item || !item.ItemImage) return "";
+
+    const fullFileName = `thumbs/${item.ItemNumber}_${item.ItemImage}`;
+
+    const { data } = supabase.storage
+      .from(IMAGE_BUCKET)
+      .getPublicUrl(fullFileName);
+
+    return data.publicUrl;
+  },
+
+  async uploadItemImage(file,thumbFileName, itemNumber) {
     if (!file) return "";
 
     const cleanFileName = file.name.replace(/\s+/g, "_");
     const fullFileName = `${itemNumber}_${cleanFileName}`;
+    const cleanThumbFileName = thumbFileName.name.replace(/\s+/g, "_");
+    const fullThumbFileName = `thumbs/${itemNumber}_${cleanThumbFileName}`;
 
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)
@@ -171,7 +190,14 @@ const APIService = {
       });
 
     if (error) throw error;
+    const { error2 } = await supabase.storage
+      .from(IMAGE_BUCKET)
+      .upload(fullThumbFileName, thumbFileName, {
+        upsert: true,
+        cacheControl: "31536000",
+      });
 
+    if (error2) throw error;
     return cleanFileName;
   },
 
@@ -179,13 +205,15 @@ const APIService = {
     if (!itemNumber || !imageName) return;
 
     const fullFileName = `${itemNumber}_${imageName}`;
+    const thumbFileName = `thumbs/${itemNumber}_${imageName}`;
 
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)
-      .remove([fullFileName]);
+      .remove([fullFileName, thumbFileName]);
 
     if (error) throw error;
   },
+
   getGalleryImageUrl(item) {
     if (!item || !item.ItemImage) return "";
 
@@ -197,7 +225,7 @@ const APIService = {
 
     return data.publicUrl;
   },
-  // Event-related API methods
+
   async getEvents() {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
@@ -207,17 +235,19 @@ const APIService = {
     if (error) throw error;
     return data;
   },
+
   async getEventsByDateRange(startDate, endDate) {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
       .select("*")
-      .gte("eventDate", startDate) // start
-      .lte("eventDate", endDate) // end
+      .gte("eventDate", startDate)
+      .lte("eventDate", endDate)
       .order("eventDate", { ascending: true });
 
     if (error) throw error;
     return data;
   },
+
   async getEventById(eventId) {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
@@ -228,6 +258,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
+
   async getEventsByYearAndSeason(year, season) {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
@@ -239,6 +270,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
+
   async getEventsByDisplay(eventDisplay = "Y") {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
@@ -249,6 +281,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
+
   async createEvent(event) {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
@@ -300,7 +333,7 @@ const APIService = {
   getEventImageThumbnailUrl(event) {
     if (!event || !event.eventImage) return "";
 
-    const fullFileName = `Events/${event.id}_${event.eventImage}`;
+    const fullFileName = `Events/thumbs/${event.id}_${event.eventImage}`;
 
     const { data } = supabase.storage
       .from(IMAGE_BUCKET)
@@ -308,11 +341,14 @@ const APIService = {
 
     return data.publicUrl;
   },
-  async uploadEventImage(file, eventId) {
+
+  async uploadEventImage(file, thumbFile, eventId) {
     if (!file) return "";
 
     const cleanFileName = file.name.replace(/\s+/g, "_");
     const fullFileName = `Events/${eventId}_${cleanFileName}`;
+    const cleanThumbFileName = thumbFile.name.replace(/\s+/g, "_");
+    const fullThumbFileName = `Events/thumbs/${eventId}_${cleanThumbFileName}`;
 
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)
@@ -322,7 +358,14 @@ const APIService = {
       });
 
     if (error) throw error;
+    const { error: error2 } = await supabase.storage
+      .from(IMAGE_BUCKET)
+      .upload(fullThumbFileName, thumbFile, {
+        upsert: true,
+        cacheControl: "31536000",
+      });
 
+    if (error2) throw error2;
     return cleanFileName;
   },
 
@@ -330,14 +373,15 @@ const APIService = {
     if (!eventId || !imageName) return;
 
     const fullFileName = `Events/${eventId}_${imageName}`;
+    const thumbFileName = `Events/thumbs/${eventId}_${imageName}`;
 
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)
-      .remove([fullFileName]);
+      .remove([fullFileName, thumbFileName]);
 
     if (error) throw error;
   },
-  // Item Type -related API methods
+
   async getItemTypes() {
     const { data, error } = await supabase
       .from(ITEMTYPES_TABLE_NAME)
@@ -383,15 +427,18 @@ const APIService = {
     if (error) throw error;
     return data;
   },
+
   async listItemImages(itemNumber) {
-    const { data, error } = await supabase.storage.from(IMAGE_BUCKET).list("", {
-      search: `${itemNumber}_`,
-    });
+    const { data, error } = await supabase.storage
+      .from(IMAGE_BUCKET)
+      .list("items", {
+        search: `${itemNumber}_`,
+      });
 
     if (error) throw error;
     return data;
   },
-  // Item SubType -related API methods
+
   async getItemSubTypes() {
     const { data, error } = await supabase
       .from(ITEMSUBTYPES_TABLE_NAME)
@@ -437,7 +484,7 @@ const APIService = {
     if (error) throw error;
     return data;
   },
-  // Item Status -related API methods
+
   async getItemStatuses() {
     const { data, error } = await supabase
       .from(ITEMSTATUS_TABLE_NAME)

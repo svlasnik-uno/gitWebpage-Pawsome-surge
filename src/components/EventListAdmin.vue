@@ -504,6 +504,7 @@ export default {
 
       try {
         await APIService.deleteEvent(event.id);
+        await APIService.deleteEventImage(event.id, event.eventImage);
         await this.loadEvents();
 
         if (this.currentPage > this.totalPages && this.totalPages > 0) {

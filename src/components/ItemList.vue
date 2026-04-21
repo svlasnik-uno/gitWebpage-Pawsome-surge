@@ -122,8 +122,8 @@
                     {{ item[header] }}
                   </button>
 
-                  <img v-else-if="header === 'ItemImage' && item[header]" :src="getImageUrl(item)" alt="Item Image"
-                    class="img-thumbnail" loading="lazy" decoding="async"
+                  <img v-else-if="header === 'ItemImage' && item[header]" :src="getImageThumbnailUrl(item)"
+                    alt="Item Image" class="img-thumbnail" loading="lazy" decoding="async"
                     style="width: 75px; height: 75px; object-fit: cover;" />
 
                   <span v-else-if="['ItemAskingPrice', 'ItemCost'].includes(header)">
@@ -178,7 +178,7 @@
             class="mobile-item-card border rounded mb-3">
             <div class="d-flex align-items-center justify-content-between p-3">
               <div class="d-flex align-items-center gap-2 mobile-item-summary">
-                <img v-if="item.ItemImage" :src="getImageUrl(item)" alt="Item Image"
+                <img v-if="item.ItemImage" :src="getImageThumbnailUrl(item)" alt="Item Image"
                   class="img-thumbnail mobile-item-thumb" loading="lazy" decoding="async" width="48" height="48" />
 
                 <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-item-number"
@@ -594,8 +594,8 @@ export default {
       });
     },
 
-    getImageUrl(item) {
-      return APIService.getImageUrl(item);
+    getImageThumbnailUrl(item) {
+      return APIService.getImageThumbnailUrl(item);
     },
 
     formatCurrency(value) {

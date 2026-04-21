@@ -79,21 +79,21 @@ export default {
     window.removeEventListener("keydown", this.handleKeydown);
   },
   methods: {
-    async loadSlideshowImages() {
-      try {
-        const items = await APIService.getItemsByImageType("H");
+async loadSlideshowImages() {
+  try {
+    const items = await APIService.getItemsByImageType("H");
 
-        this.images = items
-          .slice(0, 8)
-          .map((item) => ({
-            src: APIService.getGalleryImageUrl(item),
-            alt: item.ItemName || "Gallery image",
-          }))
-          .filter((image) => image.src);
-      } catch (error) {
-        console.error("Error loading slideshow images:", error);
-      }
-    },
+    this.images = items
+      .slice(0, 8)
+      .map((item) => ({
+        src: APIService.getImageUrl(item),
+        alt: item.ItemName || "Gallery image",
+      }))
+      .filter((image) => image.src);
+  } catch (error) {
+    console.error("Error loading slideshow images:", error);
+  }
+},
 
     startSlideshow() {
       clearInterval(this.slideInterval);

@@ -414,10 +414,10 @@ export default {
             });
         },
 
-        async getPreparedUploadFile() {
+         async getPreparedUploadFile(file, height, width, quality){
             if (!this.selectedImageFile) return null;
 
-            const resizedFile = await this.resizeImage(this.selectedImageFile, 1200, 1200, 0.85);
+            const resizedFile = await this.resizeImage(file, height, width, quality);
             this.resizedImageInfo = `${resizedFile.name} (${Math.round(resizedFile.size / 1024)} KB)`;
             return resizedFile;
         },
@@ -449,8 +449,9 @@ export default {
 
                 if (this.isEditMode) {
                     if (this.selectedImageFile) {
-                        const resizedFile = await this.getPreparedUploadFile();
-                        uploadedImageName = await APIService.uploadEventImage(resizedFile, eventId);
+                        const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 1200, 1200, 0.85);
+                        const resizedThumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.85);
+                        uploadedImageName = await APIService.uploadEventImage(resizedFile, resizedThumbFile, eventId);
                         payload.eventImage = uploadedImageName;
                     }
 
@@ -484,18 +485,21 @@ export default {
                         });
 
                         if (this.selectedImageFile) {
-                            const resizedFile = await this.getPreparedUploadFile();
-                            uploadedImageName = await APIService.uploadEventImage(resizedFile, eventId);
+                            const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 1200, 1200, 0.85);
+                            const resizedThumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.85);
+                            uploadedImageName = await APIService.uploadEventImage(resizedFile, resizedThumbFile, eventId);
 
                             await APIService.updateEvent(eventId, {
                                 ...payload,
                                 eventImage: uploadedImageName,
                             });
+                            
                         }
                     } catch (createError) {
                         if (uploadedImageName) {
                             try {
                                 await APIService.deleteEventImage(eventId, uploadedImageName);
+                                
                             } catch (cleanupError) {
                                 console.error("Failed to clean up uploaded image:", cleanupError);
                             }

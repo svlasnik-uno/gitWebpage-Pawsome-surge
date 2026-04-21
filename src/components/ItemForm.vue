@@ -322,10 +322,11 @@ export default {
       return new File([blob], `${baseName}.jpg`, { type: "image/jpeg" });
     },
 
-    async getPreparedUploadFile() {
+    async getPreparedUploadFile(file, height, width, quality) {
+      //thumbails are 300x300, full images max 1200x1200 0.8 - height and width parameters
       if (!this.selectedImageFile) return null;
 
-      const resizedFile = await this.resizeImage(this.selectedImageFile, 1200, 1200, 0.8);
+      const resizedFile = await this.resizeImage(file, height, width, quality);
       this.resizedImageInfo = `${resizedFile.name} (${Math.round(resizedFile.size / 1024)} KB)`;
       return resizedFile;
     },
@@ -378,8 +379,9 @@ export default {
           let finalImageName = oldImageName;
 
           if (this.selectedImageFile) {
-            const resizedFile = await this.getPreparedUploadFile();
-            uploadedImageName = await APIService.uploadItemImage(resizedFile, itemNumber);
+            const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 1200, 1200, 0.8);
+            const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8);
+            uploadedImageName = await APIService.uploadItemImage(resizedFile, thumbFile, itemNumber);
             finalImageName = uploadedImageName;
           }
 
@@ -393,6 +395,7 @@ export default {
           } catch (dbError) {
             if (uploadedImageName && uploadedImageName !== oldImageName) {
               await APIService.deleteItemImage(itemNumber, uploadedImageName);
+              await APIService.deleteItemImage(itemNumber, `thumbs/${uploadedImageName}`);
             }
             throw dbError;
           }
@@ -410,6 +413,7 @@ export default {
             });
 
             await APIService.deleteItemImage(itemNumber, oldImageName);
+            await APIService.deleteItemImage(itemNumber, `thumbs/${oldImageName}`);
           }
 
           this.form.ItemImage = finalImageName;
@@ -425,8 +429,9 @@ export default {
             createdItem = await APIService.createItem(createPayload);
 
             if (this.selectedImageFile) {
-              const resizedFile = await this.getPreparedUploadFile();
-              uploadedImageName = await APIService.uploadItemImage(resizedFile, itemNumber);
+              const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 1200, 1200, 0.8);
+              const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8);
+              uploadedImageName = await APIService.uploadItemImage(resizedFile, thumbFile, itemNumber);
 
               await APIService.updateItem(itemNumber, {
                 ...createdItem,
@@ -438,6 +443,7 @@ export default {
             if (uploadedImageName) {
               try {
                 await APIService.deleteItemImage(itemNumber, uploadedImageName);
+                await APIService.deleteItemImage(itemNumber, `thumbs/${uploadedImageName}`);
               } catch (cleanupError) {
                 console.error("Failed to clean up uploaded image:", cleanupError);
               }
@@ -477,6 +483,15 @@ export default {
       );
       if (!ok) return;
       try {
+        filename = this.form.ItemImage;
+        if (filename) {
+          await APIService.deleteItemImage(this.form.ItemNumber, filename);
+          await APIService.deleteItemImage(this.form.ItemNumber, `thumbs/${filename}`);
+        }
+      } catch (error) {
+        window.alert(error.message || "Delete image failed.");
+      }
+      try {
         await APIService.deleteItem(this.form.ItemNumber);
         this.$router.push({
           path: "/itemList",
@@ -508,7 +523,7 @@ export default {
       event.preventDefault();
       event.returnValue = "";
     },
-    // process all images in the tblItems table - 
+    // process all images in the tblItems table - THIS IS NOT CURRENTLY CALLED
     // resizing to max 1200x1200 and converting to JPEG with 80% quality
     async resizeAllItemImages() {
       this.errorMessage = "";
