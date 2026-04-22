@@ -31,14 +31,14 @@
             </div>
 
             <div class="mobile-detail-fields">
-              <div class="mobile-detail-field py-2 border-top">
+              <div v-if="auth.isAuthenticated" class="mobile-detail-field py-2 border-top">
                 <div class="mobile-detail-row">
                   <div class="mobile-detail-label fw-semibold small text-muted">Item Type</div>
                   <div class="mobile-detail-value text-end">{{ form.ItemType || "" }}</div>
                 </div>
               </div>
 
-              <div class="mobile-detail-field py-2 border-top">
+              <div v-if="auth.isAuthenticated" class="mobile-detail-field py-2 border-top">
                 <div class="mobile-detail-row">
                   <div class="mobile-detail-label fw-semibold small text-muted">Item Sub-type</div>
                   <div class="mobile-detail-value text-end">{{ form.ItemSubType || "" }}</div>
@@ -52,14 +52,14 @@
                 </div>
               </div>
 
-              <div class="mobile-detail-field py-2 border-top">
+              <div v-if="auth.isAuthenticated" class="mobile-detail-field py-2 border-top">
                 <div class="mobile-detail-row">
                   <div class="mobile-detail-label fw-semibold small text-muted">Item Cost</div>
                   <div class="mobile-detail-value text-end">{{ formatCurrency(form.ItemCost) }}</div>
                 </div>
               </div>
 
-              <div class="mobile-detail-field py-2 border-top">
+              <div v-if="auth.isAuthenticated" class="mobile-detail-field py-2 border-top">
                 <div class="mobile-detail-row">
                   <div class="mobile-detail-label fw-semibold small text-muted">Item Status</div>
                   <div class="mobile-detail-value text-end">{{ formatStatus(form.ItemStatus) }}</div>
@@ -86,12 +86,17 @@
             </div>
 
             <div class="d-flex gap-2 pt-3 border-top mt-3 flex-wrap">
-              <button type="button" class="btn btn-secondary" @click="editItem">
+              <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary" @click="editItem">
                 Edit Item
               </button>
-              <button type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item">
+              <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item">
                 Delete Item
               </button>
+              <button type="button" class="btn btn-sm btn-primary" @click="addToCart(form)"
+                :disabled="isInCart(form)">
+                {{ isInCart(form) ? "In Cart" : "Add To Cart" }}
+              </button>
+
               <button type="button" class="btn btn-secondary" @click="goBack">
                 Back to List
               </button>
@@ -108,12 +113,12 @@
                 <div class="form-control readonly-field">{{ form.ItemNumber || "" }}</div>
               </div>
 
-              <div class="col-md-6">
+              <div v-if="auth.isAuthenticated" class="col-md-6">
                 <label class="form-label">Item Type</label>
                 <div class="form-control readonly-field">{{ form.ItemType || "" }}</div>
               </div>
 
-              <div class="col-md-6">
+              <div v-if="auth.isAuthenticated" class="col-md-6">
                 <label class="form-label">Item Sub-type</label>
                 <div class="form-control readonly-field">{{ form.ItemSubType || "" }}</div>
               </div>
@@ -123,12 +128,12 @@
                 <div class="form-control readonly-field">{{ formatCurrency(form.ItemAskingPrice) }}</div>
               </div>
 
-              <div class="col-md-6">
+              <div v-if="auth.isAuthenticated" class="col-md-6">
                 <label class="form-label">Item Cost</label>
                 <div class="form-control readonly-field">{{ formatCurrency(form.ItemCost) }}</div>
               </div>
 
-              <div class="col-md-6">
+              <div v-if="auth.isAuthenticated" class="col-md-6">
                 <label class="form-label">Item Status</label>
                 <div class="form-control readonly-field">{{ formatStatus(form.ItemStatus) }}</div>
               </div>
@@ -143,14 +148,19 @@
                 <div class="form-control readonly-field readonly-textarea">{{ form.ItemDescription || "" }}</div>
                 <div class="col-12 d-flex gap-2">
                 </div>
-                <button type="button" class="btn btn-secondary" @click="editItem">
+                <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary" @click="editItem">
                   Edit Item
                 </button>
-                <button type="button" class="btn btn-secondary ms-2" @click="confirmDelete" title="Delete Item">
+                <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary ms-2" @click="confirmDelete"
+                  title="Delete Item">
                   Delete Item
                 </button>
+                <button type="button" class="btn btn-sm btn-primary" @click="addToCart(form)"
+                  :disabled="isInCart(form)">
+                  {{ isInCart(form) ? "In Cart" : "Add To Cart" }}
+                </button>
                 <button type="button" class="btn btn-secondary ms-2" @click="goBack">
-                  Back to List
+                  Continue Browsing
                 </button>
               </div>
             </div>
@@ -180,6 +190,8 @@
 
 <script>
 import APIService from "@/api/APIService";
+import { useAuthStore } from "@/store/AuthStore";
+import { useCartStore } from "@/store/CartStore";
 
 export default {
   name: "ItemDetail",
@@ -206,6 +218,7 @@ export default {
         ItemImage: "",
         ItemDescription: "",
       },
+      cartStore: null,
     };
   },
 
@@ -219,6 +232,9 @@ export default {
         return "";
       }
       return APIService.getImageUrl(this.form);
+    },
+    auth() {
+      return useAuthStore();
     },
   },
 
@@ -263,9 +279,25 @@ export default {
         window.alert(error.message || "Delete failed.");
       }
     },
+    addToCart(item) {
+      if (!item || !item.ItemNumber) return;
+      if (!this.cartStore) return;
+      if (this.isInCart(item)) return;
+
+      this.cartStore.addToCart(item);
+    },
+
+    isInCart(item) {
+      if (!this.cartStore || !Array.isArray(this.cartStore.cartItems)) return false;
+      if (!item || !item.ItemNumber) return false;
+
+      return this.cartStore.cartItems.some(
+        (cartItem) => String(cartItem.ItemNumber) === String(item.ItemNumber)
+      );
+    },
     goBack() {
       this.$router.push({
-        path: "/itemList",
+        path: "/AvailableItems",
         query: { ...this.$route.query },
       });
     },
@@ -289,10 +321,12 @@ export default {
       return statusMap[value] || value || "";
     },
   },
-
+  created() {
+    this.cartStore = useCartStore();
+  },
   async mounted() {
-
     await this.loadItem();
+
   },
 };
 </script>

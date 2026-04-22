@@ -11,7 +11,10 @@ import ItemForm from "@/components/ItemForm.vue";
 import ItemDetail from "@/components/ItemDetail.vue";
 import EventListAdmin from "@/components/EventListAdmin.vue";
 import EventForm from "@/components/EventForm.vue";
-import CreatePDFReport from "../components/CreatePDFReport.vue";
+import CreatePDFReport from "@/components/CreatePDFReport.vue";
+import ViewAvailableItems from "@/components/ViewAvailableItems.vue"; 
+import ViewCart from "@/components/ViewCart.vue";
+import PlaceOrder from "@/components/PlaceOrder.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -26,8 +29,11 @@ const routes = [
   { path: "/eventListAdmin", component: EventListAdmin },
   { path: "/editEvent/:id?", component: EventForm },
   { path: "/create-pdf-report", component: CreatePDFReport },
-];
+  { path: "/availableItems",   component: ViewAvailableItems },
+  { path: "/cart",   component: ViewCart },
+  { path: "/place-order", component: PlaceOrder },
 
+];
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,

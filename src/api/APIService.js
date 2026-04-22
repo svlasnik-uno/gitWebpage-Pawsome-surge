@@ -6,6 +6,8 @@ const EVENT_TABLE_NAME = "tblEvents";
 const ITEMTYPES_TABLE_NAME = "tblItemTypes";
 const ITEMSUBTYPES_TABLE_NAME = "tblSubTypes";
 const ITEMSTATUS_TABLE_NAME = "tblItemStatus";
+const CUSTOMER_ORDER_TABLE_NAME = "CustOrders";
+const CUSTOMER_ORDER_DETAIL_TABLE_NAME = "CustOrderDetail";
 
 const APIService = {
   async signUp(email, password) {
@@ -96,7 +98,7 @@ const APIService = {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .select("*")
-      .eq("ImageType", imageType) // 'G' for gallery, 'E' for event, 'H' for home
+      .eq("ImageType", imageType)
       .order("ItemNumber", { ascending: false });
 
     if (error) throw error;
@@ -174,7 +176,7 @@ const APIService = {
     return data.publicUrl;
   },
 
-  async uploadItemImage(file,thumbFileName, itemNumber) {
+  async uploadItemImage(file, thumbFileName, itemNumber) {
     if (!file) return "";
 
     const cleanFileName = file.name.replace(/\s+/g, "_");
@@ -190,14 +192,15 @@ const APIService = {
       });
 
     if (error) throw error;
-    const { error2 } = await supabase.storage
+
+    const { error: error2 } = await supabase.storage
       .from(IMAGE_BUCKET)
       .upload(fullThumbFileName, thumbFileName, {
         upsert: true,
         cacheControl: "31536000",
       });
 
-    if (error2) throw error;
+    if (error2) throw error2;
     return cleanFileName;
   },
 
@@ -358,6 +361,7 @@ const APIService = {
       });
 
     if (error) throw error;
+
     const { error: error2 } = await supabase.storage
       .from(IMAGE_BUCKET)
       .upload(fullThumbFileName, thumbFile, {
@@ -409,7 +413,7 @@ const APIService = {
     const { data, error } = await supabase
       .from(ITEMTYPES_TABLE_NAME)
       .update(updatePayload)
-      .eq("itemType", Text(itemType))
+      .eq("itemType", itemType)
       .select()
       .maybeSingle();
 
@@ -466,7 +470,7 @@ const APIService = {
     const { data, error } = await supabase
       .from(ITEMSUBTYPES_TABLE_NAME)
       .update(updatePayload)
-      .eq("itemSubType", Text(itemSubType))
+      .eq("itemSubType", itemSubType)
       .select()
       .maybeSingle();
 
@@ -512,7 +516,7 @@ const APIService = {
     const { data, error } = await supabase
       .from(ITEMSTATUS_TABLE_NAME)
       .update(updatePayload)
-      .eq("statusOption", Text(itemStatus))
+      .eq("statusOption", itemStatus)
       .select()
       .maybeSingle();
 
@@ -529,6 +533,308 @@ const APIService = {
 
     if (error) throw error;
     return data;
+  },
+
+  async createCustomerOrder(order) {
+    const orderPayload = {
+      orderTotal: Number(order.orderTotal || 0),
+      orderEmail: order.orderEmail,
+      orderStreetAddress: order.orderStreetAddress,
+      orderCity: order.orderCity,
+      orderPhone: order.orderPhone,
+      custFirstName: order.custFirstName,
+      custLastName: order.custLastName,
+      orderTotalItems: Number(order.orderTotalItems || 0),
+    };
+
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_TABLE_NAME)
+      .insert([orderPayload])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async createCustomerOrderDetails(orderNum, items) {
+    if (!orderNum) {
+      throw new Error("orderNum is required.");
+    }
+
+    if (!Array.isArray(items) || !items.length) {
+      throw new Error("At least one cart item is required.");
+    }
+
+    const detailRows = items.map((item) => ({
+      orderNum,
+      itemNumber: Number(item.ItemNumber),
+    }));
+
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_DETAIL_TABLE_NAME)
+      .insert(detailRows)
+      .select();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateItemsStatusToPending(items) {
+    if (!Array.isArray(items) || !items.length) return [];
+
+    const itemNumbers = items.map((item) => Number(item.ItemNumber));
+
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .update({ ItemStatus: "P" })
+      .in("ItemNumber", itemNumbers)
+      .select();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async createCompleteCustomerOrder(order, items) {
+    const safeItems = Array.isArray(items) ? [...items] : [];
+
+    const createdOrder = await this.createCustomerOrder(order);
+    await this.createCustomerOrderDetails(createdOrder.orderNum, safeItems);
+    await this.updateItemsStatusToPending(safeItems);
+
+    await this.sendOrderConfirmationEmail({
+      customerEmail: order.orderEmail,
+      orderNum: createdOrder.orderNum,
+      orderDate: createdOrder.created_at || new Date().toISOString(),
+      orderTotalItems: Number(order.orderTotalItems || safeItems.length),
+      items: safeItems,
+    });
+
+    return createdOrder;
+  },
+  async sendEmail({ to, subject, text, html, from }) {
+    const response = await fetch(
+      "https://xpbcouwccxlaybkbtuqh.supabase.co/functions/v1/resend-email",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ to, subject, text, html, from }),
+      },
+    );
+
+    const rawText = await response.text();
+    //console.log("status:", response.status);
+    //console.log("raw response:", rawText);
+
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      data = { error: rawText };
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+
+    return data;
+  },
+
+  async sendOrderConfirmationEmail({
+    customerEmail,
+    orderNum,
+    orderDate,
+    orderTotalItems,
+    items,
+  }) {
+    if (!customerEmail) {
+      throw new Error("customerEmail is required.");
+    }
+
+    const safeItems = Array.isArray(items) ? items : [];
+
+    const recipients = [customerEmail, "pawsomeartsandcrafts@yahoo.com"];
+
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(orderDate));
+
+    const itemLinesText = safeItems.length
+      ? safeItems
+          .map(
+            (item, index) =>
+              `${index + 1}. ${item.ItemDescription || "No description provided"}`,
+          )
+          .join("\n")
+      : "No items listed.";
+
+    const itemLinesHtml = safeItems.length
+      ? safeItems
+          .map(
+            (item) =>
+              `<li>${this.escapeHtml(
+                item.ItemDescription || "No description provided",
+              )}</li>`,
+          )
+          .join("")
+      : "<li>No items listed.</li>";
+
+    const subject = `Order Confirmation #${orderNum}`;
+
+    const text = `Thank you for your order.
+
+Order Number: ${orderNum}
+Order Date: ${formattedDate}
+Number of Items: ${orderTotalItems}
+
+Items Ordered:
+${itemLinesText}
+
+Reminder: Only local delivery is available.
+
+You will be contacted for payment and to arrange delivery.
+
+Pawsome Arts and Crafts`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>Order Confirmation</h2>
+        <p>Thank you for your order.</p>
+        <p><strong>Order Number:</strong> ${this.escapeHtml(orderNum)}</p>
+        <p><strong>Order Date:</strong> ${this.escapeHtml(formattedDate)}</p>
+        <p><strong>Number of Items:</strong> ${this.escapeHtml(orderTotalItems)}</p>
+        <p><strong>Items Ordered:</strong></p>
+        <ul>${itemLinesHtml}</ul>
+        <p><strong>Reminder:</strong> Only local delivery is available.</p>
+        <p>You will be contacted for payment and to arrange delivery.</p>
+        <p>Pawsome Arts and Crafts</p>
+      </div>
+    `;
+
+    return this.sendEmail({
+      to: recipients,
+      subject,
+      text,
+      html,
+    });
+  },
+  async sendContactUsEmail({
+    firstName,
+    lastName,
+    email,
+    inquiryTypes,
+    message,
+  }) {
+    if (!firstName || !lastName || !email || !message) {
+      throw new Error("All contact form fields are required.");
+    }
+
+    if (!Array.isArray(inquiryTypes) || !inquiryTypes.length) {
+      throw new Error("At least one inquiry type is required.");
+    }
+
+    const sentAtIso = new Date().toISOString();
+
+    const formattedTimestamp = new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(sentAtIso));
+
+    const safeFirstName = this.escapeHtml(firstName);
+    const safeLastName = this.escapeHtml(lastName);
+    const safeEmail = this.escapeHtml(email);
+    const safeMessage = this.escapeHtml(message).replace(/\n/g, "<br />");
+    const inquiryTypeText = inquiryTypes.join(", ");
+    const safeInquiryTypeText = this.escapeHtml(inquiryTypeText);
+
+    const businessEmail = "pawsomeartsandcrafts@yahoo.com";
+
+    const customerSubject =
+      "We received your message - Pawsome Arts And Crafts";
+    const businessSubject = `Contact Us Submission - ${firstName} ${lastName}`;
+
+    const customerText = `Hello ${firstName} ${lastName},
+
+Thank you for contacting Pawsome Arts And Crafts. We received your message and will review it as soon as possible.
+
+Submitted On: ${formattedTimestamp}
+Email Address: ${email}
+Inquiry Type(s): ${inquiryTypeText}
+
+Message:
+${message}
+
+Pawsome Arts And Crafts`;
+
+    const customerHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>Thank you for contacting Pawsome Arts And Crafts</h2>
+        <p>Hello ${safeFirstName} ${safeLastName},</p>
+        <p>We received your message and will review it as soon as possible.</p>
+        <p><strong>Submitted On:</strong> ${this.escapeHtml(formattedTimestamp)}</p>
+        <p><strong>Email Address:</strong> ${safeEmail}</p>
+        <p><strong>Inquiry Type(s):</strong> ${safeInquiryTypeText}</p>
+        <p><strong>Message:</strong></p>
+        <p>${safeMessage}</p>
+        <p>Pawsome Arts And Crafts</p>
+      </div>
+    `;
+
+    const businessText = `New Contact Us submission received.
+
+Submitted On: ${formattedTimestamp}
+First Name: ${firstName}
+Last Name: ${lastName}
+Email Address: ${email}
+Inquiry Type(s): ${inquiryTypes.join(", ")}
+
+Message:
+${message}`;
+
+    const businessHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>New Contact Us Submission</h2>
+        <p><strong>Submitted On:</strong> ${this.escapeHtml(formattedTimestamp)}</p>
+        <p><strong>First Name:</strong> ${safeFirstName}</p>
+        <p><strong>Last Name:</strong> ${safeLastName}</p>
+        <p><strong>Email Address:</strong> ${safeEmail}</p>
+        <p><strong>Inquiry Type(s):</strong> ${safeInquiryTypeText}</p>
+        <p><strong>Message:</strong></p>
+        <p>${safeMessage}</p>
+      </div>
+    `;
+
+    await this.sendEmail({
+      to: [email],
+      subject: customerSubject,
+      text: customerText,
+      html: customerHtml,
+    });
+
+    await this.sendEmail({
+      to: [businessEmail],
+      subject: businessSubject,
+      text: businessText,
+      html: businessHtml,
+    });
+
+    return {
+      success: true,
+      sentAt: sentAtIso,
+    };
+  },
+  escapeHtml(value = "") {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   },
 };
 

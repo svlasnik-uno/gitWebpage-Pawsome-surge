@@ -13,26 +13,39 @@
           {{ link.label }}
         </router-link>
       </li>
+
+      <!-- Cart (only shows if items exist) -->
+      <li class="nav-item" v-if="cart.cartCount > 0">
+        <router-link to="/cart" class="nav-link">
+          View Cart ({{ cart.cartCount }})
+        </router-link>
+      </li>
+
       <li v-if="auth.isAuthenticated" class="nav-item separator">
         <span class="nav-link">|</span>
       </li>
+
       <li class="nav-item" v-if="auth.isAuthenticated">
         <router-link to="/itemList" class="nav-link">
           View Items
         </router-link>
       </li>
+
       <li class="nav-item" v-if="auth.isAuthenticated">
         <router-link to="/eventListAdmin" class="nav-link">
           Manage Events
         </router-link>
       </li>
+
       <!-- Auth button -->
       <li class="nav-item">
-        <!-- If logged in -->
-        <button v-if="auth.isAuthenticated" class="nav-link btn btn-link" @click="handleLogout">
+        <button
+          v-if="auth.isAuthenticated"
+          class="nav-link btn btn-link"
+          @click="handleLogout"
+        >
           Logout
         </button>
-
       </li>
 
     </ul>
@@ -41,17 +54,20 @@
 
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { useAuthStore } from "@/store/AuthStore"; // adjust path if needed
+import { useAuthStore } from "@/store/AuthStore";
+import { useCartStore } from "@/store/CartStore"; // 👈 NEW
 import APIService from "@/api/APIService";
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
+const cart = useCartStore(); // 👈 NEW
 
 const links = [
   { label: "Home", to: "/" },
   { label: "Gallery", to: "/gallery" },
   { label: "Events", to: "/events" },
+  { label: "Shop", to: "/availableItems" }, // 👈 NEW
   { label: "About Us", to: "/about" },
 ];
 
@@ -97,6 +113,7 @@ async function handleLogout() {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+
 .navbar-custom .nav-link {
   color: black !important;
 }
@@ -104,6 +121,7 @@ async function handleLogout() {
 .navbar-custom .nav-link:hover {
   color: #333 !important;
 }
+
 .navbar-custom .nav-link.active {
   color: black !important;
   font-weight: bold;
