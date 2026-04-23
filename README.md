@@ -18,6 +18,7 @@ Storage size is limited to 1GB - with 800 items with small images and smaller th
 Other usage is under limits significantly
 
 SUPABASE: Must keep active - free account pauses after 7 days of inactivity; I created a gitHub action to kick off every 6 days to ping the database to keep the database active: https://github.com/svlasnik-uno/gitWebpage-Pawsome-surge.git
+If database password changes, the SECRET will need to be updated on gitHub for the workflow - see the .github\workflows folder in this project for the yml workflow file
 
 Shop option is available to all visitors - users don't yet register - they fill out contact info on order form
 Future enhancement - allow users to register and view their orders
