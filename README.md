@@ -17,6 +17,8 @@ Egress Caching is limited to 5GB - - To decrease caching - images saved are smal
 Storage size is limited to 1GB - with 800 items with small images and smaller thumbnail images - size is .483 / 1 GB
 Other usage is under limits significantly
 
+SUPABASE: Must keep active - free account pauses after 7 days of inactivity; I created a gitHub action to kick off every 6 days to ping the database to keep the database active: https://github.com/svlasnik-uno/gitWebpage-Pawsome-surge.git
+
 Shop option is available to all visitors - users don't yet register - they fill out contact info on order form
 Future enhancement - allow users to register and view their orders
 
