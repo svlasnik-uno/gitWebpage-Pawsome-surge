@@ -4,6 +4,7 @@
       <div>
         <h2 class="mb-1">Available Items</h2>
         <p class="text-muted mb-0">Browse currently available inventory and add items to your cart.</p>
+        <p class="text-muted mb-0">Available for local delivery only.</p>
         <p class="text-muted mb-0 small">* All dimensions are approximate</p>
       </div>
 

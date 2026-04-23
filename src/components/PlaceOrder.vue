@@ -1,6 +1,6 @@
 <template>
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div class="container placeOrder-page py-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3 rounded bg-white bg-opacity-75 shadow-sm">
             <div>
                 <h2 class="mb-1">Place Order</h2>
                 <p class="text-muted mb-0">
@@ -78,7 +78,7 @@
                             <div class="d-flex gap-2 flex-wrap mt-4">
                                 <button type="submit" class="btn btn-primary"
                                     :disabled="submitting || !cartItems.length">
-                                    {{ submitting ? "Saving..." : "Save Order" }}
+                                    {{ submitting ? "Saving..." : "Place Order" }}
                                 </button>
 
                                 <button type="button" class="btn btn-outline-secondary" @click="goBackToCart"
@@ -86,6 +86,9 @@
                                     Back to Cart
                                 </button>
                             </div>
+                            <p class="text mt-3 mb-0">
+                                After placing your order, you will be contacted to complete your order and schedule delivery.
+                            </p>
                         </form>
                     </div>
                 </div>
@@ -150,6 +153,9 @@
                         <p class="mb-2">Are you sure you want to place this order?</p>
                         <p class="mb-0 text-danger fw-semibold">
                             Delivery is for the Omaha Area only.
+                        </p>
+                        <p class="text-muted mt-3 mb-0">
+                            You will be sent an email confirmation of your order. Check your SPAM folder if you don't see the message.
                         </p>
                     </div>
 
@@ -319,6 +325,9 @@ export default {
 </script>
 
 <style scoped>
+.placeOrder-page {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 .summary-item {
     border: 1px solid #dee2e6;
     border-radius: 0.65rem;

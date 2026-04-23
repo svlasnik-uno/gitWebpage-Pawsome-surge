@@ -1,9 +1,13 @@
 <template>
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div class="container viewCart-page py-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3 rounded bg-white bg-opacity-75 shadow-sm">
             <div>
                 <h2 class="mb-1">Shopping Cart</h2>
-                <p class="text-muted mb-0">Review the items you have added to your cart.</p>
+                <p class="text mb-1">Review the items you have added to your cart.</p>
+                
+                <p class="text mb-0">You will be contacted shortly to complete your purchase and schedule delivery.</p>
+                
+                <p class="text mb-0">Omaha Area Delivery Only.</p>
             </div>
 
             <div v-if="cartCount > 0" class="d-flex align-items-center gap-2 flex-wrap">
@@ -205,6 +209,9 @@ export default {
 </script>
 
 <style scoped>
+.viewCart-page {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 .cart-card {
     border: 1px solid #dee2e6;
     border-radius: 0.75rem;
