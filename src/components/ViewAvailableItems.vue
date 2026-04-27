@@ -28,56 +28,57 @@
         No available items were found.
       </div>
 
-      <div v-else class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
-        <div v-for="item in items" :key="item.ItemNumber" class="col">
-          <div class="card h-100 shadow-sm item-card">
-            <div class="image-wrap">
-              <img v-if="getImageUrl(item)" :src="getImageUrl(item)" :alt="`Item ${item.ItemNumber}`"
-                class="card-img-top item-image" />
-              <div v-else class="image-placeholder text-muted small">
-                No image available
-              </div>
-            </div>
+      <div v-else class="row g-3">
+        <div v-for="item in items" :key="item.ItemNumber" class="col-12 col-md-6 col-xl-4">
 
-            <div class="card-body d-flex flex-column p-3">
-
-
-              <div class="detail-list small mb-2">
-
-                <div class="detail-row">
-                  <span class="detail-label">Price</span>
-                  <span class="detail-value">{{ formatCurrency(item.ItemAskingPrice) }}</span>
-                </div>
-
-              </div>
-
-              <div class="mb-2">
-                <div class="text-muted small fw-semibold mb-1">Description</div>
-                <div class="description-box small">
-                  {{ item.ItemDescription || '' }}
+            <div class="card h-100 shadow-sm item-card">
+              <div class="image-wrap">
+                <img v-if="getImageUrl(item)" :src="getImageUrl(item)" :alt="`Item ${item.ItemNumber}`"
+                  class="card-img-top item-image" />
+                <div v-else class="image-placeholder text-muted small">
+                  No image available
                 </div>
               </div>
 
-              <div class="mt-auto d-grid gap-2">
-                <button type="button" class="btn btn-sm btn-primary" @click="addToCart(item)"
-                  :disabled="isInCart(item)">
-                  {{ isInCart(item) ? "In Cart" : "Add To Cart" }}
-                </button>
+              <div class="card-body d-flex flex-column p-3">
 
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="viewItem(item)">
-                  View Details
-                </button>
+
+                <div class="detail-list small mb-2">
+
+                  <div class="detail-row">
+                    <span class="detail-label">Price</span>
+                    <span class="detail-value">{{ formatCurrency(item.ItemAskingPrice) }}</span>
+                  </div>
+
+                </div>
+
+                <div class="mb-2">
+                  <div class="text-muted small fw-semibold mb-1">Description</div>
+                  <div class="description-box small">
+                    {{ item.ItemDescription || '' }}
+                  </div>
+                </div>
+
+                <div class="mt-auto d-grid gap-2">
+                  <button type="button" class="btn btn-sm btn-primary" @click="addToCart(item)"
+                    :disabled="isInCart(item)">
+                    {{ isInCart(item) ? "In Cart" : "Add To Cart" }}
+                  </button>
+
+                  <button type="button" class="btn btn-sm btn-outline-secondary" @click="viewItem(item)">
+                    View Details
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <button v-show="showBackToTop" type="button" class="btn btn-primary back-to-top" @click="scrollToTop"
+        aria-label="Back to top" title="Back to top">
+        <i class="bi bi-arrow-up"></i>
+      </button>
     </div>
-    <button v-show="showBackToTop" type="button" class="btn btn-primary back-to-top" @click="scrollToTop"
-      aria-label="Back to top" title="Back to top">
-      <i class="bi bi-arrow-up"></i>
-    </button>
-  </div>
 </template>
 
 <script>
