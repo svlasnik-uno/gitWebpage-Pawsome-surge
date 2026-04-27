@@ -63,17 +63,17 @@
                                         maxlength="50" required />
                                 </div>
 
+                                <div class="col-12">
+                                    <label class="form-label">Street Address</label>
+                                    <input v-model.trim="form.orderStreetAddress" type="text" class="form-control"
+                                        maxlength="255" required />
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label">City</label>
                                     <input v-model.trim="form.orderCity" type="text" class="form-control"
                                         maxlength="150" required />
                                 </div>
 
-                                <div class="col-12">
-                                    <label class="form-label">Street Address</label>
-                                    <input v-model.trim="form.orderStreetAddress" type="text" class="form-control"
-                                        maxlength="255" required />
-                                </div>
                             </div>
 
                             <div class="d-flex gap-2 flex-wrap mt-4">
@@ -181,148 +181,151 @@
 <script>
 import APIService from "@/api/APIService";
 import { useCartStore } from "@/store/CartStore";
+import { useAuthStore } from "@/store/AuthStore";
 
 export default {
-    name: "PlaceOrder",
+  name: "PlaceOrder",
 
-    data() {
-        return {
-            cartStore: null,
-            submitting: false,
-            showConfirmModal: false,
-            errorMessage: "",
-            successMessage: "",
-            form: {
-                custFirstName: "",
-                custLastName: "",
-                orderEmail: "",
-                orderPhone: "",
-                orderStreetAddress: "",
-                orderCity: "",
-            },
+  data() {
+    return {
+      cartStore: null,
+      authStore: null,
+      submitting: false,
+      showConfirmModal: false,
+      errorMessage: "",
+      successMessage: "",
+      form: {
+        custFirstName: "",
+        custLastName: "",
+        orderEmail: "",
+        orderPhone: "",
+        orderStreetAddress: "",
+        orderCity: "",
+      },
+    };
+  },
+
+  computed: {
+    cartItems() {
+      return this.cartStore?.cartItems || [];
+    },
+
+    cartCount() {
+      return this.cartStore?.cartCount || 0;
+    },
+
+    cartTotal() {
+      return this.cartStore?.cartTotal || 0;
+    },
+  },
+
+  methods: {
+    loadOrderFields() {
+      this.form.custFirstName = this.authStore?.firstName || "";
+      this.form.custLastName = this.authStore?.lastName || "";
+      this.form.orderEmail = this.authStore?.email || "";
+      this.form.orderPhone = this.authStore?.phone || "";
+    },
+
+    getImageThumbnailUrl(item) {
+      return APIService.getImageThumbnailUrl(item);
+    },
+
+    formatCurrency(value) {
+      if (value == null || value === "") return "";
+
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(Number(value) || 0);
+    },
+
+    validateForm() {
+      if (!this.form.custFirstName) return "First name is required.";
+      if (!this.form.custLastName) return "Last name is required.";
+      if (!this.form.orderEmail) return "Email address is required.";
+      if (!this.form.orderPhone) return "Phone number is required.";
+      if (!this.form.orderStreetAddress) return "Street address is required.";
+      if (!this.form.orderCity) return "City is required.";
+      if (!this.cartItems.length) return "Your cart is empty.";
+      return "";
+    },
+
+    openConfirmModal() {
+      this.errorMessage = "";
+      this.successMessage = "";
+
+      const validationError = this.validateForm();
+      if (validationError) {
+        this.errorMessage = validationError;
+        return;
+      }
+
+      this.showConfirmModal = true;
+    },
+
+    closeConfirmModal() {
+      if (this.submitting) return;
+      this.showConfirmModal = false;
+    },
+
+    async submitOrder() {
+      this.errorMessage = "";
+      this.successMessage = "";
+      this.submitting = true;
+
+      try {
+        const orderPayload = {
+          orderTotal: Number(this.cartTotal || 0),
+          orderEmail: this.form.orderEmail,
+          orderStreetAddress: this.form.orderStreetAddress,
+          orderCity: this.form.orderCity,
+          orderPhone: this.form.orderPhone,
+          custFirstName: this.form.custFirstName,
+          custLastName: this.form.custLastName,
+          orderTotalItems: this.cartCount,
+          orderStatus: "P",
         };
+
+        const createdOrder = await APIService.createCompleteCustomerOrder(
+          orderPayload,
+          this.cartItems
+        );
+
+        this.successMessage = `Order #${createdOrder.orderNum} was placed successfully.`;
+        this.showConfirmModal = false;
+        this.cartStore.clearCart();
+
+        this.form = {
+          custFirstName: "",
+          custLastName: "",
+          orderEmail: "",
+          orderPhone: "",
+          orderStreetAddress: "",
+          orderCity: "",
+        };
+
+        setTimeout(() => {
+          this.$router.push("/");
+        }, 1500);
+      } catch (error) {
+        this.errorMessage = error.message || "Failed to save order.";
+        this.showConfirmModal = false;
+      } finally {
+        this.submitting = false;
+      }
     },
 
-    computed: {
-        cartItems() {
-            return this.cartStore?.cartItems || [];
-        },
-
-        cartCount() {
-            return this.cartStore?.cartCount || 0;
-        },
-
-        cartTotal() {
-            return this.cartStore?.cartTotal || 0;
-        },
+    goBackToCart() {
+      this.$router.push("/cart");
     },
+  },
 
-    methods: {
-        getImageThumbnailUrl(item) {
-            return APIService.getImageThumbnailUrl(item);
-        },
-
-        formatCurrency(value) {
-            if (value == null || value === "") return "";
-
-            return new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-            }).format(Number(value) || 0);
-        },
-
-        validateForm() {
-            if (!this.form.custFirstName) return "First name is required.";
-            if (!this.form.custLastName) return "Last name is required.";
-            if (!this.form.orderEmail) return "Email address is required.";
-            if (!this.form.orderPhone) return "Phone number is required.";
-            if (!this.form.orderStreetAddress) return "Street address is required.";
-            if (!this.form.orderCity) return "City is required.";
-            if (!this.cartItems.length) return "Your cart is empty.";
-            return "";
-        },
-
-        openConfirmModal() {
-            this.errorMessage = "";
-            this.successMessage = "";
-
-            const validationError = this.validateForm();
-            if (validationError) {
-                this.errorMessage = validationError;
-                return;
-            }
-
-            this.showConfirmModal = true;
-        },
-
-        closeConfirmModal() {
-            if (this.submitting) return;
-            this.showConfirmModal = false;
-        },
-
-        formatOrderDate(dateValue) {
-            return new Intl.DateTimeFormat("en-US", {
-                dateStyle: "medium",
-                timeStyle: "short",
-            }).format(new Date(dateValue));
-        },
-
-        async submitOrder() {
-            this.errorMessage = "";
-            this.successMessage = "";
-            this.submitting = true;
-
-            try {
-                const orderPayload = {
-                    orderTotal: Number(this.cartTotal || 0),
-                    orderEmail: this.form.orderEmail,
-                    orderStreetAddress: this.form.orderStreetAddress,
-                    orderCity: this.form.orderCity,
-                    orderPhone: this.form.orderPhone,
-                    custFirstName: this.form.custFirstName,
-                    custLastName: this.form.custLastName,
-                    orderTotalItems: this.cartCount,
-                    orderStatus: "P",
-                };
-
-                const createdOrder = await APIService.createCompleteCustomerOrder(
-                    orderPayload,
-                    this.cartItems
-                );
-
-
-                this.successMessage = `Order #${createdOrder.orderNum} was placed successfully.`;
-                this.showConfirmModal = false;
-                this.cartStore.clearCart();
-
-                this.form = {
-                    custFirstName: "",
-                    custLastName: "",
-                    orderEmail: "",
-                    orderPhone: "",
-                    orderStreetAddress: "",
-                    orderCity: "",
-                };
-
-                setTimeout(() => {
-                    this.$router.push("/");
-                }, 1500);
-            } catch (error) {
-                this.errorMessage = error.message || "Failed to save order.";
-                this.showConfirmModal = false;
-            } finally {
-                this.submitting = false;
-            }
-        },
-
-        goBackToCart() {
-            this.$router.push("/cart");
-        },
-    },
-
-    created() {
-        this.cartStore = useCartStore();
-    },
+  created() {
+    this.cartStore = useCartStore();
+    this.authStore = useAuthStore();
+    this.loadOrderFields();
+  },
 };
 </script>
 

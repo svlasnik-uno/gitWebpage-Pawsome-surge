@@ -21,35 +21,34 @@
         </router-link>
       </li>
 
-      <li v-if="auth.isAuthenticated" class="nav-item separator">
+      <!-- Admin-only section -->
+      <li v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="nav-item separator">
         <span class="nav-link">|</span>
       </li>
 
-      <li class="nav-item" v-if="auth.isAuthenticated">
+      <li class="nav-item" v-if="auth.isAuthenticated && auth.usertype === 'admin'">
         <router-link to="/itemList" class="nav-link">
           View Items
         </router-link>
       </li>
 
-      <li class="nav-item" v-if="auth.isAuthenticated">
+      <li class="nav-item" v-if="auth.isAuthenticated && auth.usertype === 'admin'">
         <router-link to="/eventListAdmin" class="nav-link">
           Manage Events
         </router-link>
       </li>
 
-      <!-- Auth button -->
+      <!-- Auth buttons -->
       <li class="nav-item">
-        <button
-          v-if="auth.isAuthenticated"
-          class="nav-link btn btn-link"
-          @click="handleLogout"
-        >
+        <!-- NOT logged in -->
+        <router-link v-if="!auth.isAuthenticated" to="/login" class="nav-link">
+          Login
+        </router-link>
+
+        <!-- Logged in -->
+        <router-link v-else to="/login" class="nav-link" @click="handleLogout">
           Logout
-        </button>
-      </li>
-      <!-- Logo -->
-      <li class="navbar-brand">
-        <img src="/img/logo.png" alt="Logo" class="logo-img" />
+        </router-link>
       </li>
     </ul>
   </nav>
@@ -58,17 +57,17 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/AuthStore";
-import { useCartStore } from "@/store/CartStore"; 
+import { useCartStore } from "@/store/CartStore";
 import APIService from "@/api/APIService";
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
-const cart = useCartStore(); 
+const cart = useCartStore();
 
 const links = [
   { label: "Home", to: "/" },
-  { label: "Shop", to: "/availableItems" }, 
+  { label: "Shop", to: "/availableItems" },
   { label: "Gallery", to: "/gallery" },
   { label: "Events", to: "/events" },
   { label: "About Us", to: "/about" },
@@ -87,6 +86,7 @@ async function handleLogout() {
     console.error("Logout failed:", error.message);
   }
 }
+
 </script>
 
 <style scoped>

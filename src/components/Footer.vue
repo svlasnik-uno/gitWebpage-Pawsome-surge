@@ -15,9 +15,6 @@
         <img src="/img/fbLogo.png" width="20" height="20" alt="Facebook" />
       </a>
 
-      <router-link to="/Auth" class="foot-link">
-        Admin
-      </router-link>
     </div>
 
     <!-- Bottom row -->

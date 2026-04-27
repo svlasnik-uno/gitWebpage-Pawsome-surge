@@ -4,21 +4,52 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     isAuthenticated: false,
     user: null,
+    usertype: null,
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
   }),
 
   actions: {
-    setAuth({ user, access, refresh }) {
+    setAuth({
+      user,
+      usertype = null,
+      firstName = "",
+      lastName = "",
+      phone = "",
+      email = "",
+    }) {
       this.isAuthenticated = true;
+      this.user = user;
+      this.usertype = usertype;
+      this.firstName = firstName;
+      this.lastName = lastName;
+      this.phone = phone;
+      this.email = email;
     },
- 
+
     clearAuth() {
       this.isAuthenticated = false;
-      this.user = null;  
+      this.user = null;
+      this.usertype = null;
+      this.firstName = "";
+      this.lastName = "";
+      this.phone = "";
+      this.email = "";
     },
   },
-   // ensure the local storage is persistent during the session
+
   persist: {
     storage: localStorage,
-    pick: ["isAuthenticated", "user"],
+    pick: [
+      "isAuthenticated",
+      "user",
+      "usertype",
+      "firstName",
+      "lastName",
+      "phone",
+      "email",
+    ],
   },
 });

@@ -8,14 +8,26 @@ const ITEMSUBTYPES_TABLE_NAME = "tblSubTypes";
 const ITEMSTATUS_TABLE_NAME = "tblItemStatus";
 const CUSTOMER_ORDER_TABLE_NAME = "CustOrders";
 const CUSTOMER_ORDER_DETAIL_TABLE_NAME = "CustOrderDetail";
+const URL = "http://localhost:8080"; // "https://pawsome-arts-and-crafts.com";
 
 const APIService = {
-  async signUp(email, password) {
+  async signUp(email, password, profileData) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          usertype: profileData.userType,
+          userfirstname: profileData.firstName,
+          userlastname: profileData.lastName,
+          userphone: profileData.phone || null,
+        },
+        emailRedirectTo: "https://www.pawsomeartsandcrafts.com/auth/callback",
+      },
     });
+
     if (error) throw error;
+
     return data;
   },
 
@@ -23,6 +35,14 @@ const APIService = {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+    });
+    if (error) throw error;
+    return data;
+  },
+
+  async resetPassword(email) {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${URL}/reset-password`,
     });
     if (error) throw error;
     return data;
