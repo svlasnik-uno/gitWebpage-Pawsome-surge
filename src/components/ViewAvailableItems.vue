@@ -4,7 +4,9 @@
       <div>
         <h2 class="mb-1">Available Items</h2>
         <p class="text mb-0">Browse currently available inventory and add items to your cart.</p>
-        <b><p class="text mb-0">Available for local, Omaha Area, delivery only.</p></b>
+        <b>
+          <p class="text mb-0">Available for local, Omaha Area, delivery only.</p>
+        </b>
         <p class="text mb-0 small">* All dimensions are approximate</p>
       </div>
 
@@ -26,7 +28,7 @@
         No available items were found.
       </div>
 
-      <div v-else class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+<div v-else class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
         <div v-for="item in items" :key="item.ItemNumber" class="col">
           <div class="card h-100 shadow-sm item-card">
             <div class="image-wrap">
