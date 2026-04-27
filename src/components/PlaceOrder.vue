@@ -1,6 +1,7 @@
 <template>
     <div class="container placeOrder-page py-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3 rounded bg-white bg-opacity-75 shadow-sm">
+        <div
+            class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3 rounded bg-white bg-opacity-100 shadow-sm">
             <div>
                 <h2 class="mb-1">Place Order</h2>
                 <p class="text-muted mb-0">
@@ -87,7 +88,8 @@
                                 </button>
                             </div>
                             <p class="text mt-3 mb-0">
-                                After placing your order, you will be contacted to complete your order and schedule delivery.
+                                After placing your order, you will be contacted to complete your order and schedule
+                                delivery.
                             </p>
                         </form>
                     </div>
@@ -111,8 +113,6 @@
                                     </div>
 
                                     <div class="flex-grow-1 min-w-0">
-                                        <div class="fw-semibold">Item #{{ item.ItemNumber }}</div>
-                                        <div class="small">{{ item.ItemColor || "" }}</div>
                                         <div class="small mt-1">{{ item.ItemDescription || "" }}</div>
                                     </div>
 
@@ -151,11 +151,13 @@
 
                     <div class="modal-body">
                         <p class="mb-2">Are you sure you want to place this order?</p>
-                        <p class="mb-0 text-danger fw-semibold">
-                            Delivery is for the Omaha Area only.
+
+                        <p class="text mt-3 mb-0">
+                            You will receive an email confirmation of your order. <br>Check your SPAM folder if you
+                            don't see the message.
                         </p>
-                        <p class="text-muted mt-3 mb-0">
-                            You will be sent an email confirmation of your order. Check your SPAM folder if you don't see the message.
+                        <p class="mb-0 text fw-semibold">
+                            <b>* Delivery available for the Omaha Area only.</b>
                         </p>
                     </div>
 
@@ -326,8 +328,9 @@ export default {
 
 <style scoped>
 .placeOrder-page {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .summary-item {
     border: 1px solid #dee2e6;
     border-radius: 0.65rem;

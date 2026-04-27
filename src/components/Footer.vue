@@ -214,7 +214,8 @@ async function submitContactForm() {
 .footer {
   text-align: center;
   padding: 16px;
-  color: #0d3b66;
+  color: black;
+  font-weight: bold;
 }
 
 .footer-top,
@@ -229,7 +230,7 @@ async function submitContactForm() {
 
 .footer a,
 .footer .foot-link {
-  color: #0d3b66;
+  color: black;
   text-decoration: none;
   margin: 0 8px;
   display: inline-flex;
@@ -249,17 +250,23 @@ async function submitContactForm() {
 .foot-button:hover {
   text-decoration: underline;
 }
+.footer a.foot-link.active {
+  font-weight: bold;
+  text-decoration: underline;
 
+  padding: 2px 8px;
+  border-radius: 6px;
+}
 .active {
   font-weight: bold;
   text-decoration: underline;
-  color: #0d3b66;
+  color: black;
 }
 
 .modal-backdrop-custom {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(227, 225, 225, 0.55);
   display: flex;
   align-items: flex-end;
   justify-content: center;

@@ -47,7 +47,10 @@
           Logout
         </button>
       </li>
-
+      <!-- Logo -->
+      <li class="navbar-brand">
+        <img src="/img/logo.png" alt="Logo" class="logo-img" />
+      </li>
     </ul>
   </nav>
 </template>
@@ -55,19 +58,19 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/store/AuthStore";
-import { useCartStore } from "@/store/CartStore"; // 👈 NEW
+import { useCartStore } from "@/store/CartStore"; 
 import APIService from "@/api/APIService";
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
-const cart = useCartStore(); // 👈 NEW
+const cart = useCartStore(); 
 
 const links = [
   { label: "Home", to: "/" },
+  { label: "Shop", to: "/availableItems" }, 
   { label: "Gallery", to: "/gallery" },
   { label: "Events", to: "/events" },
-  { label: "Shop", to: "/availableItems" }, // 👈 NEW
   { label: "About Us", to: "/about" },
 ];
 
@@ -89,6 +92,7 @@ async function handleLogout() {
 <style scoped>
 .navbar-custom {
   padding: 1rem 0;
+  background-color: rgb(227, 225, 225);
 }
 
 .logo-img {

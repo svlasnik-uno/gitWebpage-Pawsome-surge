@@ -1,6 +1,6 @@
 <template>
   <main class="site-content py-2 events-page">
-    <div class="container-fluid px-2">
+    <div class="container-fluid px-2 events-container">
       <div v-if="loading" class="text-center py-4">
         Loading events...
       </div>
@@ -14,18 +14,10 @@
       </div>
 
       <div v-else class="row">
-        <div
-          v-for="event in events"
-          :key="event.id"
-          class="col-md-4 col-sm-6 col-12 mb-3"
-        >
+        <div v-for="event in events" :key="event.id" :class="columnClass">
           <div class="card gallery-card h-100">
             <div class="event-image-wrapper">
-              <img
-                :src="event.src"
-                :alt="event.alt"
-                class="event-img"
-              />
+              <img :src="event.src" :alt="event.alt" class="event-img" />
             </div>
 
             <div v-if="event.text" class="image-text">
@@ -41,16 +33,17 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import APIService from "@/api/APIService";
+import { computed } from "vue";
 
 const events = ref([]);
 const loading = ref(true);
 const errorMessage = ref("");
 
 const formatEventText = (event) => {
-  const parts = [];
+  const eventDetails = [];
 
   if (event.eventName) {
-    parts.push(event.eventName);
+    eventDetails.push(event.eventName);
   }
 
   if (event.eventDate) {
@@ -60,14 +53,14 @@ const formatEventText = (event) => {
       year: "numeric",
     }).format(new Date(event.eventDate));
 
-    parts.push(formattedDate);
+    eventDetails.push(formattedDate);
   }
 
   if (event.eventLocation) {
-    parts.push(event.eventLocation);
+    eventDetails.push(event.eventLocation);
   }
 
-  return parts.join(" - ");
+  return eventDetails.join(" - ");
 };
 
 const loadEvents = async () => {
@@ -96,6 +89,12 @@ const loadEvents = async () => {
 onMounted(() => {
   loadEvents();
 });
+
+const columnClass = computed(() => {
+  return events.value.length % 2 === 0
+    ? "col-md-6 col-sm-6 col-12 mb-3" // 2 columns
+    : "col-md-4 col-sm-6 col-12 mb-3"; // 3 columns
+});
 </script>
 
 <style scoped>
@@ -112,7 +111,7 @@ onMounted(() => {
   width: 100%;
   padding: 0.75rem;
   color: white;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(51, 51, 51);
   text-align: center;
 }
 
@@ -129,5 +128,15 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background: #000;
+}
+.events-container {
+  width: 90%;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .events-container {
+    width: 80%;
+  }
 }
 </style>

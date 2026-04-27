@@ -4,10 +4,10 @@ GENERAL
 https://fonts.google.com/specimen/Pacifico#license
 Images should be 1x1 ratio to display correctly
 **************************************/
-@import url("https://fonts.googleapis.com/css?family=Pacifico");
+/*@import url("https://fonts.googleapis.com/css?family=Pacifico");*/
 
 body {
-  font-family: "Pacifico", cursive;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 mark {
@@ -61,18 +61,12 @@ body,
 }
 .footer {
   width: 100%;
-  background-color: darkseagreen;
-  color: #101884;
+  background-color: rgb(227, 225, 225);
   text-align: center;
   padding: 10px 0;
 }
 
-.footer a.foot-link.active {
-  background: #101884;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 6px;
-}
+
 
 html,
 body {

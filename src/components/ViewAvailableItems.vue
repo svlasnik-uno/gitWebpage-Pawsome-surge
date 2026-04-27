@@ -3,9 +3,9 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <div>
         <h2 class="mb-1">Available Items</h2>
-        <p class="text-muted mb-0">Browse currently available inventory and add items to your cart.</p>
-        <p class="text-muted mb-0">Available for local delivery only.</p>
-        <p class="text-muted mb-0 small">* All dimensions are approximate</p>
+        <p class="text mb-0">Browse currently available inventory and add items to your cart.</p>
+        <b><p class="text mb-0">Available for local, Omaha Area, delivery only.</p></b>
+        <p class="text mb-0 small">* All dimensions are approximate</p>
       </div>
 
       <div v-if="cartCount > 0" class="badge bg-secondary fs-6" style="cursor: pointer;" @click="$router.push('/cart')">
@@ -30,7 +30,7 @@
         <div v-for="item in items" :key="item.ItemNumber" class="col">
           <div class="card h-100 shadow-sm item-card">
             <div class="image-wrap">
-              <img v-if="getImageThumbnailUrl(item)" :src="getImageThumbnailUrl(item)" :alt="`Item ${item.ItemNumber}`"
+              <img v-if="getImageUrl(item)" :src="getImageUrl(item)" :alt="`Item ${item.ItemNumber}`"
                 class="card-img-top item-image" />
               <div v-else class="image-placeholder text-muted small">
                 No image available
@@ -38,12 +38,7 @@
             </div>
 
             <div class="card-body d-flex flex-column p-3">
-              <div class="d-flex justify-content-between align-items-start gap-4 mb-2">
-                <div>
-                  <span class="text-muted small">Item Number </span>
-                  <span class="detail-value">{{ item.ItemNumber }}</span>
-                </div>
-              </div>
+
 
               <div class="detail-list small mb-2">
 
@@ -51,10 +46,7 @@
                   <span class="detail-label">Price</span>
                   <span class="detail-value">{{ formatCurrency(item.ItemAskingPrice) }}</span>
                 </div>
-                <div class="detail-row">
-                  <span class="detail-label">Color</span>
-                  <span class="detail-value">{{ item.ItemColor || '' }}</span>
-                </div>
+
               </div>
 
               <div class="mb-2">
@@ -147,8 +139,8 @@ export default {
       });
     },
 
-    getImageThumbnailUrl(item) {
-      return APIService.getImageThumbnailUrl(item);
+    getImageUrl(item) {
+      return APIService.getImageUrl(item);
     },
 
     formatCurrency(value) {
@@ -197,7 +189,7 @@ export default {
 }
 
 .image-wrap {
-  height: 160px;
+  height: 260px;
   background: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
   display: flex;

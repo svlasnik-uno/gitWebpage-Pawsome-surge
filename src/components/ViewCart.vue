@@ -1,13 +1,16 @@
 <template>
     <div class="container viewCart-page py-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3 rounded bg-white bg-opacity-75 shadow-sm">
+        <div
+            class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3 rounded bg-white bg-opacity-100 shadow-sm">
             <div>
                 <h2 class="mb-1">Shopping Cart</h2>
                 <p class="text mb-1">Review the items you have added to your cart.</p>
-                
+
                 <p class="text mb-0">You will be contacted shortly to complete your purchase and schedule delivery.</p>
-                
-                <p class="text mb-0">Omaha Area Delivery Only.</p>
+
+                <b>
+                    <p class="text mb-0">* Omaha Area Delivery Only.</p>
+                </b>
             </div>
 
             <div v-if="cartCount > 0" class="d-flex align-items-center gap-2 flex-wrap">
@@ -74,12 +77,9 @@
                             <thead>
                                 <tr>
                                     <th>Image</th>
-                                    <th>Item #</th>
-                                    <th>Type</th>
-                                    <th>Sub-type</th>
                                     <th>Color</th>
-                                    <th class="text-end">Price</th>
                                     <th>Description</th>
+                                    <th class="text-end">Price</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
@@ -94,14 +94,13 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="fw-semibold">{{ item.ItemNumber }}</td>
-                                    <td>{{ item.ItemType || "" }}</td>
-                                    <td>{{ item.ItemSubType || "" }}</td>
+
                                     <td>{{ item.ItemColor || "" }}</td>
-                                    <td class="text-end">{{ formatCurrency(item.ItemAskingPrice) }}</td>
                                     <td>
                                         <div class="description-cell">{{ item.ItemDescription || "" }}</div>
                                     </td>
+                                    <td class="text-end">{{ formatCurrency(item.ItemAskingPrice) }}</td>
+
                                     <td>
                                         <div class="d-flex justify-content-end gap-2 flex-wrap">
                                             <button type="button" class="btn btn-sm btn-outline-secondary"
@@ -210,8 +209,9 @@ export default {
 
 <style scoped>
 .viewCart-page {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .cart-card {
     border: 1px solid #dee2e6;
     border-radius: 0.75rem;
@@ -280,7 +280,7 @@ export default {
 }
 
 .description-cell {
-    max-width: 240px;
+    max-width: 800px;
     white-space: pre-wrap;
     word-break: break-word;
 }
