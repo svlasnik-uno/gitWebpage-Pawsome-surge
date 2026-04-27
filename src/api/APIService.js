@@ -8,7 +8,35 @@ const ITEMSUBTYPES_TABLE_NAME = "tblSubTypes";
 const ITEMSTATUS_TABLE_NAME = "tblItemStatus";
 const CUSTOMER_ORDER_TABLE_NAME = "CustOrders";
 const CUSTOMER_ORDER_DETAIL_TABLE_NAME = "CustOrderDetail";
-const URL = "http://localhost:8080"; // "https://pawsome-arts-and-crafts.com";
+const URL = "https://pawsome-arts-and-crafts.com"; // "http://localhost:8080";
+
+const ORDER_SELECT = `
+  orderNum,
+  created_at,
+  orderTotal,
+  orderEmail,
+  orderStreetAddress,
+  orderCity,
+  orderPhone,
+  custFirstName,
+  custLastName,
+  orderTotalItems,
+  orderStatus,
+  user_id,
+  details:${CUSTOMER_ORDER_DETAIL_TABLE_NAME} (
+    id,
+    created_at,
+    orderNum,
+    itemNumber,
+    tblItems:${TABLE_NAME} (
+      ItemNumber,
+      ItemDescription,
+      ItemImage,
+      ItemAskingPrice,
+      ItemStatus
+    )
+  )
+`;
 
 const APIService = {
   async signUp(email, password, profileData) {
@@ -22,12 +50,11 @@ const APIService = {
           userlastname: profileData.lastName,
           userphone: profileData.phone || null,
         },
-        emailRedirectTo: "https://www.pawsomeartsandcrafts.com/auth/callback",
+        emailRedirectTo: `${URL}/auth/callback`,
       },
     });
 
     if (error) throw error;
-
     return data;
   },
 
@@ -99,7 +126,6 @@ const APIService = {
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
     return data;
   },
@@ -124,12 +150,22 @@ const APIService = {
     if (error) throw error;
     return data;
   },
+  async getItemsByStatus(status) {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("*")
+      .eq("ItemStatus", status)
+      .order("ItemNumber", { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
 
   async getItemById(itemNumber) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .select("*")
-      .eq("ItemNumber", itemNumber)
+      .eq("ItemNumber", Number(itemNumber))
       .single();
 
     if (error) throw error;
@@ -161,11 +197,40 @@ const APIService = {
     return data;
   },
 
+  async updateItemInventoryStatus(itemNumber, newStatus) {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .update({ ItemStatus: newStatus })
+      .eq("ItemNumber", Number(itemNumber))
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateItemStatuses(itemNumbers = [], newStatus) {
+    const safeItemNumbers = itemNumbers
+      .map((n) => Number(n))
+      .filter((n) => Number.isFinite(n));
+
+    if (!safeItemNumbers.length) return [];
+
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .update({ ItemStatus: newStatus })
+      .in("ItemNumber", safeItemNumbers)
+      .select();
+
+    if (error) throw error;
+    return data || [];
+  },
+
   async deleteItem(itemNumber) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .delete()
-      .eq("ItemNumber", itemNumber)
+      .eq("ItemNumber", Number(itemNumber))
       .select();
 
     if (error) throw error;
@@ -176,7 +241,6 @@ const APIService = {
     if (!item || !item.ItemImage) return "";
 
     const fullFileName = `${item.ItemNumber}_${item.ItemImage}`;
-
     const { data } = supabase.storage
       .from(IMAGE_BUCKET)
       .getPublicUrl(fullFileName);
@@ -188,7 +252,6 @@ const APIService = {
     if (!item || !item.ItemImage) return "";
 
     const fullFileName = `thumbs/${item.ItemNumber}_${item.ItemImage}`;
-
     const { data } = supabase.storage
       .from(IMAGE_BUCKET)
       .getPublicUrl(fullFileName);
@@ -241,7 +304,6 @@ const APIService = {
     if (!item || !item.ItemImage) return "";
 
     const fullFileName = `${item.ItemNumber}_${item.ItemImage}`;
-
     const { data } = supabase.storage
       .from(IMAGE_BUCKET)
       .getPublicUrl(fullFileName);
@@ -275,7 +337,7 @@ const APIService = {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
       .select("*")
-      .eq("id", eventId)
+      .eq("id", Number(eventId))
       .single();
 
     if (error) throw error;
@@ -334,7 +396,7 @@ const APIService = {
     const { data, error } = await supabase
       .from(EVENT_TABLE_NAME)
       .delete()
-      .eq("id", eventId)
+      .eq("id", Number(eventId))
       .select();
 
     if (error) throw error;
@@ -345,7 +407,6 @@ const APIService = {
     if (!event || !event.eventImage) return "";
 
     const fullFileName = `Events/${event.id}_${event.eventImage}`;
-
     const { data } = supabase.storage
       .from(IMAGE_BUCKET)
       .getPublicUrl(fullFileName);
@@ -357,7 +418,6 @@ const APIService = {
     if (!event || !event.eventImage) return "";
 
     const fullFileName = `Events/thumbs/${event.id}_${event.eventImage}`;
-
     const { data } = supabase.storage
       .from(IMAGE_BUCKET)
       .getPublicUrl(fullFileName);
@@ -557,6 +617,7 @@ const APIService = {
 
   async createCustomerOrder(order) {
     const orderPayload = {
+      user_id: order.user_id || null,
       orderTotal: Number(order.orderTotal || 0),
       orderEmail: order.orderEmail,
       orderStreetAddress: order.orderStreetAddress,
@@ -565,6 +626,7 @@ const APIService = {
       custFirstName: order.custFirstName,
       custLastName: order.custLastName,
       orderTotalItems: Number(order.orderTotalItems || 0),
+      orderStatus: order.orderStatus || "P",
     };
 
     const { data, error } = await supabase
@@ -587,7 +649,7 @@ const APIService = {
     }
 
     const detailRows = items.map((item) => ({
-      orderNum,
+      orderNum: Number(orderNum),
       itemNumber: Number(item.ItemNumber),
     }));
 
@@ -600,19 +662,153 @@ const APIService = {
     return data;
   },
 
-  async updateItemsStatusToPending(items) {
-    if (!Array.isArray(items) || !items.length) return [];
+  async getOrderDetails(orderNum) {
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_DETAIL_TABLE_NAME)
+      .select(
+        `
+        id,
+        created_at,
+        orderNum,
+        itemNumber,
+        tblItems:${TABLE_NAME} (
+          ItemNumber,
+          ItemDescription,
+          ItemImage,
+          ItemAskingPrice,
+          ItemStatus
+        )
+      `,
+      )
+      .eq("orderNum", Number(orderNum))
+      .order("id", { ascending: true });
 
-    const itemNumbers = items.map((item) => Number(item.ItemNumber));
+    if (error) throw error;
+    return data || [];
+  },
+
+  async addItemToOrder(orderNum, itemNumber) {
+    const numericOrderNum = Number(orderNum);
+    const numericItemNumber = Number(itemNumber);
+
+    if (!numericOrderNum) throw new Error("orderNum is required.");
+    if (!numericItemNumber) throw new Error("itemNumber is required.");
+
+    const item = await this.getItemById(numericItemNumber);
+    if (!item) throw new Error("Item not found.");
+
+    const { data: existing, error: existingError } = await supabase
+      .from(CUSTOMER_ORDER_DETAIL_TABLE_NAME)
+      .select("id")
+      .eq("orderNum", numericOrderNum)
+      .eq("itemNumber", numericItemNumber)
+      .maybeSingle();
+
+    if (existingError) throw existingError;
+    if (existing) {
+      throw new Error("That item is already on this order.");
+    }
 
     const { data, error } = await supabase
-      .from(TABLE_NAME)
-      .update({ ItemStatus: "P" })
-      .in("ItemNumber", itemNumbers)
-      .select();
+      .from(CUSTOMER_ORDER_DETAIL_TABLE_NAME)
+      .insert([
+        {
+          orderNum: numericOrderNum,
+          itemNumber: numericItemNumber,
+        },
+      ])
+      .select()
+      .single();
 
     if (error) throw error;
     return data;
+  },
+
+  async removeItemFromOrder(detailId) {
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_DETAIL_TABLE_NAME)
+      .delete()
+      .eq("id", Number(detailId))
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateOrderAddress(orderNum, updates) {
+    const payload = {
+      custFirstName: updates.custFirstName,
+      custLastName: updates.custLastName,
+      orderPhone: updates.orderPhone,
+      orderCity: updates.orderCity,
+      orderStreetAddress: updates.orderStreetAddress,
+    };
+
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_TABLE_NAME)
+      .update(payload)
+      .eq("orderNum", Number(orderNum))
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateOrderTotals(orderNum, orderTotal, orderTotalItems) {
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_TABLE_NAME)
+      .update({
+        orderTotal: Number(orderTotal || 0),
+        orderTotalItems: Number(orderTotalItems || 0),
+      })
+      .eq("orderNum", Number(orderNum))
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async syncOrderTotals(orderNum) {
+    const details = await this.getOrderDetails(orderNum);
+
+    if (!details.length) {
+      return {
+        shouldDeleteOrder: true,
+        orderTotal: 0,
+        orderTotalItems: 0,
+        details: [],
+      };
+    }
+
+    const orderTotal = details.reduce(
+      (sum, detail) => sum + Number(detail?.tblItems?.ItemAskingPrice || 0),
+      0,
+    );
+
+    const orderTotalItems = details.length;
+
+    const order = await this.updateOrderTotals(
+      orderNum,
+      orderTotal,
+      orderTotalItems,
+    );
+
+    return {
+      shouldDeleteOrder: false,
+      orderTotal,
+      orderTotalItems,
+      order,
+      details,
+    };
+  },
+
+  async updateItemsStatusToPending(items) {
+    if (!Array.isArray(items) || !items.length) return [];
+    const itemNumbers = items.map((item) => Number(item.ItemNumber));
+    return this.updateItemStatuses(itemNumbers, "P");
   },
 
   async createCompleteCustomerOrder(order, items) {
@@ -632,6 +828,108 @@ const APIService = {
 
     return createdOrder;
   },
+
+  async getMyOrders(userId) {
+    if (!userId) {
+      throw new Error("userId is required.");
+    }
+
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_TABLE_NAME)
+      .select(ORDER_SELECT)
+      .eq("user_id", userId)
+      .order("orderNum", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getAllOrders() {
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_TABLE_NAME)
+      .select(ORDER_SELECT)
+      .order("user_id", { ascending: true })
+      .order("orderNum", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateCustomerOrder(orderNum, updates) {
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_TABLE_NAME)
+      .update(updates)
+      .eq("orderNum", Number(orderNum))
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteCustomerOrder(orderNum) {
+    const numericOrderNum = Number(orderNum);
+    const details = await this.getOrderDetails(numericOrderNum);
+
+    const itemNumbers = details
+      .map((detail) => Number(detail.itemNumber))
+      .filter((n) => Number.isFinite(n));
+
+    if (itemNumbers.length) {
+      await this.updateItemStatuses(itemNumbers, "AW");
+    }
+
+    const { data, error } = await supabase
+      .from(CUSTOMER_ORDER_TABLE_NAME)
+      .delete()
+      .eq("orderNum", numericOrderNum)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async removeItemAndSyncOrder(orderNum, detail) {
+    if (!detail?.id) {
+      throw new Error("Order detail id is required.");
+    }
+
+    if (detail?.itemNumber) {
+      await this.updateItemInventoryStatus(detail.itemNumber, "AW");
+    }
+
+    await this.removeItemFromOrder(detail.id);
+
+    const syncResult = await this.syncOrderTotals(orderNum);
+
+    if (syncResult.shouldDeleteOrder) {
+      await this.deleteCustomerOrder(orderNum);
+      return {
+        deletedOrder: true,
+      };
+    }
+
+    return {
+      deletedOrder: false,
+      details: syncResult.details,
+      orderTotal: syncResult.orderTotal,
+      orderTotalItems: syncResult.orderTotalItems,
+    };
+  },
+
+  async addItemAndSyncOrder(orderNum, itemNumber) {
+    await this.addItemToOrder(orderNum, itemNumber);
+
+    const syncResult = await this.syncOrderTotals(orderNum);
+
+    return {
+      details: syncResult.details,
+      orderTotal: syncResult.orderTotal,
+      orderTotalItems: syncResult.orderTotalItems,
+    };
+  },
+
   async sendEmail({ to, subject, text, html, from }) {
     const response = await fetch(
       "https://xpbcouwccxlaybkbtuqh.supabase.co/functions/v1/resend-email",
@@ -647,8 +945,6 @@ const APIService = {
     );
 
     const rawText = await response.text();
-    //console.log("status:", response.status);
-    //console.log("raw response:", rawText);
 
     let data;
     try {
@@ -743,6 +1039,7 @@ Pawsome Arts and Crafts`;
       html,
     });
   },
+
   async sendContactUsEmail({
     firstName,
     lastName,
@@ -848,6 +1145,7 @@ ${message}`;
       sentAt: sentAtIso,
     };
   },
+
   escapeHtml(value = "") {
     return String(value)
       .replace(/&/g, "&amp;")

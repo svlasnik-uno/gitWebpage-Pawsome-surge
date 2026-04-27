@@ -17,6 +17,9 @@ import PlaceOrder from "@/components/PlaceOrder.vue";
 import Login from "@/components/Login.vue";
 import ForgotPassword from "@/components/ForgotPassword.vue";
 import ResetPassword from "@/components/ResetPassword.vue";
+import MyOrders from "@/components/MyOrders.vue";
+import AdminOrders from "@/components/AdminOrders.vue";
+import { compile } from "vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -37,6 +40,8 @@ const routes = [
   { path: "/register", component: Register },
   { path: '/forgot-password', component: ForgotPassword },
   { path: '/reset-password', component: ResetPassword },
+  { path: "/my-orders", name: "MyOrders", component: MyOrders, meta: { requiresAuth: true } },
+  { path: "/AdminOrders", name: "AdminOrders", component: AdminOrders, meta: { requiresAuth: true, requiresAdmin: true } },
 ];
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

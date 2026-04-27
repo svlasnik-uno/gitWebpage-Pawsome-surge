@@ -14,42 +14,61 @@
         </router-link>
       </li>
 
-      <!-- Cart (only shows if items exist) -->
+
+
+      <!-- AUTHENTICATED USERS BLOCK -->
+      <template v-if="auth.isAuthenticated">
+      <!-- Cart -->
       <li class="nav-item" v-if="cart.cartCount > 0">
-        <router-link to="/cart" class="nav-link">
+        <router-link to="/cart" class="nav-link" :class="{ active: isActive('/cart') }">
           View Cart ({{ cart.cartCount }})
         </router-link>
       </li>
+        <!-- My Orders -->
+        <li class="nav-item">
+          <router-link to="/my-orders" class="nav-link" :class="{ active: isActive('/my-orders') }">
+            My Orders
+          </router-link>
+        </li>
 
-      <!-- Admin-only section -->
-      <li v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="nav-item separator">
-        <span class="nav-link">|</span>
-      </li>
+        <!-- ADMIN SECTION -->
+        <template v-if="auth.usertype === 'admin'">
+          <li class="nav-item separator">
+            <span class="nav-link">|</span>
+          </li>
 
-      <li class="nav-item" v-if="auth.isAuthenticated && auth.usertype === 'admin'">
-        <router-link to="/itemList" class="nav-link">
-          View Items
-        </router-link>
-      </li>
+          <li class="nav-item">
+            <router-link to="/itemList" class="nav-link" :class="{ active: isActive('/itemList') }">
+              View Items
+            </router-link>
+          </li>
 
-      <li class="nav-item" v-if="auth.isAuthenticated && auth.usertype === 'admin'">
-        <router-link to="/eventListAdmin" class="nav-link">
-          Manage Events
-        </router-link>
-      </li>
+          <li class="nav-item">
+            <router-link to="/eventListAdmin" class="nav-link" :class="{ active: isActive('/eventListAdmin') }">
+              Manage Events
+            </router-link>
+          </li>
+
+          <li class="nav-item">
+            <router-link to="/AdminOrders" class="nav-link" :class="{ active: isActive('/AdminOrders') }">
+              Manage Orders
+            </router-link>
+          </li>
+        </template>
+
+      </template>
 
       <!-- Auth buttons -->
       <li class="nav-item">
-        <!-- NOT logged in -->
         <router-link v-if="!auth.isAuthenticated" to="/login" class="nav-link">
           Login
         </router-link>
 
-        <!-- Logged in -->
         <router-link v-else to="/login" class="nav-link" @click="handleLogout">
           Logout
         </router-link>
       </li>
+
     </ul>
   </nav>
 </template>

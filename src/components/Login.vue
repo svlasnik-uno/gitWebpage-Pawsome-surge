@@ -176,6 +176,7 @@ export default {
 
         auth.setAuth({
           user,
+          userId: user.id || "",
           usertype: profile?.usertype || null,
           firstName: profile?.userfirstname || "",
           lastName: profile?.userlastname || "",

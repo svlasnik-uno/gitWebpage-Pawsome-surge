@@ -4,6 +4,7 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     isAuthenticated: false,
     user: null,
+    userId: "",
     usertype: null,
     firstName: "",
     lastName: "",
@@ -14,6 +15,7 @@ export const useAuthStore = defineStore("auth", {
   actions: {
     setAuth({
       user,
+      userId = "",
       usertype = null,
       firstName = "",
       lastName = "",
@@ -22,6 +24,7 @@ export const useAuthStore = defineStore("auth", {
     }) {
       this.isAuthenticated = true;
       this.user = user;
+      this.userId = userId;
       this.usertype = usertype;
       this.firstName = firstName;
       this.lastName = lastName;
@@ -32,6 +35,7 @@ export const useAuthStore = defineStore("auth", {
     clearAuth() {
       this.isAuthenticated = false;
       this.user = null;
+      this.userId = "";
       this.usertype = null;
       this.firstName = "";
       this.lastName = "";
@@ -45,6 +49,7 @@ export const useAuthStore = defineStore("auth", {
     pick: [
       "isAuthenticated",
       "user",
+      "userId",
       "usertype",
       "firstName",
       "lastName",
