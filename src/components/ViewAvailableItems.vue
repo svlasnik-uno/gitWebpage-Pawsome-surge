@@ -28,7 +28,7 @@
         No available items were found.
       </div>
 
-<div v-else class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+      <div v-else class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
         <div v-for="item in items" :key="item.ItemNumber" class="col">
           <div class="card h-100 shadow-sm item-card">
             <div class="image-wrap">
@@ -73,6 +73,10 @@
         </div>
       </div>
     </div>
+    <button v-show="showBackToTop" type="button" class="btn btn-primary back-to-top" @click="scrollToTop"
+      aria-label="Back to top" title="Back to top">
+      <i class="bi bi-arrow-up"></i>
+    </button>
   </div>
 </template>
 
@@ -96,6 +100,7 @@ export default {
       errorMessage: "",
       items: [],
       cartStore: null,
+      showBackToTop: false,
     };
   },
 
@@ -168,6 +173,17 @@ export default {
     statusBadgeClass(status) {
       return status === "A" ? "text-bg-success" : "text-bg-secondary";
     },
+
+    handleScroll() {
+      this.showBackToTop = window.scrollY > 300;
+    },
+
+    scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    },
   },
 
   created() {
@@ -178,9 +194,17 @@ export default {
     if (this.autoLoad) {
       this.loadItems();
     }
+
+    window.addEventListener("scroll", this.handleScroll);
+    this.handleScroll();
+  },
+
+  beforeUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
   },
 };
 </script>
+
 
 <style scoped>
 .item-card {
@@ -262,6 +286,25 @@ export default {
   word-break: break-word;
 }
 
+.back-to-top {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.2);
+}
+
+.back-to-top i {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
 @media (max-width: 767.98px) {
   .item-card {
     max-width: 100%;
@@ -278,6 +321,13 @@ export default {
 
   .detail-value {
     text-align: left;
+  }
+
+  .back-to-top {
+    right: 1rem;
+    bottom: 1rem;
+    width: 44px;
+    height: 44px;
   }
 }
 </style>
