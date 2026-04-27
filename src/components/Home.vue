@@ -1,6 +1,6 @@
 ﻿<template>
   <div class="site">
-    <main class="content container-fluid py-4">
+    <main class="container-fluid py-4 home-main">
       <div
         class="slideshow-container"
         @touchstart.stop="handleTouchStart"
@@ -162,6 +162,14 @@ async loadSlideshowImages() {
 </script>
 
 <style scoped>
+.site {
+  min-height: auto;
+}
+
+.home-main {
+  flex: 0 0 auto;
+}
+
 .slideshow-container {
   position: relative;
   max-width: 650px;
@@ -202,10 +210,6 @@ async loadSlideshowImages() {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.nav-btn:hover {
-  background: rgba(0, 0, 0, 0.75);
 }
 
 .prev {

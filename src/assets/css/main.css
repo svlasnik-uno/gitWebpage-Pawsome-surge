@@ -1,59 +1,26 @@
-/*************************************
-This css file includes several different formatting examples
-GENERAL
-https://fonts.google.com/specimen/Pacifico#license
-Images should be 1x1 ratio to display correctly
-**************************************/
-/*@import url("https://fonts.googleapis.com/css?family=Pacifico");*/
-
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-mark {
-  background-color: gray;
-  color: black;
-}
-
-.logo-img {
-  height: 40px;
-  width: auto;
 }
 
 html,
 body,
 #app {
-  height: 100%;
   margin: 0;
+  min-height: 100%;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
-.content {
+.app-main {
   flex: 1;
+  min-height: 0;
 }
 
-.nav-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
-}
-.navbar {
-  font-size: 1.3rem;
-}
-/* Change the color of links on hover */
-.navbar-centered a:hover {
-  background-color: #ddd;
-  color: black;
-}
-.navbar-brand img {
-  height: 50px;
-  float: left;
-  margin-right: 7px;
-  margin-left: 7px;
-}
 .footer {
   width: 100%;
   background-color: rgb(227, 225, 225);
@@ -63,7 +30,6 @@ body,
 
 html,
 body {
-  height: 100%;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
     url("/img/background.jpg");
@@ -71,22 +37,3 @@ body {
   background-attachment: fixed;
   background-size: cover;
 }
-
-body.site {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-@media (max-width: 767.98px) {
-  .site,
-  .content {
-    min-height: auto !important;
-    height: auto !important;
-    flex: 0 0 auto;
-  }
-}
-.site-content {
-  flex: 1; /* pushes footer to bottom on short pages */
-}
-
-
