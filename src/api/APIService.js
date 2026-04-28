@@ -8,7 +8,7 @@ const ITEMSUBTYPES_TABLE_NAME = "tblSubTypes";
 const ITEMSTATUS_TABLE_NAME = "tblItemStatus";
 const CUSTOMER_ORDER_TABLE_NAME = "CustOrders";
 const CUSTOMER_ORDER_DETAIL_TABLE_NAME = "CustOrderDetail";
-const URL = "https://pawsome-arts-and-crafts.com"; // "http://localhost:8080";
+const URL = "https://pawsomeartsandcrafts.com"; // "http://localhost:8080";
 
 const ORDER_SELECT = `
   orderNum,
@@ -70,6 +70,7 @@ const APIService = {
   async resetPassword(email) {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${URL}/reset-password`,
+      captchaToken: undefined, // Add this to ensure compatibility
     });
     if (error) throw error;
     return data;
