@@ -18,12 +18,12 @@
 
       <!-- AUTHENTICATED USERS BLOCK -->
       <template v-if="auth.isAuthenticated">
-      <!-- Cart -->
-      <li class="nav-item" v-if="cart.cartCount > 0">
-        <router-link to="/cart" class="nav-link" :class="{ active: isActive('/cart') }">
-          View Cart ({{ cart.cartCount }})
-        </router-link>
-      </li>
+        <!-- Cart -->
+        <li class="nav-item" v-if="cart.cartCount > 0">
+          <router-link to="/cart" class="nav-link" :class="{ active: isActive('/cart') }">
+            View Cart ({{ cart.cartCount }})
+          </router-link>
+        </li>
         <!-- My Orders -->
         <li class="nav-item">
           <router-link to="/my-orders" class="nav-link" :class="{ active: isActive('/my-orders') }">
@@ -60,9 +60,15 @@
 
       <!-- Auth buttons -->
       <li class="nav-item">
-        <router-link v-if="!auth.isAuthenticated" to="/login" class="nav-link">
-          Login
-        </router-link>
+        <div v-if="!auth.isAuthenticated" class="d-flex gap-2">
+          <router-link to="/login" class="nav-link">
+            Login
+          </router-link>
+
+          <router-link to="/register" class="nav-link">
+            Create Account
+          </router-link>
+        </div>
 
         <router-link v-else to="/login" class="nav-link" @click="handleLogout">
           Logout
