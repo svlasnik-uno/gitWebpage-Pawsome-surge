@@ -153,7 +153,7 @@
               your SPAM folder if you don't see the message.
             </p>
             <p class="mb-0 text fw-semibold">
-              <b>* Delivery available for the Omaha Area only.</b>
+              <b>* Free Delivery available for the Omaha Area only.</b>
             </p>
           </div>
 

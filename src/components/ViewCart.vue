@@ -9,7 +9,7 @@
                 <p class="text mb-0">You will be contacted shortly to complete your purchase and schedule delivery.</p>
 
                 <b>
-                    <p class="text mb-0">* Omaha Area Delivery Only.</p>
+                    <p class="text mb-0">* Free Delivery to the Omaha Area Only.</p>
                 </b>
             </div>
 
@@ -49,14 +49,6 @@
                             </div>
 
                             <div class="flex-grow-1 min-w-0">
-                                <div class="text-muted small">Item Number</div>
-                                <div class="fw-semibold mb-2">{{ item.ItemNumber }}</div>
-                                <div class="small mb-1"><span class="text-muted fw-semibold">Type:</span> {{
-                                    item.ItemType || "" }}</div>
-                                <div class="small mb-1"><span class="text-muted fw-semibold">Sub-type:</span> {{
-                                    item.ItemSubType || "" }}</div>
-                                <div class="small mb-1"><span class="text-muted fw-semibold">Color:</span> {{
-                                    item.ItemColor || "" }}</div>
                                 <div class="small mb-1"><span class="text-muted fw-semibold">Price:</span> {{
                                     formatCurrency(item.ItemAskingPrice) }}</div>
                                 <div class="small text-muted mt-2">{{ item.ItemDescription || "" }}</div>

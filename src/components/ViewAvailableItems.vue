@@ -5,7 +5,7 @@
         <h2 class="mb-1">Available Items</h2>
         <p class="text mb-0">Browse currently available inventory and add items to your cart.</p>
         <b>
-          <p class="text mb-0">Available for local, Omaha Area, delivery only.</p>
+          <p class="text mb-0">* Free Delivery available for the Omaha Area only.</p>
         </b>
         <p class="text mb-0 small">* All dimensions are approximate</p>
       </div>
