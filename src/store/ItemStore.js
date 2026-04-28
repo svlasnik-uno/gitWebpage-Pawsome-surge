@@ -11,6 +11,13 @@ export const useItemStore = defineStore("itemStore", {
     hasLoadedAllItems: false,
   }),
 
+  // Persist only static data that doesn't change frequently
+  persist: {
+    key: 'item-store',
+    storage: localStorage,
+    paths: ['subTypes', 'statuses'], // Only persist subTypes and statuses
+  },
+
   actions: {
     setItems(items) {
       this.items = Array.isArray(items) ? items : [];

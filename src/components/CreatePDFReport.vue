@@ -125,6 +125,37 @@ import autoTable from "jspdf-autotable";
 import APIService from "@/api/APIService";
 import { useItemStore } from "@/store/ItemStore";
 
+// Static data moved outside component for better performance
+const ITEM_TYPE_OPTIONS = Object.freeze([
+    { value: "Flowers", label: "Flowers" },
+    { value: "Crochet", label: "Crochet" },
+]);
+
+const SORT_OPTIONS = Object.freeze([
+    { value: "ItemNumber", label: "Item Number" },
+    { value: "ItemType", label: "Item Type" },
+    { value: "ItemSubType", label: "Item SubType" },
+    { value: "ItemStatus", label: "Item Status" },
+]);
+
+const HEADERS = Object.freeze([
+    "ItemNumber",
+    "ItemType",
+    "ItemSubType",
+    "ItemStatus",
+    "ItemDescription",
+    "ItemAskingPrice",
+]);
+
+const HEADER_LABELS = Object.freeze({
+    ItemNumber: "Item #",
+    ItemType: "Type",
+    ItemSubType: "SubType",
+    ItemStatus: "Status",
+    Description: "Description",
+    Price: "Price",
+});
+
 export default {
     name: "CreatePDFReport",
 
@@ -148,10 +179,7 @@ export default {
                 itemStatus: [],
             },
 
-            itemTypeOptions: [
-                { value: "Flowers", label: "Flowers" },
-                { value: "Crochet", label: "Crochet" },
-            ],
+            itemTypeOptions: ITEM_TYPE_OPTIONS,
 
             subTypeOptions: [
                 // This will be populated dynamically from the API
@@ -162,12 +190,7 @@ export default {
 
             itemStore: null,
 
-            sortOptions: [
-                { value: "ItemNumber", label: "Item Number" },
-                { value: "ItemType", label: "Item Type" },
-                { value: "ItemSubType", label: "Item SubType" },
-                { value: "ItemStatus", label: "Item Status" },
-            ],
+            sortOptions: SORT_OPTIONS,
 
             sortSelections: {
                 first: "",
@@ -175,23 +198,19 @@ export default {
                 third: "",
             },
             // columns to include in the report and their display labels
-            headers: [
-                "ItemNumber",
-                "ItemType",
-                "ItemSubType",
-                "ItemStatus",
-                "ItemDescription",
-                "ItemAskingPrice",
-            ],
+            headers: HEADERS,
 
-            headerLabels: {
-                ItemNumber: "Item #",
-                ItemType: "Type",
-                ItemSubType: "SubType",
-                ItemStatus: "Status",
-                Description: "Description",
-                Price: "Price",
-            },
+            headerLabels: HEADER_LABELS,
+
+            // Cached formatters for performance
+            currencyFormatter: new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+            }),
+            dateFormatter: new Intl.DateTimeFormat("en-US", {
+                year: "numeric", month: "short", day: "numeric",
+                hour: "numeric", minute: "2-digit",
+            }),
         };
     },
 
@@ -386,10 +405,7 @@ export default {
         // Formats a numeric value as currency, returning an empty string for null or empty values
         formatCurrency(value) {
             if (value == null || value === "") return "";
-            return new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-            }).format(value);
+            return this.currencyFormatter.format(value);
         },
         // Handles the generation of the PDF report by first loading the relevant items based on 
         // the selected filters and then generating the PDF if items are found
@@ -420,10 +436,7 @@ export default {
                 const tableBody = this.items.map((item) =>
                     exportHeaders.map((header) => this.formatPdfCellValue(header, item))
                 );
-                const generatedAt = new Intl.DateTimeFormat("en-US", {
-                    year: "numeric", month: "short", day: "numeric",
-                    hour: "numeric", minute: "2-digit",
-                }).format(new Date());
+                const generatedAt = this.dateFormatter.format(new Date());
                 // Use autoTable to generate the table in the PDF, with custom styling and pagination
                 autoTable(doc, {
                     head: tableHead,
@@ -501,7 +514,7 @@ export default {
     async mounted() {
         this.itemStore = useItemStore();
         await this.loadSubTypes();
-        this.loadStatusOptions();
+        await this.loadStatusOptions();
     },
 };
 </script>

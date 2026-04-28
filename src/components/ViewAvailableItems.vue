@@ -106,6 +106,16 @@ export default {
       itemStore: null,
       authStore: null,
       showBackToTop: false,
+      currencyFormatter: new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }),
+      statusMap: Object.freeze({
+        A: "Available",
+        S: "Sold",
+        R: "Replace",
+        K: "Kept",
+      }),
     };
   },
 
@@ -159,21 +169,11 @@ export default {
     formatCurrency(value) {
       if (value == null || value === "") return "";
 
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(value);
+      return this.currencyFormatter.format(value);
     },
 
     formatStatus(value) {
-      const statusMap = {
-        A: "Available",
-        S: "Sold",
-        R: "Replace",
-        K: "Kept",
-      };
-
-      return statusMap[value] || value || "";
+      return this.statusMap[value] || value || "";
     },
 
     statusBadgeClass(status) {
