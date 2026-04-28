@@ -28,7 +28,10 @@
         </div>
 
         <div v-if="!cartItems.length && !isVerifying" class="alert alert-info" role="alert">
-            Your cart is empty.
+            Your cart is empty.<br><br>
+            <button type="button" class="btn btn-secondary" @click="continueShopping">
+                View Available Items
+            </button>
         </div>
 
         <div v-else-if="!isVerifying">
@@ -123,45 +126,30 @@
                     </div>
                 </div>
             </div>
+            <div class="d-flex justify-content-end flex-wrap gap-2 mb-4 p-3 rounded bg-white bg-opacity-100 shadow-sm">
 
-            <div class="d-flex justify-content-end flex-wrap gap-2 mt-4">
                 <button type="button" class="btn btn-secondary" @click="continueShopping">
                     Continue Shopping
                 </button>
                 <button type="button" class="btn btn-secondary" @click="clearCart">
                     Clear Cart
                 </button>
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    @click="checkout"
-                    :disabled="!cartCount || isVerifying"
-                >
+                <button type="button" class="btn btn-secondary" @click="checkout" :disabled="!cartCount || isVerifying">
                     Checkout
                 </button>
             </div>
         </div>
 
         <!-- Unavailable items modal -->
-        <div
-            class="modal fade"
-            id="unavailableItemsModal"
-            tabindex="-1"
-            aria-labelledby="unavailableItemsModalLabel"
-            aria-hidden="true"
-        >
+        <div class="modal fade" id="unavailableItemsModal" tabindex="-1" aria-labelledby="unavailableItemsModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="unavailableItemsModalLabel">
                             Cart Updated
                         </h5>
-                        <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                        ></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">

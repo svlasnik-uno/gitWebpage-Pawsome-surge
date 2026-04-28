@@ -11,7 +11,7 @@
       </div>
 
       <div v-if="cartCount > 0" class="badge bg-secondary fs-6" style="cursor: pointer;" @click="$router.push('/cart')">
-        View Cart: {{ cartCount }} item<span v-if="cartCount !== 1">s</span>
+        View Cart and Checkout: {{ cartCount }} item<span v-if="cartCount !== 1">s</span>
       </div>
     </div>
 

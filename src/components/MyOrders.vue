@@ -21,9 +21,20 @@
     </div>
 
     <div v-if="loading" class="alert alert-info">Loading your orders...</div>
-    <div v-else-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+    <div v-else-if="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
     <div v-else-if="!orders.length" class="alert alert-secondary">
       You do not have any orders yet.
+      <button
+        type="button"
+        class="btn btn-secondary ms-2"
+        @click="continueShopping"
+      >
+        View Available Items
+      </button>
     </div>
 
     <div v-else class="card shadow-sm">
@@ -59,13 +70,15 @@
                   </td>
                 </tr>
 
-                <!-- Details row -->
                 <tr v-if="expandedOrders[order.orderNum]" class="details-row">
                   <td colspan="6">
                     <div class="p-2">
                       <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                          <div><strong>Name:</strong> {{ order.custFirstName }} {{ order.custLastName }}</div>
+                          <div>
+                            <strong>Name:</strong>
+                            {{ order.custFirstName }} {{ order.custLastName }}
+                          </div>
                           <div><strong>Email:</strong> {{ order.orderEmail }}</div>
                           <div><strong>Phone:</strong> {{ order.orderPhone }}</div>
                         </div>
@@ -89,11 +102,11 @@
                           class="order-item-row"
                         >
                           <div class="d-flex gap-3 align-items-start">
-                            <!-- Thumbnail -->
                             <div class="thumb-wrap">
                               <img
                                 v-if="getImageThumbnailUrl(detail.tblItems)"
                                 :src="getImageThumbnailUrl(detail.tblItems)"
+                                :alt="detail.tblItems?.ItemDescription || `Item #${detail.itemNumber}`"
                                 class="thumb-image"
                               />
                               <div v-else class="thumb-placeholder text-muted small">
@@ -101,7 +114,6 @@
                               </div>
                             </div>
 
-                            <!-- Item info -->
                             <div class="flex-grow-1 min-w-0">
                               <div class="fw-semibold">
                                 {{ detail.tblItems?.ItemDescription || `Item #${detail.itemNumber}` }}
@@ -111,7 +123,6 @@
                               </div>
                             </div>
 
-                            <!-- Price -->
                             <div class="text-end fw-semibold">
                               {{ formatCurrency(detail.tblItems?.ItemAskingPrice) }}
                             </div>
@@ -153,10 +164,17 @@ export default {
     };
   },
 
+  created() {
+    this.authStore = useAuthStore();
+    this.loadOrders();
+  },
+
   methods: {
     async loadOrders() {
-      this.loading = true;
+      if (this.loading) return;
+
       this.errorMessage = "";
+      this.loading = true;
 
       try {
         if (!this.authStore?.isAuthenticated || !this.authStore?.userId) {
@@ -165,9 +183,16 @@ export default {
         }
 
         const orders = await APIService.getMyOrders(this.authStore.userId);
-        this.orders = orders || [];
+        this.orders = Array.isArray(orders) ? orders : [];
+
+        const validOrderNums = new Set(this.orders.map((order) => order.orderNum));
+        this.expandedOrders = Object.fromEntries(
+          Object.entries(this.expandedOrders).filter(([orderNum]) =>
+            validOrderNums.has(Number(orderNum))
+          )
+        );
       } catch (error) {
-        this.errorMessage = error.message || "Failed to load your orders.";
+        this.errorMessage = error?.message || "Failed to load your orders.";
       } finally {
         this.loading = false;
       }
@@ -188,6 +213,8 @@ export default {
     },
 
     formatDate(dateValue) {
+      if (!dateValue) return "";
+
       return new Intl.DateTimeFormat("en-US", {
         dateStyle: "medium",
         timeStyle: "short",
@@ -209,11 +236,10 @@ export default {
     goHome() {
       this.$router.push("/");
     },
-  },
 
-  created() {
-    this.authStore = useAuthStore();
-    this.loadOrders();
+    continueShopping() {
+      this.$router.push("/availableItems");
+    },
   },
 };
 </script>
