@@ -247,6 +247,7 @@ async function submitContactForm() {
 .foot-button:hover {
   text-decoration: underline;
 }
+
 .footer a.foot-link.active {
   font-weight: bold;
   text-decoration: underline;
@@ -254,6 +255,7 @@ async function submitContactForm() {
   padding: 2px 8px;
   border-radius: 6px;
 }
+
 .active {
   font-weight: bold;
   text-decoration: underline;

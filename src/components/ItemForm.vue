@@ -242,17 +242,8 @@ export default {
 
       try {
         const itemNumber = this.$route.params.itemNumber;
-
-        const cachedItem = this.itemStore.items.find(
-          (item) => String(item.ItemNumber) === String(itemNumber)
-        );
-
-        if (cachedItem) {
-          this.form = { ...this.form, ...cachedItem };
-        } else {
-          const data = await APIService.getItemById(itemNumber);
-          this.form = { ...this.form, ...data };
-        }
+        const data = await this.itemStore.fetchItemById(itemNumber);
+        this.form = { ...this.form, ...data };
       } catch (error) {
         this.errorMessage = error.message || "Failed to load item.";
       } finally {
@@ -262,15 +253,7 @@ export default {
 
     async loadSubTypes() {
       try {
-        let subTypesFromApi = [];
-
-        if (this.itemStore.subTypes.length) {
-          subTypesFromApi = this.itemStore.subTypes;
-        } else {
-          const data = await APIService.getItemSubTypes();
-          subTypesFromApi = Array.isArray(data) ? data : [];
-          this.itemStore.setSubTypes(subTypesFromApi);
-        }
+        const subTypesFromApi = await this.itemStore.fetchSubTypes();
 
         this.subTypeOptions = subTypesFromApi
           .filter((subType) => subType?.subTypeName)
@@ -285,15 +268,7 @@ export default {
 
     async loadStatusOptions() {
       try {
-        let statusesFromApi = [];
-
-        if (this.itemStore.statuses.length) {
-          statusesFromApi = this.itemStore.statuses;
-        } else {
-          const data = await APIService.getItemStatuses();
-          statusesFromApi = Array.isArray(data) ? data : [];
-          this.itemStore.setStatuses(statusesFromApi);
-        }
+        const statusesFromApi = await this.itemStore.fetchStatuses();
 
         this.statusOptions = statusesFromApi
           .filter((status) => status?.statusOption)

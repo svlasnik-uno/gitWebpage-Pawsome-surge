@@ -12,19 +12,10 @@
             hand-crocheted items, and other arts and crafts.
             <br />
             <br />
-            We love animals, and 10% of all net sales are donated to
+            We love animals, and 10% of profits are donated to
             <br />
-            <a
-              href="https://townandcountryanimalrescue.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="/img/tacar-logo.jpg"
-                alt="Town and Country Animal Rescue logo"
-                width="30"
-                height="30"
-              />
+            <a href="https://townandcountryanimalrescue.org/" target="_blank" rel="noopener noreferrer">
+              <img src="/img/tacar-logo.jpg" alt="Town and Country Animal Rescue logo" width="30" height="30" />
               Town and Country Animal Rescue
             </a>
             <br />
@@ -32,11 +23,7 @@
           </p>
 
           <p class="card3-img-top mb-0">
-            <img
-              src="/img/logo.png"
-              alt="Pawsome arts and crafts logo"
-              class="card-img-top about-logo"
-            />
+            <img src="/img/logo.png" alt="Pawsome arts and crafts logo" class="card-img-top about-logo" />
           </p>
         </div>
       </div>
@@ -56,14 +43,16 @@
   max-width: 400px;
   margin: 0 auto;
 }
+
 .about-card {
   height: 700px;
   overflow: hidden;
   border: none;
 }
+
 .about-container {
-  max-width: 100%; /* try 600px–750px */
+  max-width: 100%;
+  /* try 600px–750px */
 
 }
-
 </style>

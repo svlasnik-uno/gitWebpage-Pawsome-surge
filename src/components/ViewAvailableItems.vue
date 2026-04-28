@@ -84,6 +84,8 @@
 <script>
 import APIService from "@/api/APIService";
 import { useCartStore } from "@/store/CartStore";
+import { useItemStore } from "@/store/ItemStore";
+import { useAuthStore } from "@/store/AuthStore";
 
 export default {
   name: "AvailableItemGrid",
@@ -101,6 +103,8 @@ export default {
       errorMessage: "",
       items: [],
       cartStore: null,
+      itemStore: null,
+      authStore: null,
       showBackToTop: false,
     };
   },
@@ -117,11 +121,7 @@ export default {
       this.errorMessage = "";
 
       try {
-        const data = await APIService.getItemsSortCriteria(
-          [{ column: "ItemNumber", ascending: true }],
-          [{ column: "ItemStatus", operator: "eq", value: "AW" }]
-        );
-
+        const data = await this.itemStore.fetchAvailableItems();
         this.items = Array.isArray(data) ? data : [];
       } catch (error) {
         this.errorMessage = error.message || "Failed to load available items.";
@@ -132,6 +132,11 @@ export default {
 
     addToCart(item) {
       if (this.isInCart(item)) return;
+      if (!this.authStore?.isAuthenticated) {
+        this.cartStore.savePendingCartItem(item);
+        this.$router.push({ path: "/login", query: { from: this.$route.fullPath } });
+        return;
+      }
       this.cartStore.addToCart(item);
     },
 
@@ -189,6 +194,8 @@ export default {
 
   created() {
     this.cartStore = useCartStore();
+    this.itemStore = useItemStore();
+    this.authStore = useAuthStore();
   },
 
   mounted() {

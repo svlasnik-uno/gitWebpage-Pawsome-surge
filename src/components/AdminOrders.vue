@@ -258,6 +258,7 @@
 <script>
 import APIService from "@/api/APIService";
 import { useAuthStore } from "@/store/AuthStore";
+import { useItemStore } from "@/store/ItemStore";
 
 export default {
     name: "AdminOrders",
@@ -279,6 +280,7 @@ export default {
             expandedOrders: {},
             editableOrders: {},
             newItemNumbers: {},
+            itemStore: null,
         };
     },
 
@@ -361,7 +363,7 @@ export default {
 
                 const [orders, availableItems] = await Promise.all([
                     APIService.getAllOrders(),
-                    APIService.getItemsByStatus("AW"),
+                    this.itemStore.fetchItemsByStatus("AW"),
                 ]);
 
                 this.orders = Array.isArray(orders) ? orders : [];
@@ -466,7 +468,8 @@ export default {
                 order.orderTotalItems = result.orderTotalItems || 0;
 
                 this.newItemNumbers[order.orderNum] = "";
-                this.availableItems = await APIService.getItemsByStatus("AW");
+                this.itemStore.clearCache();
+                this.availableItems = await this.itemStore.fetchItemsByStatus("AW", true);
             } catch (error) {
                 console.error("Failed to add item:", error);
                 this.errorMessage = error.message || "Failed to add item to order.";
@@ -492,14 +495,16 @@ export default {
                     delete this.expandedOrders[order.orderNum];
                     delete this.editableOrders[order.orderNum];
                     delete this.newItemNumbers[order.orderNum];
-                    this.availableItems = await APIService.getItemsByStatus("AW");
+                    this.itemStore.clearCache();
+                    this.availableItems = await this.itemStore.fetchItemsByStatus("AW", true);
                     return;
                 }
 
                 order.details = result.details || [];
                 order.orderTotal = result.orderTotal || 0;
                 order.orderTotalItems = result.orderTotalItems || 0;
-                this.availableItems = await APIService.getItemsByStatus("AW");
+                this.itemStore.clearCache();
+                this.availableItems = await this.itemStore.fetchItemsByStatus("AW", true);
             } catch (error) {
                 console.error("Failed to remove item:", error);
                 this.errorMessage = error.message || "Failed to remove item from order.";
@@ -524,7 +529,8 @@ export default {
                 delete this.expandedOrders[order.orderNum];
                 delete this.editableOrders[order.orderNum];
                 delete this.newItemNumbers[order.orderNum];
-                this.availableItems = await APIService.getItemsByStatus("AW");
+                this.itemStore.clearCache();
+                this.availableItems = await this.itemStore.fetchItemsByStatus("AW", true);
             } catch (error) {
                 console.error("Failed to delete order:", error);
                 this.errorMessage = error.message || "Failed to delete order.";
@@ -566,6 +572,7 @@ export default {
 
     created() {
         this.authStore = useAuthStore();
+        this.itemStore = useItemStore();
         this.loadOrders();
     },
 };

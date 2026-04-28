@@ -195,6 +195,7 @@
 import APIService from "@/api/APIService";
 import { useCartStore } from "@/store/CartStore";
 import { useAuthStore } from "@/store/AuthStore";
+import { useItemStore } from "@/store/ItemStore";
 import { Modal } from "bootstrap";
 
 export default {
@@ -204,6 +205,7 @@ export default {
         return {
             cartStore: null,
             authStore: null,
+            itemStore: null,
             isVerifying: false,
             removedItems: [],
         };
@@ -279,7 +281,7 @@ export default {
                 const results = await Promise.all(
                     this.cartItems.map(async (cartItem) => {
                         try {
-                            const latestItem = await APIService.getItemById(cartItem.ItemNumber);
+                            const latestItem = await this.itemStore.fetchItemById(cartItem.ItemNumber);
 
                             return {
                                 cartItem,
@@ -320,6 +322,7 @@ export default {
     async created() {
         this.cartStore = useCartStore();
         this.authStore = useAuthStore();
+        this.itemStore = useItemStore();
 
         if (!this.authStore?.isAuthenticated || !this.authStore?.email) {
             this.$router.push("/login");

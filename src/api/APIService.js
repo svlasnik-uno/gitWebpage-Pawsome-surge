@@ -172,6 +172,23 @@ const APIService = {
     return data;
   },
 
+  async getItemsByIds(itemNumbers = []) {
+    const safeItemNumbers = itemNumbers
+      .map((n) => Number(n))
+      .filter((n) => Number.isFinite(n));
+
+    if (!safeItemNumbers.length) return [];
+
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("*")
+      .in("ItemNumber", safeItemNumbers)
+      .order("ItemNumber", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+
   async createItem(item) {
     const { data, error } = await supabase
       .from(TABLE_NAME)

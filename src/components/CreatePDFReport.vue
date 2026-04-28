@@ -123,6 +123,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import APIService from "@/api/APIService";
+import { useItemStore } from "@/store/ItemStore";
 
 export default {
     name: "CreatePDFReport",
@@ -158,6 +159,8 @@ export default {
 
             statusOptions: [
             ],
+
+            itemStore: null,
 
             sortOptions: [
                 { value: "ItemNumber", label: "Item Number" },
@@ -320,7 +323,7 @@ export default {
                 const filterCriteria = this.buildFilterCriteria();
                 const sortCriteria = this.resolvedSortCriteria;
 
-                const data = await APIService.getItemsSortCriteria(sortCriteria, filterCriteria);
+                const data = await this.itemStore.fetchItemsSortCriteria(sortCriteria, filterCriteria);
                 this.items = Array.isArray(data) ? data : [];
                 if (!this.items.length) {
                     window.alert("No items matched the selected report criteria.");
@@ -338,9 +341,7 @@ export default {
         // Load item sub-types from the API to populate the sub-type filter dropdown
         async loadSubTypes() {
             try {
-                const data = await APIService.getItemSubTypes();
-
-                const subTypesFromApi = Array.isArray(data) ? data : [];
+                const subTypesFromApi = await this.itemStore.fetchSubTypes();
 
                 this.subTypeOptions = [
                     ...subTypesFromApi
@@ -356,9 +357,7 @@ export default {
         // Load item statuses from the API to populate the status filter dropdown
         async loadStatusOptions() {
             try {
-                const data = await APIService.getItemStatuses();
-                console
-                const statusesFromApi = Array.isArray(data) ? data : [];
+                const statusesFromApi = await this.itemStore.fetchStatuses();
 
                 this.statusOptions = [
                     ...statusesFromApi
@@ -500,6 +499,7 @@ export default {
 
     },
     async mounted() {
+        this.itemStore = useItemStore();
         await this.loadSubTypes();
         this.loadStatusOptions();
     },

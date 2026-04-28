@@ -1,6 +1,11 @@
 <template>
   <div class="container py-4">
-    <h2 class="mb-4">Item Detail</h2>
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <h2>Item Detail</h2>
+      <button v-if="auth.isAuthenticated && isInCart(form)" type="button" class="btn btn-sm btn-success" disabled>
+        In Cart
+      </button>
+    </div>
 
     <div v-if="loading" class="text-center py-4">
       Loading item...
@@ -155,12 +160,11 @@
                   title="Delete Item">
                   Delete Item
                 </button>
-                <button type="button" class="btn btn-sm btn-primary" @click="addToCart(form)"
-                  :disabled="isInCart(form)">
-                  {{ isInCart(form) ? "In Cart" : "Add To Cart" }}
-                </button>
                 <button type="button" class="btn btn-secondary ms-2" @click="goBack">
                   Continue Browsing
+                </button>
+                <button v-if="auth.isAuthenticated && isInCart(form)" type="button" class="btn btn-secondary ms-2" @click="viewCart">
+                  View Cart
                 </button>
               </div>
             </div>
@@ -190,6 +194,7 @@
 
 <script>
 import APIService from "@/api/APIService";
+import { useItemStore } from "@/store/ItemStore";
 import { useAuthStore } from "@/store/AuthStore";
 import { useCartStore } from "@/store/CartStore";
 
@@ -219,6 +224,7 @@ export default {
         ItemDescription: "",
       },
       cartStore: null,
+      itemStore: null,
     };
   },
 
@@ -249,7 +255,7 @@ export default {
       this.errorMessage = "";
 
       try {
-        const data = await APIService.getItemById(this.resolvedItemNumber);
+        const data = await this.itemStore.fetchItemById(this.resolvedItemNumber);
         this.form = { ...this.form, ...data };
       } catch (error) {
         this.errorMessage = error.message || "Failed to load item.";
@@ -284,6 +290,12 @@ export default {
       if (!this.cartStore) return;
       if (this.isInCart(item)) return;
 
+      if (!this.auth.isAuthenticated) {
+        this.cartStore.savePendingCartItem(item);
+        this.$router.push({ path: "/login", query: { from: this.$route.fullPath } });
+        return;
+      }
+
       this.cartStore.addToCart(item);
     },
 
@@ -300,6 +312,10 @@ export default {
         path: "/AvailableItems",
         query: { ...this.$route.query },
       });
+    },
+
+    viewCart() {
+      this.$router.push("/cart");
     },
 
     formatCurrency(value) {
@@ -323,6 +339,7 @@ export default {
   },
   created() {
     this.cartStore = useCartStore();
+    this.itemStore = useItemStore();
   },
   async mounted() {
     await this.loadItem();

@@ -563,13 +563,7 @@ export default {
       this.errorMessage = "";
 
       try {
-        if (!forceRefresh && this.itemStore.items.length) {
-          return;
-        }
-
-        const data = await APIService.getItems();
-        const items = Array.isArray(data) ? data : [];
-        this.itemStore.setItems(items);
+        await this.itemStore.fetchItems(forceRefresh);
       } catch (error) {
         this.errorMessage = error.message || "Failed to load items.";
       } finally {
@@ -578,55 +572,29 @@ export default {
     },
 
     async loadSubTypes() {
-      try {
-        let subTypesFromApi = [];
-
-        if (this.itemStore.subTypes.length) {
-          subTypesFromApi = this.itemStore.subTypes;
-        } else {
-          const data = await APIService.getItemSubTypes();
-          subTypesFromApi = Array.isArray(data) ? data : [];
-          this.itemStore.setSubTypes(subTypesFromApi);
-        }
-
-        this.subTypeOptions = [
-          { value: "All", label: "All" },
-          ...subTypesFromApi
-            .filter((subType) => subType?.subTypeName)
-            .map((subType) => ({
-              value: subType.subTypeName,
-              label: subType.subTypeName,
-            })),
-        ];
-      } catch (error) {
-        console.error("Failed to load item sub-types:", error);
-      }
+      const subTypesFromApi = await this.itemStore.fetchSubTypes();
+      this.subTypeOptions = [
+        { value: "All", label: "All" },
+        ...subTypesFromApi
+          .filter((subType) => subType?.subTypeName)
+          .map((subType) => ({
+            value: subType.subTypeName,
+            label: subType.subTypeName,
+          })),
+      ];
     },
 
     async loadStatusOptions() {
-      try {
-        let statusesFromApi = [];
-
-        if (this.itemStore.statuses.length) {
-          statusesFromApi = this.itemStore.statuses;
-        } else {
-          const data = await APIService.getItemStatuses();
-          statusesFromApi = Array.isArray(data) ? data : [];
-          this.itemStore.setStatuses(statusesFromApi);
-        }
-
-        this.statusOptions = [
-          { value: "All", label: "All" },
-          ...statusesFromApi
-            .filter((status) => status?.statusOption)
-            .map((status) => ({
-              value: status.statusOption,
-              label: status.statusLabel,
-            })),
-        ];
-      } catch (error) {
-        console.error("Failed to load item statuses:", error);
-      }
+      const statusesFromApi = await this.itemStore.fetchStatuses();
+      this.statusOptions = [
+        { value: "All", label: "All" },
+        ...statusesFromApi
+          .filter((status) => status?.statusOption)
+          .map((status) => ({
+            value: status.statusOption,
+            label: status.statusLabel,
+          })),
+      ];
     },
 
     syncStateToRoute() {
@@ -818,6 +786,10 @@ export default {
       this.expandedMobileItems = [];
       this.syncStateToRoute();
     },
+  },
+
+  created() {
+    this.itemStore = useItemStore();
   },
 
   async mounted() {

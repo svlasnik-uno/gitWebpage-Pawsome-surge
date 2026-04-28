@@ -1,6 +1,8 @@
 // CartStore.js
 import { defineStore } from "pinia";
 
+const PENDING_CART_KEY = "pending_cart_items";
+
 export const useCartStore = defineStore("cartStore", {
   state: () => ({
     cartItems: [],
@@ -49,6 +51,45 @@ export const useCartStore = defineStore("cartStore", {
       if (!key) return;
 
       localStorage.setItem(key, JSON.stringify(this.cartItems));
+    },
+
+    getPendingCartItems() {
+      try {
+        const raw = sessionStorage.getItem(PENDING_CART_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.error("Failed to read pending cart items:", error);
+        return [];
+      }
+    },
+
+    savePendingCartItem(item) {
+      if (!item || item.ItemNumber == null) return;
+
+      const pending = this.getPendingCartItems();
+      const exists = pending.some(
+        (pendingItem) =>
+          String(pendingItem.ItemNumber) === String(item.ItemNumber)
+      );
+
+      if (!exists) {
+        pending.push(item);
+        sessionStorage.setItem(PENDING_CART_KEY, JSON.stringify(pending));
+      }
+    },
+
+    clearPendingCartItems() {
+      sessionStorage.removeItem(PENDING_CART_KEY);
+    },
+
+    async flushPendingCartItems() {
+      const items = this.getPendingCartItems();
+      if (!items.length) return [];
+
+      items.forEach((item) => this.addToCart(item));
+      this.clearPendingCartItems();
+      return this.cartItems;
     },
 
     addToCart(item) {

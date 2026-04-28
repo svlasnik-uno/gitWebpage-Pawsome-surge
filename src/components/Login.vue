@@ -156,7 +156,9 @@ export default {
           email: user?.email || "",
         });
         this.cart.setUser(user.email);
-        router.push("/");
+        await this.cart.flushPendingCartItems();
+        const redirectTo = this.$route.query.from || "/";
+        router.push(redirectTo);
       } catch (error) {
         console.error("Login error:", error);
         this.showMsg = "loginError";

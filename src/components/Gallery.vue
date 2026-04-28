@@ -4,11 +4,7 @@
 
     <div class="container mt-3">
       <div class="row">
-        <div
-          v-for="(image, index) in images"
-          :key="index"
-          class="col-md-4 col-sm-6 col-12 mb-3"
-        >
+        <div v-for="(image, index) in images" :key="index" class="col-md-4 col-sm-6 col-12 mb-3">
           <div class="card gallery-card">
             <img class="gallery-img img-fluid" :src="image.src" :alt="image.alt" />
           </div>
@@ -16,14 +12,8 @@
       </div>
     </div>
 
-    <button
-      v-show="showBackToTop"
-      type="button"
-      class="btn btn-primary back-to-top"
-      @click="scrollToTop"
-      aria-label="Back to top"
-      title="Back to top"
-    >
+    <button v-show="showBackToTop" type="button" class="btn btn-primary back-to-top" @click="scrollToTop"
+      aria-label="Back to top" title="Back to top">
       <i class="bi bi-arrow-up"></i>
     </button>
   </main>
@@ -32,13 +22,15 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import APIService from "@/api/APIService";
+import { useItemStore } from "@/store/ItemStore";
 
 const images = ref([]);
 const showBackToTop = ref(false);
+const itemStore = useItemStore();
 
 const loadGalleryImages = async () => {
   try {
-    const items = await APIService.getItemsByImageType("G");
+    const items = await itemStore.fetchItemsByImageType("G");
 
     images.value = items
       .map((item) => ({

@@ -27,55 +27,35 @@
                                                         #{{ eventForm.id || "New" }}
                                                     </span>
 
-                                                    <span
-                                                        v-if="eventForm.eventName"
-                                                        class="mobile-event-name"
-                                                    >
+                                                    <span v-if="eventForm.eventName" class="mobile-event-name">
                                                         {{ eventForm.eventName }}
                                                     </span>
 
-                                                    <span
-                                                        v-if="eventForm.eventDate"
-                                                        class="mobile-event-date"
-                                                    >
+                                                    <span v-if="eventForm.eventDate" class="mobile-event-date">
                                                         {{ formatDisplayDate(eventForm.eventDate) }}
                                                     </span>
                                                 </div>
 
-                                                <button
-                                                    type="button"
+                                                <button type="button"
                                                     class="btn btn-sm btn-outline-secondary mobile-event-expand"
-                                                    @click="showMobileDetails = !showMobileDetails"
-                                                >
+                                                    @click="showMobileDetails = !showMobileDetails">
                                                     {{ showMobileDetails ? "−" : "+" }}
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <div
-                                            class="row g-3"
-                                            v-show="showMobileDetails || !isMobileView"
-                                        >
+                                        <div class="row g-3" v-show="showMobileDetails || !isMobileView">
                                             <div class="col-12 col-sm-6 col-md-5">
                                                 <label for="id" class="form-label">Event ID</label>
-                                                <input
-                                                    id="id"
-                                                    v-model.number="eventForm.id"
-                                                    type="number"
-                                                    class="form-control mobile-form-control"
-                                                    :disabled="isEditMode"
-                                                    required
-                                                />
+                                                <input id="id" v-model.number="eventForm.id" type="number"
+                                                    class="form-control mobile-form-control" :disabled="isEditMode"
+                                                    required />
                                             </div>
 
                                             <div class="col-12 col-sm-6 col-md-4">
                                                 <label for="eventSeason" class="form-label">Season</label>
-                                                <select
-                                                    id="eventSeason"
-                                                    v-model="eventForm.eventSeason"
-                                                    class="form-select mobile-form-control"
-                                                    required
-                                                >
+                                                <select id="eventSeason" v-model="eventForm.eventSeason"
+                                                    class="form-select mobile-form-control" required>
                                                     <option value="">Select season</option>
                                                     <option value="Spring">Spring</option>
                                                     <option value="Summer">Summer</option>
@@ -86,57 +66,34 @@
 
                                             <div class="col-12 col-sm-6 col-md-4">
                                                 <label for="eventYear" class="form-label">Year</label>
-                                                <input
-                                                    id="eventYear"
-                                                    v-model.number="eventForm.eventYear"
-                                                    type="number"
-                                                    class="form-control mobile-form-control"
-                                                    min="2000"
-                                                    max="2100"
-                                                />
+                                                <input id="eventYear" v-model.number="eventForm.eventYear" type="number"
+                                                    class="form-control mobile-form-control" min="2000" max="2100" />
                                             </div>
 
                                             <div class="col-12">
                                                 <label for="eventName" class="form-label">Event Name</label>
-                                                <input
-                                                    id="eventName"
-                                                    v-model="eventForm.eventName"
-                                                    type="text"
-                                                    class="form-control mobile-form-control"
-                                                    required
-                                                />
+                                                <input id="eventName" v-model="eventForm.eventName" type="text"
+                                                    class="form-control mobile-form-control" required />
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <label for="eventDate" class="form-label">Event Date</label>
-                                                <input
-                                                    id="eventDate"
-                                                    v-model="eventForm.eventDate"
-                                                    type="date"
-                                                    class="form-control mobile-form-control"
-                                                />
+                                                <input id="eventDate" v-model="eventForm.eventDate" type="date"
+                                                    class="form-control mobile-form-control" />
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <label for="eventLocation" class="form-label">Location</label>
-                                                <input
-                                                    id="eventLocation"
-                                                    v-model="eventForm.eventLocation"
-                                                    type="text"
-                                                    class="form-control mobile-form-control"
-                                                />
+                                                <input id="eventLocation" v-model="eventForm.eventLocation" type="text"
+                                                    class="form-control mobile-form-control" />
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <label for="eventDisplay" class="form-label">
                                                     Display on Site (Y/N)
                                                 </label>
-                                                <input
-                                                    id="eventDisplay"
-                                                    v-model="eventForm.eventDisplay"
-                                                    type="text"
-                                                    class="form-control mobile-form-control"
-                                                />
+                                                <input id="eventDisplay" v-model="eventForm.eventDisplay" type="text"
+                                                    class="form-control mobile-form-control" />
                                             </div>
                                         </div>
                                     </div>
@@ -146,12 +103,8 @@
                                             <h5 class="mb-3">Event Image</h5>
 
                                             <div class="image-preview-box">
-                                                <img
-                                                    v-if="selectedImagePreviewUrl"
-                                                    :src="selectedImagePreviewUrl"
-                                                    alt="Event preview"
-                                                    class="preview-image"
-                                                />
+                                                <img v-if="selectedImagePreviewUrl" :src="selectedImagePreviewUrl"
+                                                    alt="Event preview" class="preview-image" />
                                                 <div v-else class="text-muted">
                                                     No image available
                                                 </div>
@@ -161,12 +114,8 @@
                                                 <label class="form-label">
                                                     {{ isEditMode ? "Replace Image" : "Add Image" }}
                                                 </label>
-                                                <input
-                                                    type="file"
-                                                    class="form-control mobile-form-control"
-                                                    accept="image/*"
-                                                    @change="handleImageSelected"
-                                                />
+                                                <input type="file" class="form-control mobile-form-control"
+                                                    accept="image/*" @change="handleImageSelected" />
                                             </div>
 
                                             <div v-if="selectedImageFile" class="mt-2 small text-muted">
@@ -189,12 +138,8 @@
                                         {{ saving ? "Saving..." : "Save Event" }}
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-secondary"
-                                        @click="cancelEdit"
-                                        :disabled="saving"
-                                    >
+                                    <button type="button" class="btn btn-secondary" @click="cancelEdit"
+                                        :disabled="saving">
                                         Cancel
                                     </button>
                                 </div>
@@ -324,7 +269,7 @@ export default {
                 };
 
                 if (this.eventForm.eventImage) {
-                    this.selectedImagePreviewUrl = APIService.getEventImageUrl(this.eventForm) ;
+                    this.selectedImagePreviewUrl = APIService.getEventImageUrl(this.eventForm);
                 } else {
                     this.selectedImagePreviewUrl = "";
                 }
@@ -414,7 +359,7 @@ export default {
             });
         },
 
-         async getPreparedUploadFile(file, height, width, quality){
+        async getPreparedUploadFile(file, height, width, quality) {
             if (!this.selectedImageFile) return null;
 
             const resizedFile = await this.resizeImage(file, height, width, quality);
@@ -493,13 +438,13 @@ export default {
                                 ...payload,
                                 eventImage: uploadedImageName,
                             });
-                            
+
                         }
                     } catch (createError) {
                         if (uploadedImageName) {
                             try {
                                 await APIService.deleteEventImage(eventId, uploadedImageName);
-                                
+
                             } catch (cleanupError) {
                                 console.error("Failed to clean up uploaded image:", cleanupError);
                             }

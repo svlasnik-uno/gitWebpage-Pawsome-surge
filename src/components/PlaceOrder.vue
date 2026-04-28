@@ -176,6 +176,7 @@
 <script>
 import APIService from "@/api/APIService";
 import { useCartStore } from "@/store/CartStore";
+import { useItemStore } from "@/store/ItemStore";
 import { useAuthStore } from "@/store/AuthStore";
 
 export default {
@@ -185,6 +186,7 @@ export default {
     return {
       cartStore: null,
       authStore: null,
+      itemStore: null,
       submitting: false,
       showConfirmModal: false,
       errorMessage: "",
@@ -295,6 +297,16 @@ export default {
 
         this.successMessage = `Order #${createdOrder.orderNum} was placed successfully.`;
         this.showConfirmModal = false;
+
+        if (this.itemStore) {
+          this.cartItems.forEach((item) => {
+            this.itemStore.updateItem({
+              ...item,
+              ItemStatus: "P",
+            });
+          });
+        }
+
         this.cartStore.clearCart();
 
         this.form = {
@@ -325,6 +337,7 @@ export default {
   created() {
     this.cartStore = useCartStore();
     this.authStore = useAuthStore();
+    this.itemStore = useItemStore();
     this.loadOrderFields();
   },
 };

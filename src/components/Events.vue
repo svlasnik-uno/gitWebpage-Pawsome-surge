@@ -17,7 +17,10 @@
         <div v-for="event in events" :key="event.id" :class="columnClass">
           <div class="card gallery-card h-100">
             <div class="event-image-wrapper">
-              <img :src="event.src" :alt="event.alt" class="event-img" />
+              <img v-if="event.src" :src="event.src" :alt="event.alt" class="event-img" />
+              <div v-else class="event-placeholder">
+                No image available
+              </div>
             </div>
 
             <div v-if="event.text" class="image-text">
@@ -71,14 +74,12 @@ const loadEvents = async () => {
     const data = await APIService.getEventsByDisplay("Y");
 
     events.value = (Array.isArray(data) ? data : [])
-      .filter((event) => event.eventImage)
       .map((event) => ({
         id: event.id,
-        src: APIService.getEventImageUrl(event),
+        src: event.eventImage ? APIService.getEventImageUrl(event) : null,
         alt: event.eventName || "Event image",
         text: formatEventText(event),
-      }))
-      .filter((event) => event.src);
+      }));
   } catch (error) {
     errorMessage.value = error.message || "Failed to load events.";
   } finally {
@@ -122,13 +123,17 @@ const columnClass = computed(() => {
   display: block;
 }
 
-.event-image-wrapper {
-  height: 450px;
+.event-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #fff;
   background: #000;
+  text-align: center;
 }
+
 .events-container {
   width: 90%;
   margin: 0 auto;

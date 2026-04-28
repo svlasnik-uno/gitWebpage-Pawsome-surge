@@ -19,7 +19,6 @@ import ForgotPassword from "@/components/ForgotPassword.vue";
 import ResetPassword from "@/components/ResetPassword.vue";
 import MyOrders from "@/components/MyOrders.vue";
 import AdminOrders from "@/components/AdminOrders.vue";
-import { compile } from "vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -28,7 +27,6 @@ const routes = [
   { path: "/about", component: About },
   { path: "/itemList", component: ItemList },
   { path: "/itemDetail/:itemNumber", component: ItemDetail },
-  { path: "/register", component: Register },
   { path: "/editItem/:itemNumber?", component: ItemForm },
   { path: "/eventListAdmin", component: EventListAdmin },
   { path: "/editEvent/:id?", component: EventForm },

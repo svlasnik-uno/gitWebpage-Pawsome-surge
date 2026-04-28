@@ -57,6 +57,7 @@
 
 <script>
 import APIService from "@/api/APIService";
+import { useItemStore } from "@/store/ItemStore";
 
 export default {
   name: "Home",
@@ -67,9 +68,11 @@ export default {
       touchStartX: 0,
       touchEndX: 0,
       images: [],
+      itemStore: null,
     };
   },
   async mounted() {
+    this.itemStore = useItemStore();
     await this.loadSlideshowImages();
     this.startSlideshow();
     window.addEventListener("keydown", this.handleKeydown);
@@ -81,7 +84,7 @@ export default {
   methods: {
 async loadSlideshowImages() {
   try {
-    const items = await APIService.getItemsByImageType("H");
+    const items = await this.itemStore.fetchItemsByImageType("H");
 
     this.images = items
       .slice(0, 8)
