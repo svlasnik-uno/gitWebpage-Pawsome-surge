@@ -45,10 +45,10 @@
             </div>
 
             <div class="text-center">
-              <small>
+
                 Don’t have an account?
-                <a href="#" @click.prevent="goToRegister">Register here</a>
-              </small>
+                <b><a href="#" @click.prevent="goToRegister">Register here</a></b>
+
             </div>
           </div>
         </div>
