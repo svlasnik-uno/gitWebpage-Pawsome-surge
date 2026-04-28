@@ -23,11 +23,15 @@
             </div>
         </div>
 
-        <div v-if="!cartItems.length" class="alert alert-info" role="alert">
+        <div v-if="isVerifying" class="alert alert-secondary" role="alert">
+            Verifying cart availability...
+        </div>
+
+        <div v-if="!cartItems.length && !isVerifying" class="alert alert-info" role="alert">
             Your cart is empty.
         </div>
 
-        <div v-else>
+        <div v-else-if="!isVerifying">
             <!-- Mobile card view -->
             <div class="d-md-none d-grid gap-3">
                 <div v-for="item in cartItems" :key="item.ItemNumber" class="card shadow-sm cart-card">
@@ -124,12 +128,64 @@
                 <button type="button" class="btn btn-secondary" @click="continueShopping">
                     Continue Shopping
                 </button>
-                <button type="button" class="btn btn-danger" @click="clearCart">
+                <button type="button" class="btn btn-secondary" @click="clearCart">
                     Clear Cart
                 </button>
-                <button type="button" class="btn btn-primary" @click="checkout" :disabled="!cartCount">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    @click="checkout"
+                    :disabled="!cartCount || isVerifying"
+                >
                     Checkout
                 </button>
+            </div>
+        </div>
+
+        <!-- Unavailable items modal -->
+        <div
+            class="modal fade"
+            id="unavailableItemsModal"
+            tabindex="-1"
+            aria-labelledby="unavailableItemsModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="unavailableItemsModalLabel">
+                            Cart Updated
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p class="mb-2">
+                            The following item<span v-if="removedItems.length !== 1">s are</span><span v-else> is</span>
+                            no longer available and
+                            <span v-if="removedItems.length !== 1">were</span><span v-else>was</span>
+                            removed from your cart:
+                        </p>
+
+                        <ul class="mb-0">
+                            <li v-for="item in removedItems" :key="item.ItemNumber">
+                                Item #{{ item.ItemNumber }}
+                                <span v-if="item.ItemDescription">- {{ item.ItemDescription }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            OK
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -138,6 +194,8 @@
 <script>
 import APIService from "@/api/APIService";
 import { useCartStore } from "@/store/CartStore";
+import { useAuthStore } from "@/store/AuthStore";
+import { Modal } from "bootstrap";
 
 export default {
     name: "CartView",
@@ -145,6 +203,9 @@ export default {
     data() {
         return {
             cartStore: null,
+            authStore: null,
+            isVerifying: false,
+            removedItems: [],
         };
     },
 
@@ -199,10 +260,74 @@ export default {
                 currency: "USD",
             }).format(value);
         },
+
+        showUnavailableItemsModal() {
+            const modalElement = document.getElementById("unavailableItemsModal");
+            if (!modalElement) return;
+
+            const modal = new Modal(modalElement);
+            modal.show();
+        },
+
+        async verifyCartContents() {
+            if (!this.cartItems.length) return;
+
+            this.isVerifying = true;
+            this.removedItems = [];
+
+            try {
+                const results = await Promise.all(
+                    this.cartItems.map(async (cartItem) => {
+                        try {
+                            const latestItem = await APIService.getItemById(cartItem.ItemNumber);
+
+                            return {
+                                cartItem,
+                                latestItem,
+                            };
+                        } catch (error) {
+                            console.error(`Failed to verify item ${cartItem.ItemNumber}:`, error);
+                            return {
+                                cartItem,
+                                latestItem: null,
+                            };
+                        }
+                    })
+                );
+
+                const unavailableItems = results
+                    .filter(({ latestItem }) => {
+                        return !latestItem || latestItem.ItemStatus !== "AW";
+                    })
+                    .map(({ cartItem }) => cartItem);
+
+                unavailableItems.forEach((item) => {
+                    this.cartStore.removeFromCart(item.ItemNumber);
+                });
+
+                if (unavailableItems.length > 0) {
+                    this.removedItems = unavailableItems;
+                    this.$nextTick(() => {
+                        this.showUnavailableItemsModal();
+                    });
+                }
+            } finally {
+                this.isVerifying = false;
+            }
+        },
     },
 
-    created() {
+    async created() {
         this.cartStore = useCartStore();
+        this.authStore = useAuthStore();
+
+        if (!this.authStore?.isAuthenticated || !this.authStore?.email) {
+            this.$router.push("/login");
+            return;
+        }
+
+        this.cartStore.setUser(this.authStore.email);
+        await this.verifyCartContents();
     },
 };
 </script>

@@ -6,68 +6,36 @@
           <div class="card-body">
             <h3 class="card-title text-center mb-4">Login</h3>
 
-            <div
-              v-if="showMsg === 'emailNotConfirmed'"
-              class="alert alert-warning"
-              role="alert"
-            >
+            <div v-if="showMsg === 'emailNotConfirmed'" class="alert alert-warning" role="alert">
               Your email is not confirmed yet. Please check your inbox and click
               the confirmation link before logging in.
             </div>
 
-            <div
-              v-else-if="showMsg === 'loginError'"
-              class="alert alert-danger"
-              role="alert"
-            >
+            <div v-else-if="showMsg === 'loginError'" class="alert alert-danger" role="alert">
               {{ errorMessage || "Login failed. Please try again." }}
             </div>
 
             <div class="mb-3">
               <label class="form-label">Email</label>
-              <input
-                v-model.trim="email"
-                type="email"
-                maxlength="100"
-                required
-                class="form-control"
-                placeholder="Email"
-                @keyup.enter="login"
-              />
+              <input v-model.trim="email" type="email" maxlength="100" required class="form-control" placeholder="Email"
+                @keyup.enter="login" />
             </div>
 
             <div class="mb-3">
               <label class="form-label">Password</label>
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                v-model="password"
-                maxlength="100"
-                required
-                class="form-control"
-                placeholder="Password"
-                @keyup.enter="login"
-              />
+              <input :type="showPassword ? 'text' : 'password'" v-model="password" maxlength="100" required
+                class="form-control" placeholder="Password" @keyup.enter="login" />
             </div>
 
             <div class="form-check mb-3">
-              <input
-                id="showPassword"
-                v-model="showPassword"
-                class="form-check-input"
-                type="checkbox"
-              />
+              <input id="showPassword" v-model="showPassword" class="form-check-input" type="checkbox" />
               <label class="form-check-label" for="showPassword">
                 Show password
               </label>
             </div>
 
             <div class="d-grid mb-3">
-              <button
-                type="button"
-                class="btn btn-primary"
-                @click.prevent="login"
-                :disabled="loading"
-              >
+              <button type="button" class="btn btn-primary" @click.prevent="login" :disabled="loading">
                 {{ loading ? "Logging in..." : "Login" }}
               </button>
             </div>
@@ -94,6 +62,7 @@ import router from "@/router";
 import APIService from "@/api/APIService";
 import { supabase } from "@/supabase";
 import { useAuthStore } from "@/store/AuthStore";
+import { useCartStore } from "@/store/CartStore";
 
 export default {
   name: "Login",
@@ -106,14 +75,17 @@ export default {
       showPassword: false,
       showMsg: "",
       errorMessage: "",
+      auth: null,
+      cart: null, 
     };
   },
 
   mounted() {
-    const auth = useAuthStore();
-
-    if (auth.isAuthenticated) {
+    this.auth = useAuthStore();
+    this.cart = useCartStore();
+    if (this.auth.isAuthenticated) {
       router.push("/");
+      this.cart.setUser(this.auth.email);
     }
   },
 
@@ -183,7 +155,7 @@ export default {
           phone: profile?.userphone || "",
           email: user?.email || "",
         });
-
+        this.cart.setUser(user.email);
         router.push("/");
       } catch (error) {
         console.error("Login error:", error);

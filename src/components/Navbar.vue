@@ -99,11 +99,15 @@ function isActive(path) {
 async function handleLogout() {
   try {
     await APIService.signOut();
+
+    cart.clearLocalState(); // clears visible cart in memory only
     auth.clearAuth();
+
     router.push("/");
   } catch (error) {
     console.error("Logout failed:", error.message);
   }
+
 }
 
 </script>
