@@ -1,6 +1,14 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid">
+      <!-- Mobile logo -->
+      <router-link
+        to="/"
+        class="navbar-brand m-0 d-lg-none"
+        @click="closeMenu"
+      >
+        <img src="/img/logo.png" alt="Logo" class="logo-img" />
+      </router-link>
 
       <!-- Hamburger button -->
       <button
@@ -20,15 +28,17 @@
       >
         <!-- Centered group -->
         <div class="d-flex align-items-center gap-3 navbar-inner">
-
-          <!-- Logo -->
-          <router-link to="/" class="navbar-brand m-0" @click="closeMenu">
+          <!-- Desktop logo -->
+          <router-link
+            to="/"
+            class="navbar-brand m-0 d-none d-lg-block"
+            @click="closeMenu"
+          >
             <img src="/img/logo.png" alt="Logo" class="logo-img" />
           </router-link>
 
           <!-- Nav links -->
           <ul class="navbar-nav">
-
             <!-- Main links -->
             <li class="nav-item" v-for="link in links" :key="link.to">
               <router-link
@@ -43,7 +53,6 @@
 
             <!-- AUTHENTICATED USERS -->
             <template v-if="auth.isAuthenticated">
-
               <li class="nav-item" v-if="cart.cartCount > 0">
                 <router-link
                   to="/cart"
@@ -105,7 +114,6 @@
                   </router-link>
                 </li>
               </template>
-
             </template>
 
             <!-- Auth -->
@@ -132,7 +140,6 @@
                 Logout
               </router-link>
             </li>
-
           </ul>
         </div>
       </div>
@@ -190,6 +197,13 @@ async function handleLogout() {
 .navbar-custom {
   padding: 1rem 0;
   background-color: rgb(227, 225, 225);
+}
+
+.navbar-custom .container-fluid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
 }
 
 .navbar-toggler {
@@ -252,8 +266,12 @@ async function handleLogout() {
 
 /* Mobile */
 @media (max-width: 991.98px) {
+  .navbar-brand {
+    margin-bottom: 0;
+  }
+
   .navbar-toggler {
-    margin-left: auto;
+    margin-left: 0;
   }
 
   .navbar-collapse {
@@ -270,10 +288,6 @@ async function handleLogout() {
   .navbar-inner {
     flex-direction: column;
     align-items: center;
-  }
-
-  .navbar-brand {
-    margin-bottom: 0.5rem;
   }
 
   .navbar-nav {
