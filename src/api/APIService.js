@@ -1095,7 +1095,7 @@ Pawsome Arts and Crafts`;
 
     const customerText = `Hello ${firstName} ${lastName},
 
-Thank you for contacting Pawsome Arts And Crafts. We received your message and will review it as soon as possible.
+Thank you for contacting Pawsome Arts And Crafts. We received your message and will respond as soon as possible.
 
 Submitted On: ${formattedTimestamp}
 Email Address: ${email}
@@ -1110,7 +1110,7 @@ Pawsome Arts And Crafts`;
       <div style="font-family: Arial, sans-serif; line-height: 1.5;">
         <h2>Thank you for contacting Pawsome Arts And Crafts</h2>
         <p>Hello ${safeFirstName} ${safeLastName},</p>
-        <p>We received your message and will review it as soon as possible.</p>
+        <p>We received your message and will respond as soon as possible.</p>
         <p><strong>Submitted On:</strong> ${this.escapeHtml(formattedTimestamp)}</p>
         <p><strong>Email Address:</strong> ${safeEmail}</p>
         <p><strong>Inquiry Type(s):</strong> ${safeInquiryTypeText}</p>

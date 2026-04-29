@@ -21,17 +21,44 @@
             <br />
             We hope you love our designs as much as we do!
           </p>
-
+      <button type="button" class="foot-link foot-button" @click="openContactModal">
+        Contact Us
+      </button>
           <p class="card3-img-top mb-0">
             <img src="/img/logo.png" alt="Pawsome arts and crafts logo" class="card-img-top about-logo" />
           </p>
         </div>
+        
       </div>
+          <ContactUsModal
+      :show="showContactModal"
+      :is-submitting="isSubmitting"
+      :submit-success-message="submitSuccessMessage"
+      :submit-error-message="submitErrorMessage"
+      :category-error="categoryError"
+      :contact-form="contactForm"
+      @close="closeContactModal"
+      @submit="submitContactForm"
+    />
     </div>
   </main>
 </template>
 
 <script setup>
+import { useContactUs } from "@/composables/useContactUs";
+import ContactUsModal from "@/components/ContactUsModal.vue";
+
+const {
+  showContactModal,
+  isSubmitting,
+  submitSuccessMessage,
+  submitErrorMessage,
+  categoryError,
+  contactForm,
+  openContactModal,
+  closeContactModal,
+  submitContactForm,
+} = useContactUs();
 </script>
 
 <style scoped>
