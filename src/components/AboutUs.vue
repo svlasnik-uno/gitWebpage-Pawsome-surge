@@ -8,7 +8,7 @@
 
         <div class="card-body about-card">
           <p class="card-text">
-            We create custom, long-lasting sola wood flower arrangements,
+            We create custom, long-lasting Sola-Wood flower arrangements,
             hand-crocheted items, and other arts and crafts.
             <br />
             <br />
@@ -21,25 +21,26 @@
             <br />
             We hope you love our designs as much as we do!
           </p>
-      <button type="button" class="foot-link foot-button" @click="openContactModal">
-        Contact Us
-      </button>
+          <button type="button" class="foot-link foot-button" @click="openContactModal">
+            Contact Us
+          </button>
           <p class="card3-img-top mb-0">
             <img src="/img/logo.png" alt="Pawsome arts and crafts logo" class="card-img-top about-logo" />
           </p>
         </div>
-        
+        <div class="mt-3">
+          <h5>Our flowers are crafted from Sola Wood</h5>
+          <p>
+             What are Sola Wood Flowers? 
+             <br>Sola wood flowers are handcrafted from the wood of the <em>Aeschynomene aspera</em> plant.
+            <br>We soften and hand-dye raw sola wood flowers for our custom arrangements.
+          </p>
+        </div>
       </div>
-          <ContactUsModal
-      :show="showContactModal"
-      :is-submitting="isSubmitting"
-      :submit-success-message="submitSuccessMessage"
-      :submit-error-message="submitErrorMessage"
-      :category-error="categoryError"
-      :contact-form="contactForm"
-      @close="closeContactModal"
-      @submit="submitContactForm"
-    />
+      <ContactUsModal :show="showContactModal" :is-submitting="isSubmitting"
+        :submit-success-message="submitSuccessMessage" :submit-error-message="submitErrorMessage"
+        :category-error="categoryError" :contact-form="contactForm" @close="closeContactModal"
+        @submit="submitContactForm" />
     </div>
   </main>
 </template>
