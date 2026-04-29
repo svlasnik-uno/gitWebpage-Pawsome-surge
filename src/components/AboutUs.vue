@@ -29,9 +29,8 @@
           </p>
         </div>
         <div class="mt-3">
-          <h5>Our flowers are crafted from Sola Wood</h5>
+          <h5>What are Sola Wood Flowers? </h5>
           <p>
-             What are Sola Wood Flowers? 
              <br>Sola wood flowers are handcrafted from the wood of the <em>Aeschynomene aspera</em> plant.
             <br>We soften and hand-dye raw sola wood flowers for our custom arrangements.
           </p>
