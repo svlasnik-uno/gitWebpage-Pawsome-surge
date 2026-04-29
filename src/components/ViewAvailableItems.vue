@@ -43,7 +43,9 @@
       <div v-else class="row g-3">
         <div v-for="item in sortedItems" :key="item.ItemNumber" class="col-12 col-md-6 col-xl-4">
           <div class="card h-100 shadow-sm item-card">
-            <div class="image-wrap">
+            <div class="image-wrap image-clickable" @click="viewItem(item)" role="button" tabindex="0"
+              @keyup.enter="viewItem(item)" @keyup.space.prevent="viewItem(item)"
+              :aria-label="`View details for item ${item.ItemNumber}`">
               <img v-if="getImageUrl(item)" :src="getImageUrl(item)" :alt="`Item ${item.ItemNumber}`"
                 class="card-img-top item-image" />
               <div v-else class="image-placeholder text-muted small">
@@ -274,6 +276,12 @@ export default {
   text-align: center;
 }
 
+.image-clickable {
+  cursor: pointer;
+}
+.image-clickable:hover {
+  opacity: 0.92;
+}
 .detail-list {
   display: flex;
   flex-direction: column;

@@ -117,11 +117,6 @@ onUnmounted(() => {
   line-height: inherit;
 }
 
-.gallery-link {
-  position: relative;
-  display: block;
-}
-
 .overlay-text {
   position: absolute;
   left: 0;
