@@ -60,7 +60,7 @@
                                 View Details
                             </button>
                             <button type="button" class="btn btn-sm btn-danger"
-                                @click="removeFromCart(item.ItemNumber)">
+                                @click="removeFromCart(item)">
                                 Remove
                             </button>
                         </div>
@@ -107,7 +107,7 @@
                                                 View
                                             </button>
                                             <button type="button" class="btn btn-sm btn-danger"
-                                                @click="removeFromCart(item.ItemNumber)">
+                                                @click="removeFromCart(item)">
                                                 Remove
                                             </button>
                                         </div>
@@ -210,10 +210,18 @@ export default {
             return APIService.getImageThumbnailUrl(item);
         },
 
-        removeFromCart(itemNumber) {
-            this.cartStore.removeFromCart(itemNumber);
-        },
+        removeFromCart(item) {
+            if (!item || !item.ItemNumber) return;
+            if (!this.cartStore) return;
 
+            const ok = window.confirm(
+                `Remove item from your cart?`
+            );
+
+            if (!ok) return;
+
+            this.cartStore.removeFromCart(item.ItemNumber);
+        },
         clearCart() {
             const ok = window.confirm("Clear all items from your cart?");
             if (!ok) return;

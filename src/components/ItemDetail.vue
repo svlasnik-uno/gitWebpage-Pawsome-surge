@@ -87,20 +87,22 @@
             </div>
 
             <div class="d-flex gap-2 pt-3 border-top mt-3 flex-wrap">
-              <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary" @click="editItem">
+              <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button" class="btn btn-secondary"
+                @click="editItem">
                 Edit Item
               </button>
-              <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item">
+              <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button" class="btn btn-secondary"
+                @click="confirmDelete" title="Delete Item">
                 Delete Item
-              </button>
-              <button type="button" class="btn btn-sm btn-primary" @click="addToCart(form)"
-                :disabled="isInCart(form)">
-                {{ isInCart(form) ? "In Cart" : "Add To Cart" }}
               </button>
 
               <button type="button" class="btn btn-secondary" @click="goBack">
                 Back to List
               </button>
+              <button type="button" class="btn btn-secondary" @click="toggleCart(form)">
+                {{ isInCart(form) ? "Remove From Cart" : "Add To Cart" }}
+              </button>
+
             </div>
           </div>
         </div>
@@ -114,12 +116,12 @@
                 <div class="form-control readonly-field">{{ form.ItemNumber || "" }}</div>
               </div>
 
-              <div v-if="auth.isAuthenticated" class="col-md-6">
+              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
                 <label class="form-label fw-bold">Item Type</label>
                 <div class="form-control readonly-field">{{ form.ItemType || "" }}</div>
               </div>
 
-              <div v-if="auth.isAuthenticated" class="col-md-6">
+              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
                 <label class="form-label fw-bold">Item Sub-type</label>
                 <div class="form-control readonly-field">{{ form.ItemSubType || "" }}</div>
               </div>
@@ -129,17 +131,17 @@
                 <div class="form-control readonly-field">{{ formatCurrency(form.ItemAskingPrice) }}</div>
               </div>
 
-              <div v-if="auth.isAuthenticated" class="col-md-6">
+              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
                 <label class="form-label fw-bold">Item Cost</label>
                 <div class="form-control readonly-field">{{ formatCurrency(form.ItemCost) }}</div>
               </div>
 
-              <div v-if="auth.isAuthenticated" class="col-md-6">
+              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
                 <label class="form-label fw-bold">Item Status</label>
                 <div class="form-control readonly-field">{{ formatStatus(form.ItemStatus) }}</div>
               </div>
 
-              <div class="col-md-6">
+              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
                 <label class="form-label fw-bold">Item Color</label>
                 <div class="form-control readonly-field">{{ form.ItemColor || "" }}</div>
               </div>
@@ -149,19 +151,29 @@
                 <div class="form-control readonly-field readonly-textarea">{{ form.ItemDescription || "" }}</div>
                 <div class="col-12 d-flex gap-2">
                 </div>
-                <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary" @click="editItem">
+
+                <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button" class="btn btn-secondary"
+                  @click="editItem">
                   Edit Item
                 </button>
-                <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary ms-2" @click="confirmDelete"
-                  title="Delete Item">
+
+                <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button"
+                  class="btn btn-secondary ms-2" @click="confirmDelete" title="Delete Item">
                   Delete Item
                 </button>
-                <button type="button" class="btn btn-secondary ms-2" @click="goBack">
-                  Continue Browsing
+
+                <button type="button" class="btn btn-secondary ms-2" @click="toggleCart(form)">
+                  {{ isInCart(form) ? "Remove From Cart" : "Add To Cart" }}
                 </button>
-                <button v-if="auth.isAuthenticated && isInCart(form)" type="button" class="btn btn-secondary ms-2" @click="viewCart">
+
+                <button v-if="auth.isAuthenticated && isInCart(form)" type="button" class="btn btn-secondary ms-2"
+                  @click="viewCart">
                   View Cart
                 </button>
+                <button type="button" class="btn btn-secondary ms-2" @click="goBack">
+                  Back
+                </button>
+
               </div>
             </div>
           </div>
@@ -177,7 +189,7 @@
                 </div>
               </div>
 
-              <div v-if="form.ItemImage" class="mt-2 small text-muted">
+              <div v-if="form.ItemImage && auth.isAuthenticated && auth.usertype === 'admin'"  class="mt-2 small text-muted">
                 Current: {{ form.ItemImage }}
               </div>
             </div>
@@ -259,7 +271,44 @@ export default {
         this.loading = false;
       }
     },
+    toggleCart(item) {
+      if (!item || !item.ItemNumber) return;
+      if (!this.cartStore) return;
 
+      if (this.isInCart(item)) {
+        this.removeFromCart(item);
+        return;
+      }
+
+      this.addToCart(item);
+    },
+
+    addToCart(item) {
+      if (!item || !item.ItemNumber) return;
+      if (!this.cartStore) return;
+      if (this.isInCart(item)) return;
+
+      if (!this.auth.isAuthenticated) {
+        this.cartStore.savePendingCartItem(item);
+        this.$router.push({ path: "/login", query: { from: this.$route.fullPath } });
+        return;
+      }
+
+      this.cartStore.addToCart(item);
+    },
+
+    removeFromCart(item) {
+      if (!item || !item.ItemNumber) return;
+      if (!this.cartStore) return;
+
+      const ok = window.confirm(
+        `Remove item from your cart?`
+      );
+
+      if (!ok) return;
+
+      this.cartStore.removeFromCart(item.ItemNumber);
+    },
     editItem() {
       this.$router.push({
         path: `/editItem/${this.form.ItemNumber}`,
@@ -304,10 +353,7 @@ export default {
       );
     },
     goBack() {
-      this.$router.push({
-        path: "/AvailableItems",
-        query: { ...this.$route.query },
-      });
+      this.$router.back();
     },
 
     viewCart() {

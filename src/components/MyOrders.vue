@@ -236,7 +236,9 @@ export default {
     goHome() {
       this.$router.push("/");
     },
-
+    goViewAvailable() {
+      this.$router.push("/availableItems");
+    },
     continueShopping() {
       this.$router.push("/availableItems");
     },
