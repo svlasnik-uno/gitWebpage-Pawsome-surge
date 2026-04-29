@@ -245,8 +245,8 @@
                     </div>
 
                     <div class="d-flex justify-content-end mt-3">
-                        <button type="button" class="btn btn-outline-secondary" @click="goHome">
-                            Back Home
+                        <button type="button" class="btn btn-outline-secondary" @click="goViewAvailable">
+                            View Available Items
                         </button>
                     </div>
                 </div>
@@ -565,8 +565,8 @@ export default {
             return map[status] || status || "";
         },
 
-        goHome() {
-            this.$router.push("/");
+        goViewAvailable() {
+            this.$router.push("/availableItems");
         },
     },
 

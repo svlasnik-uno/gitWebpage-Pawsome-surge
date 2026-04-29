@@ -3,24 +3,14 @@
     <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
       <div class="d-flex align-items-center gap-3 flex-wrap">
         <label for="categorySelect" class="fw-semibold mb-0">View Items by Category:</label>
-        <select
-          id="categorySelect"
-          v-model="selectedCategory"
-          class="form-select w-auto"
-          @change="handleFilterChange"
-        >
+        <select id="categorySelect" v-model="selectedCategory" class="form-select w-auto" @change="handleFilterChange">
           <option v-for="option in statusOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
         </select>
 
         <label for="subTypeSelect" class="fw-semibold mb-0">View Items by Sub-type:</label>
-        <select
-          id="subTypeSelect"
-          v-model="selectedSubType"
-          class="form-select w-auto"
-          @change="handleFilterChange"
-        >
+        <select id="subTypeSelect" v-model="selectedSubType" class="form-select w-auto" @change="handleFilterChange">
           <option v-for="option in subTypeOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
@@ -31,7 +21,7 @@
         </span>
       </div>
 
-      <div class="d-flex align-items-center gap-2 flex-wrap">
+      <div class="d-flex align-items-center gap-2 flex-nowrap search-controls-row">
         <select v-model="searchField" class="form-select search-field-select">
           <option value="ItemNumber">Item Number</option>
           <option value="ItemDescription">Item Description</option>
@@ -81,12 +71,7 @@
           <nav aria-label="Items pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button
-                  type="button"
-                  class="page-link"
-                  @click="goToPreviousPage"
-                  :disabled="currentPage === 1"
-                >
+                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
                   <i class="bi bi-chevron-left"></i>
                 </button>
               </li>
@@ -97,12 +82,7 @@
                 class="page-item"
                 :class="{ active: currentPage === page, disabled: page === '...' }"
               >
-                <button
-                  v-if="page !== '...'"
-                  type="button"
-                  class="page-link"
-                  @click="goToPage(page)"
-                >
+                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
                   {{ page }}
                 </button>
 
@@ -141,14 +121,8 @@
                   <div class="th-content justify-content-center">
                     <span class="header-label">{{ headerLabels[header] || header }}</span>
                     <span class="sort-icon-slot">
-                      <i
-                        v-if="sortKey === header && sortDirection === 'asc'"
-                        class="bi bi-caret-up-fill"
-                      ></i>
-                      <i
-                        v-else-if="sortKey === header && sortDirection === 'desc'"
-                        class="bi bi-caret-down-fill"
-                      ></i>
+                      <i v-if="sortKey === header && sortDirection === 'asc'" class="bi bi-caret-up-fill"></i>
+                      <i v-else-if="sortKey === header && sortDirection === 'desc'" class="bi bi-caret-down-fill"></i>
                     </span>
                   </div>
                 </th>
@@ -193,21 +167,11 @@
 
                 <td class="text-center">
                   <div class="d-inline-flex gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-primary"
-                      @click="editItem(item)"
-                      title="Edit Item"
-                    >
+                    <button type="button" class="btn btn-sm btn-outline-primary" @click="editItem(item)" title="Edit Item">
                       <i class="bi bi-pencil-fill"></i>
                     </button>
 
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-danger"
-                      @click="confirmDelete(item)"
-                      title="Delete Item"
-                    >
+                    <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" title="Delete Item">
                       <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
@@ -290,11 +254,7 @@
               </button>
             </div>
 
-            <div
-              v-if="isExpanded(item.ItemNumber)"
-              :id="`mobile-item-details-${item.ItemNumber}`"
-              class="px-3 pb-3"
-            >
+            <div v-if="isExpanded(item.ItemNumber)" :id="`mobile-item-details-${item.ItemNumber}`" class="px-3 pb-3">
               <div
                 v-for="header in mobileDetailHeaders"
                 :key="`${item.ItemNumber}-mobile-${header}`"
@@ -318,22 +278,12 @@
               </div>
 
               <div class="d-flex gap-2 pt-3 border-top mt-2">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary"
-                  @click="editItem(item)"
-                  title="Edit Item"
-                >
+                <button type="button" class="btn btn-sm btn-outline-primary" @click="editItem(item)" title="Edit Item">
                   <i class="bi bi-pencil-fill me-1"></i>
                   Edit
                 </button>
 
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  @click="confirmDelete(item)"
-                  title="Delete Item"
-                >
+                <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" title="Delete Item">
                   <i class="bi bi-trash-fill me-1"></i>
                   Delete
                 </button>
@@ -346,12 +296,7 @@
           <nav aria-label="Items pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button
-                  type="button"
-                  class="page-link"
-                  @click="goToPreviousPage"
-                  :disabled="currentPage === 1"
-                >
+                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
                   <i class="bi bi-chevron-left"></i>
                 </button>
               </li>
@@ -362,12 +307,7 @@
                 class="page-item"
                 :class="{ active: currentPage === page, disabled: page === '...' }"
               >
-                <button
-                  v-if="page !== '...'"
-                  type="button"
-                  class="page-link"
-                  @click="goToPage(page)"
-                >
+                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
                   {{ page }}
                 </button>
 
@@ -860,13 +800,23 @@ export default {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.search-controls-row {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.search-controls-row .btn {
+  white-space: nowrap;
+}
+
 .search-field-select {
-  max-width: 180px;
+  width: 150px;
+  min-width: 150px;
 }
 
 .item-search-input {
+  width: 180px;
   min-width: 180px;
-  max-width: 220px;
 }
 
 .mobile-item-card {

@@ -182,6 +182,7 @@ export default {
             suppressUpdatedTracking: false,
             showMobileDetails: false,
             isMobileView: false,
+            initialEventForm: null,
         };
     },
 
@@ -219,6 +220,28 @@ export default {
     methods: {
         resetUpdatedState() {
             this.isUpdated = false;
+        },
+
+        isOnlyEventIdChanged() {
+            if (this.isEditMode || !this.initialEventForm) {
+                return false;
+            }
+
+            const fieldsToCheck = [
+                "eventName",
+                "eventDate",
+                "eventLocation",
+                "eventImage",
+                "eventSeason",
+                "eventYear",
+                "eventDisplay",
+            ];
+
+            return (
+                fieldsToCheck.every(
+                    (field) => this.eventForm[field] === this.initialEventForm[field]
+                ) && !this.selectedImageFile
+            );
         },
 
         formatDateForInput(value) {
@@ -274,6 +297,7 @@ export default {
                     this.selectedImagePreviewUrl = "";
                 }
 
+                this.initialEventForm = JSON.parse(JSON.stringify(this.eventForm));
                 this.selectedImageFile = null;
                 this.resetUpdatedState();
             } catch (error) {
@@ -387,7 +411,7 @@ export default {
                     eventDate: this.eventForm.eventDate || null,
                     eventLocation: this.eventForm.eventLocation,
                     eventImage: this.eventForm.eventImage,
-                    eventSeason: this.eventForm.eventSeason,
+                    eventSeason: String(this.eventForm.eventSeason || "").toUpperCase(),
                     eventYear: this.eventForm.eventYear || null,
                     eventDisplay: this.eventForm.eventDisplay,
                 };
@@ -472,7 +496,9 @@ export default {
         },
 
         cancelEdit() {
-            if (this.hasUnsavedChanges) {
+            const shouldWarnAboutChanges = this.hasUnsavedChanges && !this.isOnlyEventIdChanged();
+
+            if (shouldWarnAboutChanges) {
                 const confirmed = window.confirm(
                     "You have unsaved changes. Are you sure you want to cancel and lose your updates?"
                 );
@@ -509,6 +535,7 @@ export default {
                 this.suppressUpdatedTracking = false;
             }
 
+            this.initialEventForm = JSON.parse(JSON.stringify(this.eventForm));
             this.resetUpdatedState();
         }
 

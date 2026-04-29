@@ -138,8 +138,8 @@
         </div>
 
         <div class="d-flex justify-content-end mt-3">
-          <button class="btn btn-outline-secondary" @click="goHome">
-            Back Home
+          <button class="btn btn-outline-secondary" @click="goViewAvailable">
+            View Available Items
           </button>
         </div>
       </div>

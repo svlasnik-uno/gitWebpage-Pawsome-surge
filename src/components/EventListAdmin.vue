@@ -1,24 +1,45 @@
 <template>
   <div class="container py-4 list-events-page">
-    <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
-      <div class="d-flex align-items-center gap-3 flex-wrap">
+    <div class="d-flex align-items-start justify-content-between gap-3 mb-4 event-list-toolbar">
+      <div class="d-flex align-items-center gap-3 flex-wrap toolbar-filters">
         <label for="seasonSelect" class="fw-semibold mb-0">View Events by Season:</label>
-        <select id="seasonSelect" v-model="selectedSeason" class="form-select w-auto" @change="handleSeasonChange">
+
+        <select
+          id="seasonSelect"
+          v-model="selectedSeason"
+          class="form-select season-select"
+          @change="handleSeasonChange"
+        >
           <option v-for="option in seasonOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
         </select>
 
-        <span>
+        <span class="results-summary">
           Showing {{ startItem }} - {{ endItem }} of {{ events.length }} events
         </span>
       </div>
 
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-        <input v-model="searchEventId" type="number" class="form-control event-id-search" placeholder="Enter Event ID"
-          @keyup.enter="findByEventId" />
+      <div class="d-flex align-items-center gap-2 search-controls-row">
+        <select
+          v-model="searchFieldType"
+          class="form-select search-field-select"
+          title="Select search field"
+        >
+          <option value="eventId">Event ID</option>
+          <option value="eventName">Event Name</option>
+          <option value="eventYear">Year</option>
+        </select>
 
-        <button type="button" class="btn btn-secondary" @click="findByEventId">
+        <input
+          v-model="searchValue"
+          :type="searchFieldType === 'eventYear' || searchFieldType === 'eventId' ? 'number' : 'text'"
+          :placeholder="getSearchPlaceholder()"
+          class="form-control search-input"
+          @keyup.enter="performSearch"
+        />
+
+        <button type="button" class="btn btn-secondary" @click="performSearch">
           Find
         </button>
 
@@ -51,21 +72,35 @@
           <table class="table table-striped table-hover align-middle sortable-table">
             <thead>
               <tr>
-                <th v-for="header in headers" :key="header" @click="sortBy(header)" :class="[
-                  'sortable-header',
-                  ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay', 'eventGrossSales'].includes(header)
-                    ? 'text-center'
-                    : 'text-start'
-                ]">
-                  <div class="th-content" :class="[
-                    ['id', 'eventImage', 'eventDisplay'].includes(header)
-                      ? 'justify-content-center'
-                      : 'justify-content-start'
-                  ]">
+                <th
+                  v-for="header in headers"
+                  :key="header"
+                  @click="sortBy(header)"
+                  :class="[
+                    'sortable-header',
+                    ['id', 'eventDate', 'eventImage', 'eventSeason', 'eventYear', 'eventDisplay', 'eventGrossSales'].includes(header)
+                      ? 'text-center'
+                      : 'text-start'
+                  ]"
+                >
+                  <div
+                    class="th-content"
+                    :class="[
+                      ['id', 'eventImage', 'eventDisplay'].includes(header)
+                        ? 'justify-content-center'
+                        : 'justify-content-start'
+                    ]"
+                  >
                     <span class="header-label">{{ headerLabels[header] || header }}</span>
                     <span class="sort-icon-slot">
-                      <i v-if="sortKey === header && sortDirection === 'asc'" class="bi bi-caret-up-fill"></i>
-                      <i v-else-if="sortKey === header && sortDirection === 'desc'" class="bi bi-caret-down-fill"></i>
+                      <i
+                        v-if="sortKey === header && sortDirection === 'asc'"
+                        class="bi bi-caret-up-fill"
+                      ></i>
+                      <i
+                        v-else-if="sortKey === header && sortDirection === 'desc'"
+                        class="bi bi-caret-down-fill"
+                      ></i>
                     </span>
                   </div>
                 </th>
@@ -75,26 +110,44 @@
 
             <tbody>
               <tr v-for="event in paginatedEvents" :key="event.id">
-                <td v-for="header in headers" :key="`${event.id}-${header}`" :class="[
-                  ['id', 'eventImage', 'eventDisplay'].includes(header)
-                    ? 'text-center'
-                    : 'text-start'
-                ]">
-                  <button v-if="header === 'id'" type="button" class="btn btn-link p-0 text-decoration-underline"
-                    @click="viewEventDetail(event)">
+                <td
+                  v-for="header in headers"
+                  :key="`${event.id}-${header}`"
+                  :class="[
+                    ['id', 'eventImage', 'eventDisplay'].includes(header)
+                      ? 'text-center'
+                      : 'text-start'
+                  ]"
+                >
+                  <button
+                    v-if="header === 'id'"
+                    type="button"
+                    class="btn btn-link p-0 text-decoration-underline"
+                    @click="viewEventDetail(event)"
+                  >
                     {{ event[header] }}
                   </button>
 
-                  <img v-else-if="header === 'eventImage' && event[header]" :src="event.thumbnailUrl" alt="Event Image"
-                    class="img-thumbnail" loading="lazy" decoding="async" width="75" height="75"
-                    style="width: 75px; height: 75px; object-fit: cover;" />
+                  <img
+                    v-else-if="header === 'eventImage' && event[header]"
+                    :src="event.thumbnailUrl"
+                    alt="Event Image"
+                    class="img-thumbnail"
+                    loading="lazy"
+                    decoding="async"
+                    width="75"
+                    height="75"
+                    style="width: 75px; height: 75px; object-fit: cover;"
+                  />
 
                   <span v-else-if="header === 'eventDate'">
                     {{ formatDate(event[header]) }}
                   </span>
+
                   <span v-else-if="header === 'eventGrossSales'">
                     {{ formatCurrency(event[header]) }}
                   </span>
+
                   <span v-else>
                     {{ event[header] }}
                   </span>
@@ -102,13 +155,21 @@
 
                 <td class="text-center">
                   <div class="d-inline-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary" @click="editEvent(event)"
-                      title="Edit Event">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      @click="editEvent(event)"
+                      title="Edit Event"
+                    >
                       <i class="bi bi-pencil-fill"></i>
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(event)"
-                      title="Delete Event">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      @click="confirmDelete(event)"
+                      title="Delete Event"
+                    >
                       <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
@@ -118,39 +179,59 @@
           </table>
         </div>
 
-        <!-- Mobile accordion view -->
+        <!-- Mobile card view -->
         <div class="d-md-none mobile-event-list">
-          <div v-for="event in paginatedEvents" :key="`mobile-${event.id}`"
-            class="mobile-event-card border rounded mb-3">
+          <div
+            v-for="event in paginatedEvents"
+            :key="`mobile-${event.id}`"
+            class="mobile-event-card border rounded mb-3"
+          >
             <div class="mobile-event-card-header p-3">
               <div class="mobile-event-summary">
-                <button type="button" class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-event-id"
-                  @click="viewEventDetail(event)">
-                  {{ event.id }}
-                </button>
+                <div class="mobile-event-top-row">
+                  <button
+                    type="button"
+                    class="btn btn-link p-0 text-decoration-underline fw-semibold mobile-event-id"
+                    @click="viewEventDetail(event)"
+                  >
+                    #{{ event.id }}
+                  </button>
 
-                <span class="mobile-event-name">
+                  <span class="mobile-event-gross-sales fw-semibold">
+                    {{ formatCurrency(event.eventGrossSales) || "-" }}
+                  </span>
+                </div>
+
+                <div class="mobile-event-name">
                   {{ event.eventName || "-" }}
-                </span>
+                </div>
 
-                <span class="mobile-event-date">
+                <div class="mobile-event-date">
                   {{ formatDate(event.eventDate) || "-" }}
-                </span>
-                <span class="mobile-eventGrossSales fw-semibold">
-                  {{ formatCurrency(event.eventGrossSales) }}
-                </span>
+                </div>
               </div>
 
-              <button type="button" class="btn btn-sm btn-outline-secondary mobile-expand-btn"
-                @click="toggleExpandedEvent(event.id)" :aria-expanded="isExpanded(event.id)"
-                :aria-controls="`mobile-event-details-${event.id}`">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary mobile-expand-btn"
+                @click="toggleExpandedEvent(event.id)"
+                :aria-expanded="isExpanded(event.id)"
+                :aria-controls="`mobile-event-details-${event.id}`"
+              >
                 <i class="bi" :class="isExpanded(event.id) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
               </button>
             </div>
 
-            <div v-if="isExpanded(event.id)" :id="`mobile-event-details-${event.id}`" class="px-3 pb-3">
-              <div v-for="header in mobileDetailHeaders" :key="`${event.id}-mobile-${header}`"
-                class="mobile-event-field py-2 border-top">
+            <div
+              v-if="isExpanded(event.id)"
+              :id="`mobile-event-details-${event.id}`"
+              class="px-3 pb-3"
+            >
+              <div
+                v-for="header in mobileDetailHeaders"
+                :key="`${event.id}-mobile-${header}`"
+                class="mobile-event-field py-2 border-top"
+              >
                 <div class="mobile-event-field-row">
                   <div class="mobile-event-label fw-semibold small text-muted">
                     {{ headerLabels[header] || header }}
@@ -158,16 +239,30 @@
 
                   <div class="mobile-event-value text-end">
                     <template v-if="header === 'eventImage' && event[header]">
-                      <img :src="event.thumbnailUrl" alt="Event Image" class="img-thumbnail" loading="lazy"
-                        decoding="async" width="75" height="75" style="width: 75px; height: 75px; object-fit: cover;" />
+                      <img
+                        :src="event.thumbnailUrl"
+                        alt="Event Image"
+                        class="img-thumbnail"
+                        loading="lazy"
+                        decoding="async"
+                        width="75"
+                        height="75"
+                        style="width: 75px; height: 75px; object-fit: cover;"
+                      />
                     </template>
 
                     <template v-else-if="header === 'eventDate'">
-                      {{ formatDate(event[header]) }}
+                      {{ formatDate(event[header]) || "-" }}
                     </template>
+
                     <template v-else-if="header === 'eventGrossSales'">
-                      {{ formatCurrency(event[header]) }}
+                      {{ formatCurrency(event[header]) || "-" }}
                     </template>
+
+                    <template v-else-if="header === 'eventDisplay'">
+                      {{ formatDisplayValue(event[header]) }}
+                    </template>
+
                     <template v-else>
                       {{ event[header] || "-" }}
                     </template>
@@ -175,15 +270,23 @@
                 </div>
               </div>
 
-              <div class="d-flex gap-2 pt-3 border-top mt-2">
-                <button type="button" class="btn btn-sm btn-outline-primary" @click="editEvent(event)"
-                  title="Edit Event">
+              <div class="mobile-event-actions pt-3 border-top mt-2">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  @click="editEvent(event)"
+                  title="Edit Event"
+                >
                   <i class="bi bi-pencil-fill me-1"></i>
                   Edit
                 </button>
 
-                <button type="button" class="btn btn-sm btn-outline-danger" @click="confirmDelete(event)"
-                  title="Delete Event">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  @click="confirmDelete(event)"
+                  title="Delete Event"
+                >
                   <i class="bi bi-trash-fill me-1"></i>
                   Delete
                 </button>
@@ -196,25 +299,44 @@
           <nav aria-label="Events pagination">
             <ul class="pagination mb-0">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToPreviousPage"
+                  :disabled="currentPage === 1"
+                >
                   Previous
                 </button>
               </li>
 
-              <li v-for="(page, index) in visiblePages" :key="`${page}-${index}`" class="page-item"
-                :class="{ active: currentPage === page, disabled: page === '...' }">
-                <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
+              <li
+                v-for="(page, index) in visiblePages"
+                :key="`${page}-${index}`"
+                class="page-item"
+                :class="{ active: currentPage === page, disabled: page === '...' }"
+              >
+                <button
+                  v-if="page !== '...'"
+                  type="button"
+                  class="page-link"
+                  @click="goToPage(page)"
+                >
                   {{ page }}
                 </button>
 
-                <span v-else class="page-link">
-                  ...
-                </span>
+                <span v-else class="page-link"> ... </span>
               </li>
 
-              <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                <button type="button" class="page-link" @click="goToNextPage"
-                  :disabled="currentPage === totalPages || totalPages === 0">
+              <li
+                class="page-item"
+                :class="{ disabled: currentPage === totalPages || totalPages === 0 }"
+              >
+                <button
+                  type="button"
+                  class="page-link"
+                  @click="goToNextPage"
+                  :disabled="currentPage === totalPages || totalPages === 0"
+                >
                   Next
                 </button>
               </li>
@@ -231,14 +353,15 @@ import APIService from "@/api/APIService";
 import { useAuthStore } from "@/store/AuthStore";
 
 export default {
-  name: "EventList",
+  name: "EventListAdmin",
 
   data() {
     return {
       allEvents: [],
       events: [],
       selectedSeason: "All",
-      searchEventId: "",
+      searchFieldType: "eventId",
+      searchValue: "",
       seasonOptions: [
         { value: "SPRING", label: "Spring" },
         { value: "SUMMER", label: "Summer" },
@@ -263,7 +386,7 @@ export default {
         eventImage: "Image",
         eventSeason: "Season",
         eventYear: "Year",
-        grossSales: "Gross Sales",
+        eventGrossSales: "Gross Sales",
         eventDisplay: "Display on Site",
       },
     };
@@ -272,7 +395,17 @@ export default {
   computed: {
     headers() {
       if (!this.events.length) return [];
-      return ["id", "eventName", "eventDate", "eventLocation", "eventImage", "eventSeason", "eventYear", "eventDisplay", "eventGrossSales"];
+      return [
+        "id",
+        "eventName",
+        "eventDate",
+        "eventLocation",
+        "eventImage",
+        "eventSeason",
+        "eventYear",
+        "eventDisplay",
+        "eventGrossSales",
+      ];
     },
 
     mobileDetailHeaders() {
@@ -356,12 +489,16 @@ export default {
 
       try {
         const data = await APIService.getEvents();
+
         this.allEvents = (Array.isArray(data) ? data : []).map((event) => ({
           ...event,
           thumbnailUrl: APIService.getEventImageThumbnailUrl(event),
-        })); this.currentPage = 1;
+        }));
+
+        this.currentPage = 1;
         this.selectedSeason = "All";
-        this.searchEventId = "";
+        this.searchFieldType = "eventId";
+        this.searchValue = "";
         this.expandedMobileEvents = [];
         this.handleSeasonChange();
       } catch (error) {
@@ -371,24 +508,58 @@ export default {
       }
     },
 
-    findByEventId() {
-      const eventId = Number(this.searchEventId);
-
-      if (!this.searchEventId || Number.isNaN(eventId)) {
+    performSearch() {
+      if (!this.searchValue) {
         this.handleSeasonChange();
         return;
       }
 
-      this.events = this.allEvents.filter(
-        (event) => Number(event.id) === eventId
-      );
+      const searchTerm = String(this.searchValue).trim();
+
+      if (this.searchFieldType === "eventId") {
+        const eventId = Number(searchTerm);
+
+        if (Number.isNaN(eventId)) {
+          this.handleSeasonChange();
+          return;
+        }
+
+        this.events = this.allEvents.filter((event) => Number(event.id) === eventId);
+      } else if (this.searchFieldType === "eventName") {
+        this.events = this.allEvents.filter((event) =>
+          String(event.eventName || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        );
+      } else if (this.searchFieldType === "eventYear") {
+        const year = Number(searchTerm);
+
+        if (Number.isNaN(year)) {
+          this.handleSeasonChange();
+          return;
+        }
+
+        this.events = this.allEvents.filter((event) => Number(event.eventYear) === year);
+      }
 
       this.currentPage = 1;
       this.expandedMobileEvents = [];
     },
 
+    getSearchPlaceholder() {
+      if (this.searchFieldType === "eventId") {
+        return "Enter Event ID";
+      } else if (this.searchFieldType === "eventName") {
+        return "Enter Event Name";
+      } else if (this.searchFieldType === "eventYear") {
+        return "Enter Year";
+      }
+
+      return "";
+    },
+
     clearSearch() {
-      this.searchEventId = "";
+      this.searchValue = "";
       this.handleSeasonChange();
     },
 
@@ -411,7 +582,7 @@ export default {
     },
 
     handleSeasonChange() {
-      this.searchEventId = "";
+      this.searchValue = "";
 
       if (this.selectedSeason === "All") {
         this.events = this.allEvents;
@@ -454,6 +625,7 @@ export default {
         day: "numeric",
       }).format(new Date(value));
     },
+
     formatCurrency(value) {
       if (value == null || value === "") return "";
 
@@ -462,6 +634,13 @@ export default {
         currency: "USD",
       }).format(value);
     },
+
+    formatDisplayValue(value) {
+      if (value === true) return "Yes";
+      if (value === false) return "No";
+      return value || "-";
+    },
+
     goToPage(page) {
       this.currentPage = page;
       this.expandedMobileEvents = [];
@@ -496,9 +675,7 @@ export default {
     },
 
     async confirmDelete(event) {
-      const ok = window.confirm(
-        `Are you sure you want to delete event #${event.id}?`
-      );
+      const ok = window.confirm(`Are you sure you want to delete event #${event.id}?`);
 
       if (!ok) return;
 
@@ -565,12 +742,46 @@ export default {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.event-id-search {
-  max-width: 140px;
+.sortable-table .btn-link {
+  font-weight: 600;
+}
+
+.event-list-toolbar {
+  flex-wrap: nowrap;
+}
+
+.toolbar-filters {
+  min-width: 0;
+}
+
+.season-select {
+  width: auto;
+  min-width: 150px;
+}
+
+.results-summary {
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.search-controls-row {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.search-field-select {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 300px;
+  min-width: 300px;
 }
 
 .mobile-event-card {
   background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .mobile-event-card-header {
@@ -581,16 +792,22 @@ export default {
 }
 
 .mobile-event-summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
   min-width: 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mobile-event-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .mobile-event-id {
-  font-size: 1rem;
+  font-size: 0.95rem;
   flex-shrink: 0;
 }
 
@@ -599,11 +816,18 @@ export default {
   color: #212529;
   min-width: 0;
   word-break: break-word;
+  line-height: 1.3;
 }
 
 .mobile-event-date {
   color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.mobile-event-gross-sales {
   font-size: 0.95rem;
+  color: #212529;
+  text-align: right;
   flex-shrink: 0;
 }
 
@@ -614,6 +838,7 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .mobile-event-field:first-child {
@@ -635,5 +860,131 @@ export default {
   flex: 1;
   min-width: 0;
   word-break: break-word;
+}
+
+.mobile-event-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 991.98px) {
+  .event-list-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .event-list-toolbar > div {
+    width: 100%;
+  }
+
+  .search-controls-row {
+    flex-wrap: wrap;
+  }
+
+  .search-field-select,
+  .search-input {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .list-events-page {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .toolbar-filters {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .toolbar-filters label {
+    width: 100%;
+  }
+
+  .season-select {
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .results-summary {
+    display: block;
+    width: 100%;
+  }
+
+  .search-controls-row {
+    overflow: visible;
+    width: 100%;
+  }
+
+  .search-controls-row .btn {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+
+  .search-controls-row .btn:last-child {
+    flex-basis: 100%;
+  }
+
+  .mobile-event-card {
+    border-radius: 0.75rem !important;
+    overflow: hidden;
+  }
+
+  .mobile-event-card-header {
+    padding: 0.9rem !important;
+  }
+
+  .mobile-event-field-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-event-label {
+    flex: none;
+  }
+
+  .mobile-event-value {
+    width: 100%;
+    text-align: left !important;
+  }
+
+  .mobile-event-actions {
+    flex-direction: column;
+  }
+
+  .mobile-event-actions .btn {
+    width: 100%;
+  }
+
+  .pagination {
+    gap: 0.25rem;
+  }
+
+  .page-link {
+    padding: 0.375rem 0.65rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .mobile-event-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .mobile-event-gross-sales {
+    text-align: left;
+  }
+
+  .search-controls-row .btn {
+    flex-basis: 100%;
+  }
 }
 </style>

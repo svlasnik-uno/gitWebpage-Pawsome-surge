@@ -132,8 +132,8 @@
                         {{ saving ? "Saving..." : "Save Item" }}
                       </button>
 
-                      <button type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item"
-                        :disabled="saving || !isEditMode">
+                      <button v-if="isEditMode" type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item"
+                        :disabled="saving">
                         Delete Item
                       </button>
 

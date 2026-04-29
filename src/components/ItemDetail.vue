@@ -29,8 +29,8 @@
                 </div>
               </div>
 
-              <div class="flex-grow-1 min-w-0">
-                <div class="text-muted small">Item Number</div>
+              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="flex-grow-1 min-w-0">
+                <div class="text small">Item Number</div>
                 <div class="fw-semibold fs-5">{{ form.ItemNumber || "" }}</div>
               </div>
             </div>
@@ -86,10 +86,6 @@
               </div>
             </div>
 
-            <div v-if="form.ItemImage" class="mt-3 small text-muted">
-              Current: {{ form.ItemImage }}
-            </div>
-
             <div class="d-flex gap-2 pt-3 border-top mt-3 flex-wrap">
               <button v-if="auth.isAuthenticated" type="button" class="btn btn-secondary" @click="editItem">
                 Edit Item
@@ -110,46 +106,46 @@
         </div>
 
         <!-- Desktop / tablet view -->
-        <div class="row g-4 d-none d-lg-flex">
+        <div class="row g-4 d-none d-lg-flex detail-section">
           <div class="col-lg-8">
             <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Item Number</label>
+              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
+                <label class="form-label fw-bold">Item Number</label>
                 <div class="form-control readonly-field">{{ form.ItemNumber || "" }}</div>
               </div>
 
               <div v-if="auth.isAuthenticated" class="col-md-6">
-                <label class="form-label">Item Type</label>
+                <label class="form-label fw-bold">Item Type</label>
                 <div class="form-control readonly-field">{{ form.ItemType || "" }}</div>
               </div>
 
               <div v-if="auth.isAuthenticated" class="col-md-6">
-                <label class="form-label">Item Sub-type</label>
+                <label class="form-label fw-bold">Item Sub-type</label>
                 <div class="form-control readonly-field">{{ form.ItemSubType || "" }}</div>
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Price</label>
+                <label class="form-label fw-bold">Price</label>
                 <div class="form-control readonly-field">{{ formatCurrency(form.ItemAskingPrice) }}</div>
               </div>
 
               <div v-if="auth.isAuthenticated" class="col-md-6">
-                <label class="form-label">Item Cost</label>
+                <label class="form-label fw-bold">Item Cost</label>
                 <div class="form-control readonly-field">{{ formatCurrency(form.ItemCost) }}</div>
               </div>
 
               <div v-if="auth.isAuthenticated" class="col-md-6">
-                <label class="form-label">Item Status</label>
+                <label class="form-label fw-bold">Item Status</label>
                 <div class="form-control readonly-field">{{ formatStatus(form.ItemStatus) }}</div>
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Item Color</label>
+                <label class="form-label fw-bold">Item Color</label>
                 <div class="form-control readonly-field">{{ form.ItemColor || "" }}</div>
               </div>
 
               <div class="col-12">
-                <label class="form-label">Item Description</label>
+                <label class="form-label fw-bold">Item Description</label>
                 <div class="form-control readonly-field readonly-textarea">{{ form.ItemDescription || "" }}</div>
                 <div class="col-12 d-flex gap-2">
                 </div>
@@ -390,7 +386,13 @@ export default {
 }
 
 .mobile-detail-card {
-  background: #fff;
+  background: #e8e8e8;
+}
+
+.detail-section {
+  background: #e8e8e8;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
 }
 
 .mobile-detail-thumb-wrap {
