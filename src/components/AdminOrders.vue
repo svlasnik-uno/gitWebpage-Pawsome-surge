@@ -571,6 +571,7 @@ export default {
     },
 
     created() {
+        
         this.authStore = useAuthStore();
         this.itemStore = useItemStore();
         this.loadOrders();

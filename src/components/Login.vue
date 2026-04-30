@@ -138,7 +138,7 @@ export default {
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("usertype, userfirstname, userlastname, userphone")
+          .select("usertype, userfirstname, userlastname, userphone","useremail")
           .eq("id", user.id)
           .single();
 

@@ -2,38 +2,22 @@
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid">
       <!-- Mobile logo -->
-      <router-link
-        to="/"
-        class="navbar-brand m-0 d-lg-none"
-        @click="closeMenu"
-      >
+      <router-link to="/" class="navbar-brand m-0 d-lg-none" @click="closeMenu">
         <img src="/img/logo.png" alt="Logo" class="logo-img" />
       </router-link>
 
       <!-- Hamburger button -->
-      <button
-        class="navbar-toggler"
-        type="button"
-        @click="toggleMenu"
-        :aria-expanded="menuOpen"
-        aria-label="Toggle navigation"
-      >
+      <button class="navbar-toggler" type="button" @click="toggleMenu" :aria-expanded="menuOpen"
+        aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <!-- Collapsible menu -->
-      <div
-        class="collapse navbar-collapse justify-content-center"
-        :class="{ show: menuOpen }"
-      >
+      <div class="collapse navbar-collapse justify-content-center" :class="{ show: menuOpen }">
         <!-- Centered group -->
         <div class="d-flex align-items-center gap-3 navbar-inner">
           <!-- Desktop logo -->
-          <router-link
-            to="/"
-            class="navbar-brand m-0 d-none d-lg-block"
-            @click="closeMenu"
-          >
+          <router-link to="/" class="navbar-brand m-0 d-none d-lg-block" @click="closeMenu">
             <img src="/img/logo.png" alt="Logo" class="logo-img" />
           </router-link>
 
@@ -41,12 +25,7 @@
           <ul class="navbar-nav">
             <!-- Main links -->
             <li class="nav-item" v-for="link in links" :key="link.to">
-              <router-link
-                :to="link.to"
-                class="nav-link"
-                :class="{ active: isActive(link.to) }"
-                @click="closeMenu"
-              >
+              <router-link :to="link.to" class="nav-link" :class="{ active: isActive(link.to) }" @click="closeMenu">
                 {{ link.label }}
               </router-link>
             </li>
@@ -54,23 +33,14 @@
             <!-- AUTHENTICATED USERS -->
             <template v-if="auth.isAuthenticated">
               <li class="nav-item" v-if="cart.cartCount > 0">
-                <router-link
-                  to="/cart"
-                  class="nav-link"
-                  :class="{ active: isActive('/cart') }"
-                  @click="closeMenu"
-                >
+                <router-link to="/cart" class="nav-link" :class="{ active: isActive('/cart') }" @click="closeMenu">
                   View Cart ({{ cart.cartCount }})
                 </router-link>
               </li>
 
               <li class="nav-item">
-                <router-link
-                  to="/my-orders"
-                  class="nav-link"
-                  :class="{ active: isActive('/my-orders') }"
-                  @click="closeMenu"
-                >
+                <router-link to="/my-orders" class="nav-link" :class="{ active: isActive('/my-orders') }"
+                  @click="closeMenu">
                   My Orders
                 </router-link>
               </li>
@@ -82,35 +52,29 @@
                 </li>
 
                 <li class="nav-item">
-                  <router-link
-                    to="/itemList"
-                    class="nav-link"
-                    :class="{ active: isActive('/itemList') }"
-                    @click="closeMenu"
-                  >
+                  <router-link to="/itemList" class="nav-link" :class="{ active: isActive('/itemList') }"
+                    @click="closeMenu">
                     View Items
                   </router-link>
                 </li>
 
                 <li class="nav-item">
-                  <router-link
-                    to="/eventListAdmin"
-                    class="nav-link"
-                    :class="{ active: isActive('/eventListAdmin') }"
-                    @click="closeMenu"
-                  >
+                  <router-link to="/eventListAdmin" class="nav-link" :class="{ active: isActive('/eventListAdmin') }"
+                    @click="closeMenu">
                     Manage Events
                   </router-link>
                 </li>
 
                 <li class="nav-item">
-                  <router-link
-                    to="/AdminOrders"
-                    class="nav-link"
-                    :class="{ active: isActive('/AdminOrders') }"
-                    @click="closeMenu"
-                  >
+                  <router-link to="/AdminOrders" class="nav-link" :class="{ active: isActive('/AdminOrders') }"
+                    @click="closeMenu">
                     Manage Orders
+                  </router-link>
+                </li>
+                <li class="nav-item">
+                  <router-link to="/AdminManageUserProfiles" class="nav-link" :class="{ active: isActive('/AdminManageUserProfiles') }"
+                    @click="closeMenu">
+                    Manage Users
                   </router-link>
                 </li>
               </template>
@@ -118,10 +82,7 @@
 
             <!-- Auth -->
             <li class="nav-item">
-              <div
-                v-if="!auth.isAuthenticated"
-                class="d-flex gap-2 flex-column flex-lg-row"
-              >
+              <div v-if="!auth.isAuthenticated" class="d-flex gap-2 flex-column flex-lg-row">
                 <router-link to="/login" class="nav-link" @click="closeMenu">
                   Login
                 </router-link>
@@ -131,12 +92,7 @@
                 </router-link>
               </div>
 
-              <router-link
-                v-else
-                to="/login"
-                class="nav-link"
-                @click="handleLogout"
-              >
+              <router-link v-else to="/login" class="nav-link" @click="handleLogout">
                 Logout
               </router-link>
             </li>

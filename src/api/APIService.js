@@ -1,6 +1,6 @@
 import { supabase } from "../supabase";
 
-const TABLE_NAME = "tblItems";
+const ITEM_TABLE_NAME = "tblItems";
 const IMAGE_BUCKET = "Images";
 const EVENT_TABLE_NAME = "tblEvents";
 const ITEMTYPES_TABLE_NAME = "tblItemTypes";
@@ -8,6 +8,7 @@ const ITEMSUBTYPES_TABLE_NAME = "tblSubTypes";
 const ITEMSTATUS_TABLE_NAME = "tblItemStatus";
 const CUSTOMER_ORDER_TABLE_NAME = "CustOrders";
 const CUSTOMER_ORDER_DETAIL_TABLE_NAME = "CustOrderDetail";
+const PROFILE_TABLE_NAME = "profiles";
 const URL = "https://pawsomeartsandcrafts.com"; // "http://localhost:8080";
 
 const ORDER_SELECT = `
@@ -28,7 +29,7 @@ const ORDER_SELECT = `
     created_at,
     orderNum,
     itemNumber,
-    tblItems:${TABLE_NAME} (
+    tblItems:${ITEM_TABLE_NAME} (
       ItemNumber,
       ItemDescription,
       ItemImage,
@@ -49,6 +50,7 @@ const APIService = {
           userfirstname: profileData.firstName,
           userlastname: profileData.lastName,
           userphone: profileData.phone || null,
+          useremail: profileData.email,
         },
         emailRedirectTo: `${URL}/auth/callback`,
       },
@@ -93,8 +95,35 @@ const APIService = {
     return data.user;
   },
 
+  async getUserProfiles() {
+    const { data, error } = await supabase
+      .from(PROFILE_TABLE_NAME)
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+  async updateUserProfile(profileId, updates) {
+    const allowedUpdates = {
+      userfirstname: updates.userfirstname,
+      userlastname: updates.userlastname,
+      userphone: updates.userphone,
+      usertype: updates.usertype,
+    };
+
+    const { data, error } = await supabase
+      .from(PROFILE_TABLE_NAME)
+      .update(allowedUpdates)
+      .eq("id", profileId)
+      .select("id, useremail, userfirstname, userlastname, userphone, usertype")
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
   async getItemsSortCriteria(sortCriteria = [], filterCriteria = []) {
-    let query = supabase.from(TABLE_NAME).select("*");
+    let query = supabase.from(ITEM_TABLE_NAME).select("*");
 
     if (Array.isArray(filterCriteria)) {
       filterCriteria.forEach((filter) => {
@@ -133,7 +162,7 @@ const APIService = {
 
   async getItems() {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .select("*")
       .order("ItemNumber", { ascending: true });
 
@@ -143,7 +172,7 @@ const APIService = {
 
   async getItemsByImageType(imageType) {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .select("*")
       .eq("ImageType", imageType)
       .order("ItemNumber", { ascending: false });
@@ -153,7 +182,7 @@ const APIService = {
   },
   async getItemsByStatus(status) {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .select("*")
       .eq("ItemStatus", status)
       .order("ItemNumber", { ascending: true });
@@ -164,7 +193,7 @@ const APIService = {
 
   async getItemById(itemNumber) {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .select("*")
       .eq("ItemNumber", Number(itemNumber))
       .single();
@@ -181,7 +210,7 @@ const APIService = {
     if (!safeItemNumbers.length) return [];
 
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .select("*")
       .in("ItemNumber", safeItemNumbers)
       .order("ItemNumber", { ascending: true });
@@ -192,7 +221,7 @@ const APIService = {
 
   async createItem(item) {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .insert([item])
       .select()
       .single();
@@ -205,7 +234,7 @@ const APIService = {
     const { ItemNumber, ...updatePayload } = item;
 
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .update(updatePayload)
       .eq("ItemNumber", Number(itemNumber))
       .select()
@@ -217,7 +246,7 @@ const APIService = {
 
   async updateItemInventoryStatus(itemNumber, newStatus) {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .update({ ItemStatus: newStatus })
       .eq("ItemNumber", Number(itemNumber))
       .select()
@@ -235,7 +264,7 @@ const APIService = {
     if (!safeItemNumbers.length) return [];
 
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .update({ ItemStatus: newStatus })
       .in("ItemNumber", safeItemNumbers)
       .select();
@@ -246,7 +275,7 @@ const APIService = {
 
   async deleteItem(itemNumber) {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(ITEM_TABLE_NAME)
       .delete()
       .eq("ItemNumber", Number(itemNumber))
       .select();
@@ -689,7 +718,7 @@ const APIService = {
         created_at,
         orderNum,
         itemNumber,
-        tblItems:${TABLE_NAME} (
+        tblItems:${ITEM_TABLE_NAME} (
           ItemNumber,
           ItemDescription,
           ItemImage,

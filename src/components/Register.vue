@@ -118,6 +118,7 @@ export default {
           firstName: this.firstName,
           lastName: this.lastName,
           phone: this.phone,
+          useremail: this.email,
         })
 
         this.showMsg = 'success'

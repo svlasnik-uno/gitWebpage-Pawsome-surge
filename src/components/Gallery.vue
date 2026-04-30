@@ -70,25 +70,47 @@ onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
 });
 </script>
-
 <style scoped>
 .gallery-card {
   height: 400px;
   overflow: hidden;
   border: none;
 }
+
 .gallery-link {
   position: relative;
   display: block;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   text-decoration: none;
 }
+
 .gallery-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.overlay-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 8px 10px;
+  font-size: 0.95rem;
+
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.gallery-link:hover .overlay-text {
+  opacity: 1;
 }
 
 .gallery-title {
@@ -115,24 +137,6 @@ onUnmounted(() => {
 
 .gallery-title mark {
   line-height: inherit;
-}
-
-.overlay-text {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  text-align: center;
-  color: white;
-  background: rgba(0, 0, 0, 0.55);
-  padding: 8px 10px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  font-size: 0.95rem;
-}
-
-.gallery-link:hover .overlay-text {
-  opacity: 1;
 }
 
 .back-to-top {
