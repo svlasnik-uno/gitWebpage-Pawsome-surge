@@ -1,7 +1,6 @@
 <template>
   <main class="site-content py-2 gallery-page">
     <h4 class="gallery-title">A few of our arrangements</h4>
-    <h3 class="gallery-subtitle">Click to view item details</h3>
 
     <div class="container mt-3">
       <div class="row">
