@@ -97,7 +97,7 @@
               </button>
 
               <button type="button" class="btn btn-secondary" @click="goBack">
-                Back to List
+                Back
               </button>
               <button type="button" class="btn btn-secondary" @click="toggleCart(form)">
                 {{ isInCart(form) ? "Remove From Cart" : "Add To Cart" }}

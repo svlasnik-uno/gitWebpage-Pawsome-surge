@@ -136,13 +136,11 @@
                         :disabled="saving">
                         Delete Item
                       </button>
-
-                      <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
-                        Back to List
-                      </button>
-
                       <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
                         Cancel
+                      </button>
+                      <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
+                        Back
                       </button>
                     </div>
                   </div>
@@ -559,11 +557,7 @@ export default {
           return;
         }
       }
-
-      this.$router.push({
-        path: "/itemList",
-        query: { ...this.$route.query },
-      });
+      this.$router.back();
     },
 
     handleBeforeUnload(event) {

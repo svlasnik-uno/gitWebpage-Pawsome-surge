@@ -6,6 +6,20 @@
           <h2 class="mb-1">Available Items</h2>
 
           <div class="d-flex align-items-center gap-2 sort-inline">
+            <label for="subTypeSelect" class="mb-0 small fw-semibold">View by Category:</label>
+            <select
+              id="subTypeSelect"
+              v-model="selectedSubType"
+              class="form-select form-select-sm sort-select"
+              @change="handleFilterChange"
+            >
+              <option v-for="option in subTypeOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 sort-inline">
             <label for="priceSort" class="mb-0 small fw-semibold">Sort by Price:</label>
             <select id="priceSort" v-model="sortOption" class="form-select form-select-sm sort-select">
               <option value="">Default</option>
@@ -13,9 +27,13 @@
               <option value="price-desc">High to Low</option>
             </select>
           </div>
+
+          <span class="small text-muted">
+            Showing {{ sortedItems.length }} of {{ items.length }} items
+          </span>
         </div>
 
-        <p class="text mb-0">Browse currently available inventory and add items to your cart.</p>
+        <p class="text mb-0">Browse available items and add items to your cart.</p>
         <b>
           <p class="text mb-0">* Free Delivery available for the Omaha Area only.</p>
         </b>
@@ -40,14 +58,28 @@
         No available items were found.
       </div>
 
+      <div v-else-if="!sortedItems.length" class="alert alert-info" role="alert">
+        No available items were found for this category at this time.
+      </div>
+
       <div v-else class="row g-3">
         <div v-for="item in sortedItems" :key="item.ItemNumber" class="col-12 col-md-6 col-xl-4">
           <div class="card h-100 shadow-sm item-card">
-            <div class="image-wrap image-clickable" @click="viewItem(item)" role="button" tabindex="0"
-              @keyup.enter="viewItem(item)" @keyup.space.prevent="viewItem(item)"
-              :aria-label="`View details for item ${item.ItemNumber}`">
-              <img v-if="getImageUrl(item)" :src="getImageUrl(item)" :alt="`Item ${item.ItemNumber}`"
-                class="card-img-top item-image" />
+            <div
+              class="image-wrap image-clickable"
+              @click="viewItem(item)"
+              role="button"
+              tabindex="0"
+              @keyup.enter="viewItem(item)"
+              @keyup.space.prevent="viewItem(item)"
+              :aria-label="`View details for item ${item.ItemNumber}`"
+            >
+              <img
+                v-if="getImageUrl(item)"
+                :src="getImageUrl(item)"
+                :alt="`Item ${item.ItemNumber}`"
+                class="card-img-top item-image"
+              />
               <div v-else class="image-placeholder text-muted small">
                 No image available
               </div>
@@ -59,18 +91,27 @@
                   <span class="detail-label">Price</span>
                   <span class="detail-value">{{ formatCurrency(item.ItemAskingPrice) }}</span>
                 </div>
+
+                <div class="detail-row">
+                  <span class="detail-label">Category</span>
+                  <span class="detail-value">{{ item.ItemSubType || "-" }}</span>
+                </div>
               </div>
 
               <div class="mb-2">
                 <div class="text-muted small fw-semibold mb-1">Description</div>
                 <div class="description-box small">
-                  {{ item.ItemDescription || '' }}
+                  {{ item.ItemDescription || "" }}
                 </div>
               </div>
 
               <div class="mt-auto d-grid gap-2">
-                <button type="button" class="btn btn-sm btn-primary" @click="addToCart(item)"
-                  :disabled="isInCart(item)">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary"
+                  @click="addToCart(item)"
+                  :disabled="isInCart(item)"
+                >
                   {{ isInCart(item) ? "In Cart" : "Add To Cart" }}
                 </button>
 
@@ -84,8 +125,14 @@
       </div>
     </div>
 
-    <button v-show="showBackToTop" type="button" class="btn btn-primary back-to-top" @click="scrollToTop"
-      aria-label="Back to top" title="Back to top">
+    <button
+      v-show="showBackToTop"
+      type="button"
+      class="btn btn-primary back-to-top"
+      @click="scrollToTop"
+      aria-label="Back to top"
+      title="Back to top"
+    >
       <i class="bi bi-arrow-up"></i>
     </button>
   </div>
@@ -117,15 +164,11 @@ export default {
       authStore: null,
       showBackToTop: false,
       sortOption: "",
+      selectedSubType: "All",
+      subTypeOptions: [{ value: "All", label: "All" }],
       currencyFormatter: new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-      }),
-      statusMap: Object.freeze({
-        A: "Available",
-        S: "Sold",
-        R: "Replace",
-        K: "Kept",
       }),
     };
   },
@@ -135,10 +178,14 @@ export default {
       return this.cartStore?.cartItems?.length || 0;
     },
 
-    sortedItems() {
-      if (!this.sortOption) return this.items;
+    filteredItems() {
+      return this.items.filter((item) => {
+        return this.selectedSubType === "All" || item.ItemSubType === this.selectedSubType;
+      });
+    },
 
-      const sorted = [...this.items];
+    sortedItems() {
+      const sorted = [...this.filteredItems];
 
       if (this.sortOption === "price-asc") {
         sorted.sort((a, b) => (Number(a.ItemAskingPrice) || 0) - (Number(b.ItemAskingPrice) || 0));
@@ -165,13 +212,37 @@ export default {
       }
     },
 
+    async loadSubTypes() {
+      try {
+        const subTypesFromApi = await this.itemStore.fetchSubTypes();
+
+        this.subTypeOptions = [
+          { value: "All", label: "All" },
+          ...subTypesFromApi
+            .filter((subType) => subType?.subTypeName)
+            .map((subType) => ({
+              value: subType.subTypeName,
+              label: subType.subTypeName,
+            })),
+        ];
+      } catch {
+        this.subTypeOptions = [{ value: "All", label: "All" }];
+      }
+    },
+
+    handleFilterChange() {
+      this.scrollToTop();
+    },
+
     addToCart(item) {
       if (this.isInCart(item)) return;
+
       if (!this.authStore?.isAuthenticated) {
         this.cartStore.savePendingCartItem(item);
         this.$router.push({ path: "/login", query: { from: this.$route.fullPath } });
         return;
       }
+
       this.cartStore.addToCart(item);
     },
 
@@ -193,16 +264,7 @@ export default {
 
     formatCurrency(value) {
       if (value == null || value === "") return "";
-
       return this.currencyFormatter.format(value);
-    },
-
-    formatStatus(value) {
-      return this.statusMap[value] || value || "";
-    },
-
-    statusBadgeClass(status) {
-      return status === "A" ? "text-bg-success" : "text-bg-secondary";
     },
 
     handleScroll() {
@@ -223,10 +285,12 @@ export default {
     this.authStore = useAuthStore();
   },
 
-  mounted() {
+  async mounted() {
     if (this.autoLoad) {
-      this.loadItems();
+      await this.loadItems();
     }
+
+    await this.loadSubTypes();
 
     window.addEventListener("scroll", this.handleScroll);
     this.handleScroll();
@@ -279,9 +343,11 @@ export default {
 .image-clickable {
   cursor: pointer;
 }
+
 .image-clickable:hover {
   opacity: 0.92;
 }
+
 .detail-list {
   display: flex;
   flex-direction: column;
