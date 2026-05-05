@@ -132,8 +132,8 @@
                         {{ saving ? "Saving..." : "Save Item" }}
                       </button>
 
-                      <button v-if="isEditMode" type="button" class="btn btn-secondary" @click="confirmDelete" title="Delete Item"
-                        :disabled="saving">
+                      <button v-if="isEditMode" type="button" class="btn btn-secondary" @click="confirmDelete"
+                        title="Delete Item" :disabled="saving">
                         Delete Item
                       </button>
                       <button type="button" class="btn btn-secondary" @click="goBackCancel" :disabled="saving">
@@ -387,8 +387,8 @@ export default {
           let finalImageName = oldImageName;
 
           if (this.selectedImageFile) {
-            const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 600, 600, 0.8 );
-            const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8 );
+            const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 600, 600, 0.8);
+            const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8);
 
             uploadedImageName = await APIService.uploadItemImage(
               resizedFile,
@@ -451,7 +451,7 @@ export default {
 
             if (this.selectedImageFile) {
               const resizedFile = await this.getPreparedUploadFile(this.selectedImageFile, 600, 600, 0.8);
-              const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8 );
+              const thumbFile = await this.getPreparedUploadFile(this.selectedImageFile, 300, 300, 0.8);
 
               uploadedImageName = await APIService.uploadItemImage(
                 resizedFile,
@@ -501,9 +501,9 @@ export default {
         this.captureInitialState();
 
         this.$router.push({
-          path: "/itemList",
           query: { ...this.$route.query },
         });
+        this.$router.back();
       } catch (error) {
         this.errorMessage = error.message || "Failed to save item.";
       } finally {
@@ -539,9 +539,10 @@ export default {
         this.itemStore.removeItem(this.form.ItemNumber);
 
         this.$router.push({
-          path: "/itemList",
           query: { ...this.$route.query },
         });
+        this.$router.back();
+
       } catch (error) {
         window.alert(error.message || "Delete failed.");
       }
@@ -557,7 +558,10 @@ export default {
           return;
         }
       }
-      this.$router.back();
+        this.$router.push({
+          query: { ...this.$route.query },
+        });
+        this.$router.back();
     },
 
     handleBeforeUnload(event) {
