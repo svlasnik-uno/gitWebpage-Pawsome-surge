@@ -20,11 +20,11 @@
         <!-- Mobile view -->
         <div class="d-lg-none">
           <div class="mobile-detail-card border rounded p-3 mb-4">
-            <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="mobile-detail-thumb-wrap">
+            <div class="d-flex flex-column align-items-center gap-3 mb-3">
+              <div class="mobile-detail-wrap">
                 <img v-if="previewImageUrl" :src="previewImageUrl" alt="Item preview"
                   class="img-thumbnail mobile-detail-thumb" />
-                <div v-else class="mobile-detail-thumb-placeholder text-muted small">
+                <div v-else class="mobile-detail-placeholder text-muted small">
                   No image
                 </div>
               </div>
@@ -91,6 +91,7 @@
                 @click="editItem">
                 Edit Item
               </button>
+
               <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button" class="btn btn-secondary"
                 @click="confirmDelete" title="Delete Item">
                 Delete Item
@@ -99,17 +100,17 @@
               <button type="button" class="btn btn-secondary" @click="goBack">
                 Back
               </button>
+
               <button type="button" class="btn btn-secondary" @click="toggleCart(form)">
                 {{ isInCart(form) ? "Remove From Cart" : "Add To Cart" }}
               </button>
-
             </div>
           </div>
         </div>
 
         <!-- Desktop / tablet view -->
         <div class="row g-4 d-none d-lg-flex detail-section">
-          <div class="col-lg-8">
+          <div class="col-lg-7">
             <div class="row g-3">
               <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
                 <label class="form-label fw-bold">Item Number</label>
@@ -149,47 +150,48 @@
               <div class="col-12">
                 <label class="form-label fw-bold">Item Description</label>
                 <div class="form-control readonly-field readonly-textarea">{{ form.ItemDescription || "" }}</div>
-                <div class="col-12 d-flex gap-2">
+
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                  <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button"
+                    class="btn btn-secondary" @click="editItem">
+                    Edit Item
+                  </button>
+
+                  <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button"
+                    class="btn btn-secondary" @click="confirmDelete" title="Delete Item">
+                    Delete Item
+                  </button>
+
+                  <button type="button" class="btn btn-secondary" @click="toggleCart(form)">
+                    {{ isInCart(form) ? "Remove From Cart" : "Add To Cart" }}
+                  </button>
+
+                  <button v-if="auth.isAuthenticated && isInCart(form)" type="button" class="btn btn-secondary"
+                    @click="viewCart">
+                    View Cart
+                  </button>
+
+                  <button type="button" class="btn btn-secondary" @click="goBack">
+                    Back
+                  </button>
                 </div>
-
-                <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button" class="btn btn-secondary"
-                  @click="editItem">
-                  Edit Item
-                </button>
-
-                <button v-if="auth.isAuthenticated && auth.usertype === 'admin'" type="button"
-                  class="btn btn-secondary ms-2" @click="confirmDelete" title="Delete Item">
-                  Delete Item
-                </button>
-
-                <button type="button" class="btn btn-secondary ms-2" @click="toggleCart(form)">
-                  {{ isInCart(form) ? "Remove From Cart" : "Add To Cart" }}
-                </button>
-
-                <button v-if="auth.isAuthenticated && isInCart(form)" type="button" class="btn btn-secondary ms-2"
-                  @click="viewCart">
-                  View Cart
-                </button>
-                <button type="button" class="btn btn-secondary ms-2" @click="goBack">
-                  Back
-                </button>
-
               </div>
             </div>
           </div>
 
-          <div class="col-lg-4">
+          <div class="col-lg-5">
             <div class="image-preview-card">
               <h5 class="mb-3">Item Image</h5>
 
               <div class="image-preview-box">
-                <img v-if="previewImageUrl" :src="previewImageUrl" alt="Item preview" class="img-fluid preview-image" />
+                <img v-if="previewImageUrl" :src="previewImageUrl" alt="Item preview" class="preview-image" />
                 <div v-else class="text-muted">
                   No image available
                 </div>
               </div>
 
-              <div v-if="form.ItemImage && auth.isAuthenticated && auth.usertype === 'admin'"  class="mt-2 small text-muted">
+              <div v-if="form.ItemImage && auth.isAuthenticated && auth.usertype === 'admin'"
+                class="mt-2 small text-muted">
                 Current: {{ form.ItemImage }}
               </div>
             </div>
@@ -247,6 +249,7 @@ export default {
       }
       return APIService.getImageUrl(this.form);
     },
+
     auth() {
       return useAuthStore();
     },
@@ -271,6 +274,7 @@ export default {
         this.loading = false;
       }
     },
+
     toggleCart(item) {
       if (!item || !item.ItemNumber) return;
       if (!this.cartStore) return;
@@ -301,25 +305,26 @@ export default {
       if (!item || !item.ItemNumber) return;
       if (!this.cartStore) return;
 
-      const ok = window.confirm(
-        `Remove item from your cart?`
-      );
-
+      const ok = window.confirm("Remove item from your cart?");
       if (!ok) return;
 
       this.cartStore.removeFromCart(item.ItemNumber);
     },
+
     editItem() {
       this.$router.push({
         path: `/editItem/${this.form.ItemNumber}`,
         query: { ...this.$route.query },
       });
     },
+
     async confirmDelete() {
       const ok = window.confirm(
         `Are you sure you want to delete item #${this.form.ItemNumber}?`
       );
+
       if (!ok) return;
+
       try {
         await APIService.deleteItem(this.form.ItemNumber);
         this.$router.push({
@@ -330,19 +335,6 @@ export default {
         window.alert(error.message || "Delete failed.");
       }
     },
-    addToCart(item) {
-      if (!item || !item.ItemNumber) return;
-      if (!this.cartStore) return;
-      if (this.isInCart(item)) return;
-
-      if (!this.auth.isAuthenticated) {
-        this.cartStore.savePendingCartItem(item);
-        this.$router.push({ path: "/login", query: { from: this.$route.fullPath } });
-        return;
-      }
-
-      this.cartStore.addToCart(item);
-    },
 
     isInCart(item) {
       if (!this.cartStore || !Array.isArray(this.cartStore.cartItems)) return false;
@@ -352,6 +344,7 @@ export default {
         (cartItem) => String(cartItem.ItemNumber) === String(item.ItemNumber)
       );
     },
+
     goBack() {
       this.$router.back();
     },
@@ -376,16 +369,18 @@ export default {
         R: "Replace",
         K: "Kept",
       };
+
       return statusMap[value] || value || "";
     },
   },
+
   created() {
     this.cartStore = useCartStore();
     this.itemStore = useItemStore();
   },
+
   async mounted() {
     await this.loadItem();
-
   },
 };
 </script>
@@ -405,15 +400,25 @@ export default {
   padding-top: 0.375rem;
 }
 
+.detail-section {
+  background: #e8e8e8;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
 .image-preview-card {
   border: 1px solid #dee2e6;
   border-radius: 0.5rem;
   padding: 1rem;
   background: #fff;
+  width: 100%;
 }
 
 .image-preview-box {
-  min-height: 260px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 520px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -422,12 +427,13 @@ export default {
   background: #f8f9fa;
   padding: 0.75rem;
   text-align: center;
+  overflow: hidden;
 }
 
 .preview-image {
-  max-height: 320px;
-  width: auto;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 0.375rem;
 }
 
@@ -435,15 +441,10 @@ export default {
   background: #e8e8e8;
 }
 
-.detail-section {
-  background: #e8e8e8;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-}
-
-.mobile-detail-thumb-wrap {
-  width: 88px;
-  height: 88px;
+.mobile-detail-wrap {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -451,14 +452,15 @@ export default {
 }
 
 .mobile-detail-thumb {
-  width: 88px;
-  height: 88px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.mobile-detail-thumb-placeholder {
-  width: 88px;
-  height: 88px;
+.mobile-detail-placeholder {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
   border: 1px dashed #ced4da;
   border-radius: 0.375rem;
   background: #f8f9fa;

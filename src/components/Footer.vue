@@ -2,13 +2,7 @@
   <div class="footer">
     <!-- Top row -->
     <div class="footer-top">
-      <router-link
-        v-for="link in links"
-        :key="link.to"
-        :to="link.to"
-        class="foot-link"
-        active-class="active"
-      >
+      <router-link v-for="link in links" :key="link.to" :to="link.to" class="foot-link" active-class="active">
         {{ link.label }}
       </router-link>
 
@@ -16,12 +10,8 @@
         Contact Us
       </button>
 
-      <a
-        href="https://www.facebook.com/profile.php?id=61587162195934"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="foot-link"
-      >
+      <a href="https://www.facebook.com/profile.php?id=61587162195934" target="_blank" rel="noopener noreferrer"
+        class="foot-link">
         <img src="/img/fbLogo.png" width="20" height="20" alt="Facebook" />
       </a>
     </div>
@@ -33,16 +23,10 @@
       <img alt="Logo image" src="/img/logo.png" height="40" />
     </div>
 
-    <ContactUsModal
-      :show="showContactModal"
-      :is-submitting="isSubmitting"
-      :submit-success-message="submitSuccessMessage"
-      :submit-error-message="submitErrorMessage"
-      :category-error="categoryError"
-      :contact-form="contactForm"
-      @close="closeContactModal"
-      @submit="submitContactForm"
-    />
+    <ContactUsModal :show="showContactModal" :is-submitting="isSubmitting"
+      :submit-success-message="submitSuccessMessage" :submit-error-message="submitErrorMessage"
+      :category-error="categoryError" :contact-form="contactForm" @close="closeContactModal"
+      @submit="submitContactForm" />
   </div>
 </template>
 
@@ -52,8 +36,9 @@ import { useContactUs } from "@/composables/useContactUs";
 
 const links = [
   { label: "Home", to: "/" },
-  { label: "Events", to: "/events" },
+  { label: "Shop", to: "/availableItems" },
   { label: "Gallery", to: "/gallery" },
+  { label: "Events", to: "/events" },
   { label: "About Us", to: "/about" },
 ];
 
