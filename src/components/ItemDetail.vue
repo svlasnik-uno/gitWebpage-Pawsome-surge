@@ -43,9 +43,9 @@
                 </div>
               </div>
 
-              <div v-if="auth.isAuthenticated" class="mobile-detail-field py-2 border-top">
+              <div class="mobile-detail-field py-2 border-top">
                 <div class="mobile-detail-row">
-                  <div class="mobile-detail-label fw-semibold small text-muted">Item Sub-type</div>
+                  <div class="mobile-detail-label fw-semibold small text-muted">Category</div>
                   <div class="mobile-detail-value text-end">{{ form.ItemSubType || "" }}</div>
                 </div>
               </div>
@@ -122,8 +122,8 @@
                 <div class="form-control readonly-field">{{ form.ItemType || "" }}</div>
               </div>
 
-              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
-                <label class="form-label fw-bold">Item Sub-type</label>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Item Category</label>
                 <div class="form-control readonly-field">{{ form.ItemSubType || "" }}</div>
               </div>
 
@@ -142,7 +142,7 @@
                 <div class="form-control readonly-field">{{ formatStatus(form.ItemStatus) }}</div>
               </div>
 
-              <div v-if="auth.isAuthenticated && auth.usertype === 'admin'" class="col-md-6">
+              <div class="col-md-6">
                 <label class="form-label fw-bold">Item Color</label>
                 <div class="form-control readonly-field">{{ form.ItemColor || "" }}</div>
               </div>

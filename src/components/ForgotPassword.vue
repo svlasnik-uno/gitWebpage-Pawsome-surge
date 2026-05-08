@@ -10,30 +10,53 @@
 
             <div v-if="showMsg === 'success'" class="alert alert-success" role="alert">
               If that email exists, a password reset link has been sent.
-              Please check your inbox.
+              Please check your inbox or SPAM folder.
             </div>
 
             <div v-else-if="showMsg === 'error'" class="alert alert-danger" role="alert">
-              {{ errorMessage || 'Unable to send reset email.' }}
+              {{ errorMessage }}
             </div>
 
             <div class="card-text pt-2">
               <div class="mb-3">
-                <div class="input-group mb-3">
+                <div class="input-group mb-1">
                   <div class="input-group-prepend">
                     <span class="input-group-text">@</span>
                   </div>
-                  <input v-model.trim="email" type="email" maxlength="100" required class="form-control"
-                    placeholder="Email" @keyup.enter="sendResetEmail" />
+                  <input
+                    v-model.trim="email"
+                    type="email"
+                    maxlength="100"
+                    required
+                    ref="emailInput"
+                    class="form-control"
+                    placeholder="Email"
+                    @keyup.enter="sendResetEmail"
+                  />
                 </div>
+
+                <!-- Inline hint -->
+                <small class="text-muted">
+                  Format: name@example.com
+                </small>
               </div>
 
               <div class="d-flex gap-2 flex-wrap mb-2">
-                <button type="button" class="btn btn-primary" @click.prevent="sendResetEmail" :disabled="loading">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  @click.prevent="sendResetEmail"
+                  :disabled="loading"
+                >
                   {{ loading ? 'Sending...' : 'Send Reset Link' }}
                 </button>
 
-                <button type="button" class="btn btn-secondary" @click="goToLogin" :disabled="loading">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  @click="goToLogin"
+                  :disabled="loading"
+                >
                   Back to Login
                 </button>
               </div>
@@ -41,10 +64,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <div v-if="errorMessage && showMsg === 'error'" class="text-center mt-3 text-danger">
-      {{ errorMessage }}
     </div>
   </div>
 </template>
@@ -70,9 +89,11 @@ export default {
       this.showMsg = ''
       this.errorMessage = ''
 
-      if (!this.email) {
+      const input = this.$refs.emailInput
+
+      if (!input.checkValidity()) {
         this.showMsg = 'error'
-        this.errorMessage = 'Email is required.'
+        this.errorMessage = 'Please enter a valid email address (e.g. name@example.com).'
         return
       }
 
@@ -84,7 +105,7 @@ export default {
       } catch (error) {
         console.error('Forgot password error:', error)
         this.showMsg = 'error'
-        this.errorMessage = error?.message || 'Unable to send reset email.'
+        this.errorMessage = 'Unable to send reset email. Check email address format.'
       } finally {
         this.loading = false
       }
