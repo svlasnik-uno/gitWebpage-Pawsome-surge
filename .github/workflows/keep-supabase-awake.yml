@@ -20,15 +20,15 @@ jobs:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          create table if not exists keep_alive (
+          create table if not exists activeItemsDB (
             id int primary key,
             touched_at timestamptz not null default now()
           );
 
-          insert into keep_alive (id, touched_at)
+          insert into activeItemsDB (id, touched_at)
           values (1, now())
           on conflict (id)
           do update set touched_at = excluded.touched_at;
 
-          select id, touched_at from keep_alive where id = 1;
+          select id, touched_at from kactiveItemsDB where id = 1;
           SQL
