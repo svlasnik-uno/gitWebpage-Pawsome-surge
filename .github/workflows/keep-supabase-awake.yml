@@ -30,5 +30,5 @@ jobs:
           on conflict (id)
           do update set touched_at = excluded.touched_at;
 
-          select id, touched_at from kactiveItemsDB where id = 1;
+          select id, touched_at from activeItemsDB where id = 1;
           SQL
