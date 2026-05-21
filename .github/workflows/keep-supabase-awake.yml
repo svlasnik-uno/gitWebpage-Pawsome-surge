@@ -2,12 +2,14 @@ name: Keep Supabase awake
 
 on:
   schedule:
-    - cron: '17 0 */6 * *'
+    # Runs every 12 hours, UTC. Avoid minute 0.
+    - cron: "23 */12 * * *"
   workflow_dispatch:
 
 jobs:
   ping-db:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Install PostgreSQL client
@@ -17,4 +19,16 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "select 1;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          create table if not exists activeItemsDB (
+            id int primary key,
+            touched_at timestamptz not null default now()
+          );
+
+          insert into activeItemsDB (id, touched_at)
+          values (1, now())
+          on conflict (id)
+          do update set touched_at = excluded.touched_at;
+
+          select id, touched_at from activeItemsDB where id = 1;
+          SQL
