@@ -5,6 +5,18 @@
       <router-link v-for="link in links" :key="link.to" :to="link.to" class="foot-link" active-class="active">
         {{ link.label }}
       </router-link>
+      <div v-if="!auth.isAuthenticated" class="d-flex gap-2 flex-column flex-lg-row">
+        <router-link to="/login" class="foot-link" >
+          Login
+        </router-link>
+
+        <router-link to="/register" class="foot-link">
+          Create Account
+        </router-link>
+      </div>
+      <router-link v-else to="/login" class="nav-link" @click="handleLogout">
+        Logout
+      </router-link>
 
       <button type="button" class="foot-link foot-button" @click="openContactModal">
         Contact Us
@@ -33,6 +45,13 @@
 <script setup>
 import ContactUsModal from "@/components/ContactUsModal.vue";
 import { useContactUs } from "@/composables/useContactUs";
+import { useAuthStore } from "@/store/AuthStore";
+import APIService from "@/api/APIService";
+import { useCartStore } from "@/store/CartStore";
+import { useRoute, useRouter } from "vue-router";
+const auth = useAuthStore();
+const cart = useCartStore();
+const router = useRouter();
 
 const links = [
   { label: "Home", to: "/" },
@@ -53,6 +72,17 @@ const {
   closeContactModal,
   submitContactForm,
 } = useContactUs();
+async function handleLogout() {
+  try {
+    await APIService.signOut();
+    cart.clearLocalState();
+    auth.clearAuth();
+    router.push("/");
+  } catch (error) {
+    console.error("Logout failed:", error.message);
+  }
+}
+
 </script>
 
 <style scoped>
