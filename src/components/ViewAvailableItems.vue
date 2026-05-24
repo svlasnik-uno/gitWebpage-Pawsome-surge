@@ -29,7 +29,7 @@
           </div>
 
           <span class="small text-muted">
-            Showing {{ sortedItems.length }} of {{ items.length }} items
+            Showing {{ startItem }} - {{ endItem }} of {{ sortedItems.length }} items
           </span>
         </div>
 
@@ -63,7 +63,7 @@
       </div>
 
       <div v-else class="row g-3">
-        <div v-for="item in sortedItems" :key="item.ItemNumber" class="col-12 col-md-6 col-xl-4">
+        <div v-for="item in paginatedItems" :key="item.ItemNumber" class="col-12 col-md-6 col-xl-4">
           <div class="card h-100 shadow-sm item-card">
             <div
               class="image-wrap image-clickable"
@@ -123,6 +123,37 @@
           </div>
         </div>
       </div>
+
+      <div v-if="totalPages > 1" class="d-flex justify-content-center align-items-center mt-4">
+        <nav aria-label="Available items pagination">
+          <ul class="pagination mb-0">
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <button type="button" class="page-link" @click="goToPreviousPage" :disabled="currentPage === 1">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+            </li>
+
+            <li
+              v-for="(page, index) in visiblePages"
+              :key="`${page}-${index}`"
+              class="page-item"
+              :class="{ active: currentPage === page, disabled: page === '...' }"
+            >
+              <button v-if="page !== '...'" type="button" class="page-link" @click="goToPage(page)">
+                {{ page }}
+              </button>
+
+              <span v-else class="page-link">...</span>
+            </li>
+
+            <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+              <button type="button" class="page-link" @click="goToNextPage" :disabled="currentPage === totalPages">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
 
     <button
@@ -166,6 +197,9 @@ export default {
       sortOption: "",
       selectedSubType: "All",
       subTypeOptions: [{ value: "All", label: "All" }],
+      currentPage: 1,
+      itemsPerPage: 9,
+      minPagesForFullDisplay: 7,
       currencyFormatter: new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -194,6 +228,66 @@ export default {
       }
 
       return sorted;
+    },
+
+    totalPages() {
+      return Math.ceil(this.sortedItems.length / this.itemsPerPage);
+    },
+
+    paginatedItems() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      return this.sortedItems.slice(start, start + this.itemsPerPage);
+    },
+
+    startItem() {
+      if (this.sortedItems.length === 0) return 0;
+      return (this.currentPage - 1) * this.itemsPerPage + 1;
+    },
+
+    endItem() {
+      return Math.min(this.currentPage * this.itemsPerPage, this.sortedItems.length);
+    },
+
+    visiblePages() {
+      if (this.totalPages <= 0) return [];
+
+      const siblingCount = 1;
+      const fullDisplayCount = this.minPagesForFullDisplay;
+
+      if (this.totalPages <= fullDisplayCount) {
+        return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+      }
+
+      const pages = [1];
+      const start = Math.max(2, this.currentPage - siblingCount);
+      const end = Math.min(this.totalPages - 1, this.currentPage + siblingCount);
+
+      if (start > 2) {
+        pages.push("...");
+      }
+
+      for (let page = start; page <= end; page += 1) {
+        pages.push(page);
+      }
+
+      if (end < this.totalPages - 1) {
+        pages.push("...");
+      }
+
+      pages.push(this.totalPages);
+
+      return pages;
+    },
+  },
+
+  watch: {
+    sortOption() {
+      this.currentPage = 1;
+    },
+    sortedItems() {
+      if (this.currentPage > this.totalPages) {
+        this.currentPage = Math.max(this.totalPages, 1);
+      }
     },
   },
 
@@ -231,7 +325,28 @@ export default {
     },
 
     handleFilterChange() {
+      this.currentPage = 1;
       this.scrollToTop();
+    },
+
+    goToPage(page) {
+      if (page === "..." || page === this.currentPage) return;
+      this.currentPage = page;
+      this.scrollToTop();
+    },
+
+    goToPreviousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage -= 1;
+        this.scrollToTop();
+      }
+    },
+
+    goToNextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage += 1;
+        this.scrollToTop();
+      }
     },
 
     addToCart(item) {
