@@ -6,7 +6,7 @@
         {{ link.label }}
       </router-link>
       <div v-if="!auth.isAuthenticated" class="d-flex gap-2 flex-column flex-lg-row">
-        <router-link to="/login" class="foot-link" >
+        <router-link to="/login" class="foot-link">
           Login
         </router-link>
 
@@ -14,7 +14,7 @@
           Create Account
         </router-link>
       </div>
-      <router-link v-else to="/login" class="nav-link" @click="handleLogout">
+      <router-link v-else to="/login" class="foot-link" @click="handleLogout">
         Logout
       </router-link>
 
@@ -110,6 +110,7 @@ async function handleLogout() {
   margin: 0 8px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 }
 
 .foot-button {
@@ -137,5 +138,47 @@ async function handleLogout() {
   font-weight: bold;
   text-decoration: underline;
   color: black;
+}
+
+/* Mobile-friendly footer */
+@media (max-width: 576px) {
+  .footer {
+    padding: 20px 12px;
+  }
+
+  .footer-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .footer a,
+  .footer .foot-link,
+  .foot-button {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .footer a:hover,
+  .footer .foot-link:hover,
+  .foot-button:hover {
+    background: rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+    margin-top: 16px;
+  }
+
+  .footer-bottom img:last-child {
+    display: none;
+  }
 }
 </style>
